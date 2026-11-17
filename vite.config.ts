@@ -20,5 +20,8 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    // Caminhos relativos: funciona no Android, no arquivo único e em
+    // endereços com subpasta (ex.: usuario.github.io/personal-finance/).
+    base: './',
   }
 })
