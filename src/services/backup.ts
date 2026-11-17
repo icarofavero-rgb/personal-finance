@@ -1,10 +1,4 @@
-import { Capacitor } from '@capacitor/core'
-import {
-  Filesystem,
-  Directory,
-  Encoding,
-} from '@capacitor/filesystem'
-import { Share } from '@capacitor/share'
+import { localDateStamp, saveTextFile } from './fileExport'
 
 import {
   getTransactions,
@@ -172,56 +166,13 @@ export async function exportBackup(): Promise<'web' | 'android'> {
 
   const json = JSON.stringify(backup, null, 2)
 
-  const filename = `personal-finance-backup-v5-${new Date()
-    .toISOString()
-    .slice(0, 10)}.json`
+  const filename = `personal-finance-backup-v5-${localDateStamp()}.json`
 
-  // Android: preparar arquivo e abrir compartilhamento nativo.
-  if (Capacitor.isNativePlatform()) {
-    await Filesystem.writeFile({
-      path: filename,
-      data: json,
-      directory: Directory.Cache,
-      encoding: Encoding.UTF8,
-    })
-
-    const file = await Filesystem.getUri({
-      path: filename,
-      directory: Directory.Cache,
-    })
-
-    await Share.share({
-      title: 'Backup Personal Finance',
-      text: 'Cópia de segurança do Personal Finance',
-      url: file.uri,
-      dialogTitle: 'Salvar ou compartilhar backup',
-    })
-
-    return 'android'
-  }
-
-  // Navegador: preservar o download existente.
-  const blob = new Blob(
-    [json],
-    { type: 'application/json' }
-  )
-
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-
-  link.href = url
-  link.download = filename
-
-  document.body.appendChild(link)
-
-  try {
-    link.click()
-  } finally {
-    link.remove()
-    setTimeout(() => URL.revokeObjectURL(url), 1000)
-  }
-
-  return 'web'
+  return saveTextFile(filename, json, {
+    title: 'Backup Personal Finance',
+    text: 'Cópia de segurança do Personal Finance',
+    dialogTitle: 'Salvar ou compartilhar backup',
+  })
 }
 
 

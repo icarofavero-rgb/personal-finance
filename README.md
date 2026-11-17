@@ -45,6 +45,33 @@ src/
 android/           Projeto Android (Capacitor)
 ```
 
+## Sincronização entre aparelhos
+
+Configurações → Dados e armazenamento → **Abrir Sincronização**.
+
+- **Pelo Wi-Fi com QR code:** um aparelho mostra um QR de convite, o outro lê e
+  mostra um QR de resposta, o primeiro lê. Os aparelhos se conectam direto
+  (WebRTC, sem servidor e sem internet) e trocam os dados.
+- **Por arquivo:** gera um arquivo de sincronização para enviar ao outro aparelho.
+
+Como funciona (`src/services/sync/`):
+
+| Arquivo              | Papel                                                        |
+| -------------------- | ------------------------------------------------------------ |
+| `changeTracker.ts`   | Diário de alterações: hash, horário e aparelho de cada registro, e exclusões |
+| `syncMerge.ts`       | Junção registro a registro — vence a alteração mais recente  |
+| `syncApply.ts`       | Valida com a auditoria do backup e grava pelo executor do backup (com recuperação automática) |
+| `syncProtocol.ts`    | Conversa entre os aparelhos (envio em pedaços, confirmações) |
+| `syncPeer.ts`        | Conexão WebRTC na rede local                                 |
+| `signalCodec.ts`     | Compacta os dados de conexão para caber no QR code           |
+
+## Distribuição sem publicar na internet
+
+- `npm run arquivo` → gera `dist-arquivo/index.html`, um único arquivo que abre
+  com clique duplo no navegador do computador.
+- `npm run rede` → serve o app para aparelhos no mesmo Wi-Fi.
+- Android: `npm run build` + `npx cap sync android` e gere o APK no Android Studio.
+
 ## Backup
 
 O arquivo de backup (versão 5) contém transações, cartões, compras,

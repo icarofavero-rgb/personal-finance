@@ -8,7 +8,7 @@ import {
   parseSyncSnapshot,
 } from './syncApply'
 
-/** Cada "aparelho" tem seu próprio armazenamento; `use()` troca o ativo. */
+/** Cada "aparelho" tem seu próprio armazenamento; `activate()` troca o ativo. */
 function createDevice() {
   const memory = new Map<string, string>()
 
@@ -47,7 +47,7 @@ Object.defineProperty(globalThis, 'localStorage', {
   get: () => active.storage,
 })
 
-function use(device: Device) {
+function activate(device: Device) {
   active = device
 }
 
@@ -91,14 +91,14 @@ const budget = {
 
 /** Troca de pacotes como fará a conexão real: cada um aplica o do outro. */
 function syncPair(a: Device, b: Device) {
-  use(a)
+  activate(a)
   const packageA = JSON.parse(JSON.stringify(createLocalSyncPackage()))
-  use(b)
+  activate(b)
   const packageB = JSON.parse(JSON.stringify(createLocalSyncPackage()))
 
-  use(a)
+  activate(a)
   const resultA = applyRemoteSyncPackage(packageB)
-  use(b)
+  activate(b)
   const resultB = applyRemoteSyncPackage(packageA)
 
   return { resultA, resultB }
@@ -127,12 +127,12 @@ describe('aplicação da sincronização', () => {
     pc.set('personal-finance-transactions', [tx('t-pc', 'Aluguel', 1500)])
     pc.set('personal-finance-credit-cards', [card])
     pc.set('personal-finance-card-purchases', [purchase])
-    use(pc)
+    activate(pc)
     captureChanges()
 
     phone.set('personal-finance-transactions', [tx('t-phone', 'Café', 8)])
     phone.set('personal-finance-budgets-v1', [budget])
-    use(phone)
+    activate(phone)
     captureChanges()
 
     const { resultA, resultB } = syncPair(pc, phone)
@@ -164,9 +164,9 @@ describe('aplicação da sincronização', () => {
 
   it('sincronizar de novo não muda nada', () => {
     pc.set('personal-finance-transactions', [tx('t1', 'Luz')])
-    use(pc)
+    activate(pc)
     captureChanges()
-    use(phone)
+    activate(phone)
     captureChanges()
 
     syncPair(pc, phone)
@@ -179,14 +179,14 @@ describe('aplicação da sincronização', () => {
 
   it('aplicar os dados recebidos não os transforma em "edições" deste aparelho', () => {
     pc.set('personal-finance-transactions', [tx('t1', 'Luz')])
-    use(pc)
+    activate(pc)
     captureChanges()
-    use(phone)
+    activate(phone)
     captureChanges()
 
     syncPair(pc, phone)
 
-    use(phone)
+    activate(phone)
     const before = phone.memory.get('personal-finance-sync-meta-v1')
     captureChanges()
 
@@ -204,17 +204,17 @@ describe('aplicação da sincronização', () => {
         date: '2026-11-12',
       },
     ])
-    use(pc)
+    activate(pc)
     captureChanges()
 
     phone.set('personal-finance-transactions', [tx('t-phone', 'Café', 8)])
-    use(phone)
+    activate(phone)
     captureChanges()
 
-    use(pc)
+    activate(pc)
     const pcPackage = JSON.parse(JSON.stringify(createLocalSyncPackage()))
 
-    use(phone)
+    activate(phone)
     const before = new Map(phone.memory)
 
     expect(() => applyRemoteSyncPackage(pcPackage)).toThrow(/inconsistentes/)
@@ -222,7 +222,7 @@ describe('aplicação da sincronização', () => {
   })
 
   it('recusa pacote do próprio aparelho', () => {
-    use(pc)
+    activate(pc)
     captureChanges()
     const own = JSON.parse(JSON.stringify(createLocalSyncPackage()))
 

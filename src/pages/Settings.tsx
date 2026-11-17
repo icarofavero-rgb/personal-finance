@@ -17,6 +17,7 @@ import {
   Layers,
   CheckCircle2,
   DatabaseBackup,
+  RefreshCw,
 } from 'lucide-react'
 
 import AvatarColorPicker from '../components/AvatarColorPicker'
@@ -96,6 +97,7 @@ type SettingsProps = {
   initialSection?: SettingsSection
   onNotificationPreferencesChanged?: () => void
   onOpenBackup?: () => void
+  onOpenSync?: () => void
 }
 
 const profileAvatars = [
@@ -117,6 +119,7 @@ export default function Settings({
   initialSection = 'profile',
   onNotificationPreferencesChanged,
   onOpenBackup,
+  onOpenSync,
 }: SettingsProps) {
 
   const [activeSection, setActiveSection] =
@@ -939,16 +942,8 @@ return (
   <h3>Backup e restauração</h3>
 
   <p>
-    Exporte os dados disponíveis no backup,
-    importe arquivos de recuperação e consulte
-    as opções de restauração.
-  </p>
-
-  <p>
-    Atenção: o backup atual ainda não contempla
-    todos os módulos financeiros. A sincronização
-    entre computador e celular também não está
-    disponível.
+    Exporte uma cópia de segurança de todos os seus
+    dados ou restaure um backup anterior.
   </p>
 
   <button
@@ -959,6 +954,25 @@ return (
   >
     <DatabaseBackup size={18} />
     Abrir Backup e restauração
+  </button>
+</div>
+
+<div className="settings-appearance-group">
+  <h3>Sincronização entre aparelhos</h3>
+
+  <p>
+    Junte os dados do celular, tablet e computador
+    pelo Wi-Fi, com QR code, sem usar a internet.
+  </p>
+
+  <button
+    type="button"
+    className="primary-button"
+    onClick={() => onOpenSync?.()}
+    disabled={!onOpenSync}
+  >
+    <RefreshCw size={18} />
+    Abrir Sincronização
   </button>
 </div>
 

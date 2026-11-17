@@ -123,6 +123,7 @@ import CardPaymentForm from './components/CardPaymentForm'
 import { registerCardPayment } from './services/cardPaymentOperations'
 import { checkPaymentSafety } from './services/cardPaymentSafety'
 import Debtors from './pages/Debtors'
+import Sync from './pages/Sync'
 import DatePicker from './components/DatePicker'
 import ConfirmDialog from './components/ConfirmDialog'
 import Toast, { type ToastMessage } from './components/Toast'
@@ -2101,6 +2102,9 @@ function handleDashboardInvoicePayment(
     onOpenBackup={() => {
       setActivePage('Backup e restauração')
     }}
+    onOpenSync={() => {
+      setActivePage('Sincronização')
+    }}
     onNotificationPreferencesChanged={() => {
       setNotificationPreferencesRevision(previous => previous + 1)
     }}
@@ -3397,6 +3401,20 @@ background:
         apenas neste aparelho. Faça backups com frequência.
       </span>
     </div>
+
+    <div>
+      <ArrowLeftRight size={18} />
+      <span>
+        Quer os mesmos dados no celular e no computador?{' '}
+        <button
+          type="button"
+          className="text-button"
+          onClick={() => setActivePage('Sincronização')}
+        >
+          Abrir Sincronização
+        </button>
+      </span>
+    </div>
   </div>
 </div>
 
@@ -3404,6 +3422,8 @@ background:
 )}
 
 {activePage === 'Devedores' && <Debtors />}
+
+{activePage === 'Sincronização' && <Sync />}
 
           {activePage === 'Relatórios' && (
             <Reports transactions={transactions} />
