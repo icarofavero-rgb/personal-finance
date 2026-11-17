@@ -1,0 +1,78 @@
+
+import type { CardPayment } from './cardPaymentsStorage'
+import type { Transaction } from './storage'
+
+export type PendingPaymentOperation = {
+  operationId: string
+  createdAt: string
+  payment: CardPayment
+  transaction: Transaction
+}
+
+const RECOVERY_KEY = 'personal-finance-pending-payment'
+
+
+export function getPendingPaymentOperation():
+  PendingPaymentOperation | null {
+  const saved = localStorage.getItem(RECOVERY_KEY)
+
+  if (saved === null) {
+    return null
+  }
+
+  let parsed: unknown
+
+  try {
+    parsed = JSON.parse(saved)
+  } catch {
+    throw new Error(
+      'O registro de recuperação de pagamentos está corrompido. ' +
+      'Nenhum novo pagamento deve ser registrado até a verificação.'
+    )
+  }
+
+  if (
+    typeof parsed !== 'object' ||
+    parsed === null ||
+    Array.isArray(parsed)
+  ) {
+    throw new Error(
+      'O registro de recuperação possui formato inválido.'
+    )
+  }
+
+  const operation = parsed as Record<string, unknown>
+
+  if (
+    typeof operation.operationId !== 'string' ||
+    !operation.operationId.trim() ||
+    typeof operation.createdAt !== 'string' ||
+    !operation.createdAt.trim() ||
+    typeof operation.payment !== 'object' ||
+    operation.payment === null ||
+    Array.isArray(operation.payment) ||
+    typeof operation.transaction !== 'object' ||
+    operation.transaction === null ||
+    Array.isArray(operation.transaction)
+  ) {
+    throw new Error(
+      'O registro de recuperação está incompleto ou inválido.'
+    )
+  }
+
+  return parsed as PendingPaymentOperation
+}
+
+
+export function savePendingPaymentOperation(
+  operation: PendingPaymentOperation
+): void {
+  localStorage.setItem(
+    RECOVERY_KEY,
+    JSON.stringify(operation)
+  )
+}
+
+export function clearPendingPaymentOperation(): void {
+  localStorage.removeItem(RECOVERY_KEY)
+}

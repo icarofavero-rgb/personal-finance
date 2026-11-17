@@ -1,0 +1,103 @@
+
+import {
+  getTransactions,
+  saveTransactions,
+  type Transaction,
+} from './storage'
+
+import {
+  getCardPayments,
+  saveCardPayments,
+  type CardPayment,
+} from './cardPaymentsStorage'
+
+import { getCards } from './cardsStorage'
+import { getCardPurchases } from './cardPurchasesStorage'
+import { getCardInvoices } from './cardInvoices'
+import { validateCardPayment } from './cardPaymentValidation'
+import { checkPaymentSafety } from './cardPaymentSafety'
+
+export function registerCardPayment(
+  payment: CardPayment
+): Transaction {
+
+    const safety = checkPaymentSafety()
+
+  if (!safety.safe) {
+    throw new Error(safety.message)
+  }
+  
+  const cards = getCards()
+  const purchases = getCardPurchases()
+  const invoices = getCardInvoices(purchases, cards)
+
+  const previousPayments = getCardPayments()
+  const previousTransactions = getTransactions()
+
+  const validation = validateCardPayment(
+  payment,
+  cards,
+  invoices,
+  previousPayments,
+  previousTransactions
+)
+
+  if (!validation.valid) {
+    throw new Error(
+      validation.error ?? 'Pagamento inválido.'
+    )
+  }
+
+  const transactionId = crypto.randomUUID()
+
+  if (
+    previousTransactions.some(
+      transaction => transaction.id === transactionId
+    )
+  ) {
+    throw new Error('Identificador de transação duplicado.')
+  }
+
+  const transaction: Transaction = {
+    id: transactionId,
+    description: `Pagamento de fatura ${payment.invoiceMonth}`,
+    amount: payment.amount,
+    type: 'expense',
+    category: 'Cartão de crédito',
+    date: payment.date,
+  }
+
+  const paymentWithTransaction: CardPayment = {
+    ...payment,
+    transactionId,
+  }
+
+  try {
+    saveTransactions([
+      ...previousTransactions,
+      transaction,
+    ])
+
+    saveCardPayments([
+      ...previousPayments,
+      paymentWithTransaction,
+    ])
+  } catch {
+    try {
+      saveTransactions(previousTransactions)
+      saveCardPayments(previousPayments)
+    } catch {
+      throw new Error(
+        'Falha ao registrar e recuperar os dados anteriores. ' +
+        'Verifique seus registros antes de tentar novamente.'
+      )
+    }
+
+    throw new Error(
+      'Falha ao registrar pagamento. ' +
+      'Os dados anteriores foram recuperados.'
+    )
+  }
+
+  return transaction
+}

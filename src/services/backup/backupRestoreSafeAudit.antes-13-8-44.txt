@@ -1,0 +1,45 @@
+
+import { hasValidRestoreStructure } from './backupRestoreStructure'
+import { auditBackupRestore } from './backupRestoreAudit'
+
+export type SafeAuditResult = {
+  valid: boolean
+  errors: string[]
+}
+
+export function safelyAuditBackupRestore(
+  value: unknown
+): SafeAuditResult {
+  if (!hasValidRestoreStructure(value)) {
+    return {
+      valid: false,
+      errors: ['Estrutura do plano de restauração inválida.'],
+    }
+  }
+
+  const collections = [
+    value.transactions,
+    value.cards,
+    value.purchases,
+    value.payments,
+  ]
+
+  for (const collection of collections) {
+    for (const item of collection) {
+      if (
+        typeof item !== 'object' ||
+        item === null ||
+        Array.isArray(item) ||
+        typeof item.id !== 'string' ||
+        item.id.trim().length === 0
+      ) {
+        return {
+          valid: false,
+          errors: ['Registro financeiro com identificador inválido.'],
+        }
+      }
+    }
+  }
+
+  return auditBackupRestore(value)
+}

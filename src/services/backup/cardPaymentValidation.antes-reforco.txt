@@ -1,0 +1,73 @@
+
+import type { CreditCard } from './cardsStorage'
+import type { CardInvoice } from './cardInvoices'
+import type { CardPayment } from './cardPaymentsStorage'
+
+export type PaymentValidationResult = {
+  valid: boolean
+  error?: string
+}
+
+export function validateCardPayment(
+  payment: CardPayment,
+  cards: CreditCard[],
+  invoices: CardInvoice[],
+  existingPayments: CardPayment[]
+): PaymentValidationResult {
+  if (
+    !payment.id ||
+    !payment.cardId ||
+    !payment.invoiceMonth ||
+    !payment.date
+  ) {
+    return {
+      valid: false,
+      error: 'Existem campos obrigatórios não preenchidos.',
+    }
+  }
+
+  if (
+    !Number.isFinite(payment.amount) ||
+    payment.amount <= 0
+  ) {
+    return {
+      valid: false,
+      error: 'O valor do pagamento deve ser maior que zero.',
+    }
+  }
+
+  if (
+    existingPayments.some(item => item.id === payment.id)
+  ) {
+    return {
+      valid: false,
+      error: 'Este pagamento já foi registrado.',
+    }
+  }
+
+  const cardExists = cards.some(
+    card => card.id === payment.cardId
+  )
+
+  if (!cardExists) {
+    return {
+      valid: false,
+      error: 'O cartão informado não existe.',
+    }
+  }
+
+  const invoiceExists = invoices.some(
+    invoice =>
+      invoice.cardId === payment.cardId &&
+      invoice.invoiceMonth === payment.invoiceMonth
+  )
+
+  if (!invoiceExists) {
+    return {
+      valid: false,
+      error: 'A fatura informada não existe.',
+    }
+  }
+
+  return { valid: true }
+}

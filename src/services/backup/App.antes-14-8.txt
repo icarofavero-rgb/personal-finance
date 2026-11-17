@@ -1,0 +1,680 @@
+
+import { useState } from 'react'
+import {
+  LayoutDashboard,
+  ArrowLeftRight,
+  CreditCard,
+  Target,
+  ChartNoAxesCombined,
+  Settings,
+  Bell,
+  Plus,
+  ArrowUpRight,
+  ArrowDownRight,
+  Wallet,
+  Search,
+  CalendarDays,
+  MoreHorizontal,
+  CircleHelp,
+  X,
+  Trash2,
+  Pencil,
+} from 'lucide-react'
+
+import {
+  getTransactions,
+  addTransaction,
+  deleteTransaction,
+  updateTransaction,
+  type Transaction,
+} from './services/storage'
+
+import './App.css'
+
+import { FinanceCharts } from './components/FinanceCharts'
+
+import { exportBackup, importBackup } from './services/backup'
+
+import Reports from './pages/Reports'
+
+import Cards from './pages/Cards'
+
+const navigation = [
+  { name: 'Dashboard', icon: LayoutDashboard },
+  { name: 'Transações', icon: ArrowLeftRight },
+  { name: 'Cartões', icon: CreditCard },
+  { name: 'Orçamentos', icon: Wallet },
+  { name: 'Metas', icon: Target },
+  { name: 'Relatórios', icon: ChartNoAxesCombined },
+]
+
+const categories = [
+  'Salário',
+  'Alimentação',
+  'Moradia',
+  'Transporte',
+  'Saúde',
+  'Lazer',
+  'Educação',
+  'Assinaturas',
+  'Outros',
+]
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value)
+}
+
+function formatDate(date: string) {
+  if (!date) return ''
+
+  const [year, month, day] = date.split('-')
+
+  return `${day}/${month}/${year}`
+}
+
+ function App() {
+  const [activePage, setActivePage] = useState('Dashboard')
+  const [transactions, setTransactions] = useState<Transaction[]>(
+    () => getTransactions()
+  )
+
+  const [showModal, setShowModal] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [filterMonth, setFilterMonth] = useState('')
+  const [filterCategory, setFilterCategory] = useState('Todas')
+  const [filterType, setFilterType] = useState('Todos')
+  const [type, setType] = useState<'income' | 'expense'>('expense')
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState('')
+  const [category, setCategory] = useState('Outros')
+  const [date, setDate] = useState(
+    () => new Date().toLocaleDateString('en-CA')
+  )
+
+  const totalIncome = transactions
+    .filter(item => item.type === 'income')
+    .reduce((sum, item) => sum + item.amount, 0)
+
+  const totalExpense = transactions
+    .filter(item => item.type === 'expense')
+    .reduce((sum, item) => sum + item.amount, 0)
+
+  const balance = totalIncome - totalExpense
+
+  const sortedTransactions = [...transactions].sort(
+    (a, b) => b.date.localeCompare(a.date)
+  )
+  const filteredTransactions = sortedTransactions.filter(item =>{
+  const matchesMonth =
+    !filterMonth || item.date.startsWith(filterMonth)
+
+  const matchesCategory =
+    filterCategory === 'Todas' ||
+    item.category === filterCategory
+
+  const matchesType =
+    filterType === 'Todos' ||
+    item.type === filterType
+
+  return matchesMonth && matchesCategory && matchesType
+})
+
+function openEditTransaction(transaction: Transaction) {
+  setEditingId(transaction.id)
+  setType(transaction.type)
+  setDescription(transaction.description)
+  setAmount(String(transaction.amount))
+  setCategory(transaction.category)
+  setDate(transaction.date)
+  setShowModal(true)
+}
+  function handleSave(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    const numericAmount = Number(amount)
+
+    if (
+      !description.trim() ||
+      !Number.isFinite(numericAmount) ||
+      numericAmount <= 0 ||
+      !date
+    ) {
+      alert('Preencha os campos corretamente.')
+      return
+    }
+
+   
+  const transaction: Transaction = {
+    id: editingId ?? crypto.randomUUID(),
+    description: description.trim(),
+    amount: Math.round(numericAmount * 100) / 100,
+    type,
+    category,
+    date,
+  }
+
+  try {
+    if (editingId) {
+      updateTransaction(transaction)
+    } else {
+      addTransaction(transaction)
+    }
+
+    setTransactions(getTransactions())
+    setShowModal(false)
+    setEditingId(null)
+    setDescription('')
+    setAmount('')
+    setCategory('Outros')
+  } catch {
+    alert('Não foi possível salvar a transação.')
+  }
+}
+
+
+  function handleDelete(id: string) {
+    if (!window.confirm('Deseja excluir esta transação?')) return
+
+    try {
+      deleteTransaction(id)
+      setTransactions(getTransactions())
+    } catch {
+      alert('Não foi possível excluir a transação.')
+    }
+  }
+
+
+async function handleImportBackup(
+  event: React.ChangeEvent<HTMLInputElement>
+) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  try {
+    const confirmed = window.confirm(
+  'A restauração substituirá as transações atuais e, se o backup incluir cartões, também substituirá os cartões cadastrados. Deseja continuar?'
+)
+
+    if (!confirmed) return
+
+    const restored = await importBackup(file)
+
+    setTransactions(restored)
+    alert('Backup restaurado com sucesso!')
+  } catch (error) {
+    alert(
+      error instanceof Error
+        ? error.message
+        : 'Não foi possível restaurar o backup.'
+    )
+  } finally {
+    event.target.value = ''
+  }
+}
+
+
+  return (
+    <div className="app">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-icon">
+            <Wallet size={23} />
+          </div>
+          <span>
+            personal<span className="brand-light">finance</span>
+          </span>
+        </div>
+
+        <div className="menu-label">MENU PRINCIPAL</div>
+
+        <nav className="navigation">
+          {navigation.map(({ name, icon: Icon }) => (
+            <button
+              key={name}
+              className={`nav-item ${activePage === name ? 'active' : ''}`}
+              onClick={() => setActivePage(name)}
+            >
+              <Icon size={19} />
+              <span>{name}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <button
+            className="nav-item"
+            onClick={() => setActivePage('Configurações')}
+          >
+            <Settings size={19} />
+            <span>Configurações</span>
+          </button>
+
+          <button
+            className="nav-item"
+            onClick={() => setActivePage('Ajuda')}
+          >
+            <CircleHelp size={19} />
+            <span>Central de ajuda</span>
+          </button>
+
+          <div className="profile">
+            <div className="avatar">U</div>
+            <div>
+              <strong>Meu perfil</strong>
+              <small>Usuário</small>
+            </div>
+            <MoreHorizontal size={20} />
+          </div>
+        </div>
+      </aside>
+
+      <main className="main">
+        <header className="topbar">
+          <div>
+            <span className="breadcrumb">Personal Finance /</span>
+            <strong>{activePage}</strong>
+          </div>
+
+          <div className="top-actions">
+            <button className="icon-button" aria-label="Pesquisar">
+              <Search size={19} />
+            </button>
+            <button className="icon-button" aria-label="Notificações">
+              <Bell size={19} />
+            </button>
+            <div className="avatar">U</div>
+          </div>
+        </header>
+
+        <section className="content">
+          <div className="welcome">
+            <div>
+              <span className="eyebrow">CONTROLE FINANCEIRO</span>
+              <h1>
+                {activePage === 'Dashboard'
+                  ? 'Olá, seja bem-vindo'
+                  : activePage}
+                <span className="neon-dot">.</span>
+              </h1>
+              <p>Acompanhe sua vida financeira em um só lugar.</p>
+            </div>
+
+            <button
+              className="primary-button"
+              onClick={() => setShowModal(true)}
+            >
+              <Plus size={18} />
+              Nova transação
+            </button>
+          </div>
+
+         {['Orçamentos', 'Metas'].includes(activePage) && (
+  <section className="panel">
+    <h3>{activePage}</h3>
+    <p>Essa funcionalidade será desenvolvida em breve.</p>
+  </section>
+)}
+
+{activePage === 'Cartões' && <Cards />}
+
+
+            {(activePage === 'Dashboard' || activePage === 'Transações') && (
+  <>
+              {activePage === 'Dashboard' && (
+                <>
+                  <div className="section-heading">
+                    <h2>Visão geral</h2>
+                    <span className="period-button">
+                      <CalendarDays size={16} />
+                      Saldo acumulado
+                    </span>
+                  </div>
+
+                  <div className="summary-grid">
+                    <div className="summary-card balance-card">
+                      <div className="card-top">
+                        <span>Saldo total</span>
+                        <div className="card-icon blue">
+                          <Wallet size={19} />
+                        </div>
+                      </div>
+                      <h2>{formatMoney(balance)}</h2>
+                      <span className="card-caption">
+                        Entradas menos saídas registradas
+                      </span>
+                      <div className="balance-decoration" />
+                    </div>
+
+                    <div className="summary-card">
+                      <div className="card-top">
+                        <span>Total de entradas</span>
+                        <div className="card-icon green">
+                          <ArrowDownRight size={19} />
+                        </div>
+                      </div>
+                      <h2>{formatMoney(totalIncome)}</h2>
+                      <span className="positive">
+                        Receitas registradas
+                      </span>
+                    </div>
+
+                    <div className="summary-card">
+                      <div className="card-top">
+                        <span>Total de saídas</span>
+                        <div className="card-icon purple">
+                          <ArrowUpRight size={19} />
+                        </div>
+                      </div>
+                      <h2>{formatMoney(totalExpense)}</h2>
+                      <span className="negative">
+                        Despesas registradas
+                      </span>
+                    </div>
+                  </div>
+                </>
+              )}
+
+
+{activePage === 'Dashboard' && (
+  <div className="backup-actions">
+    <div>
+      <h3>Segurança dos dados</h3>
+      <p>
+        Exporte ou restaure suas movimentações financeiras.
+      </p>
+    </div>
+
+    <div className="backup-buttons">
+      <button
+        type="button"
+        onClick={exportBackup}
+        className="backup-button"
+      >
+        Exportar backup
+      </button>
+
+      <label className="backup-button backup-import">
+        Importar backup
+        <input
+          type="file"
+          accept=".json,application/json"
+          onChange={handleImportBackup}
+          hidden
+        />
+      </label>
+    </div>
+  </div>
+)}
+
+{activePage === 'Dashboard' && (
+  <FinanceCharts transactions={transactions} />
+)}
+
+              <section className="panel transactions-panel">
+                <div className="panel-heading">
+                  <div>
+                    <h3>
+                      {activePage === 'Dashboard'
+                        ? 'Transações recentes'
+                        : 'Todas as transações'}
+                    </h3>
+                    <p>Suas movimentações financeiras</p>
+                  </div>
+
+                  {activePage === 'Dashboard' && (
+                    <button
+                      className="text-button"
+                      onClick={() => setActivePage('Transações')}
+                    >
+                      Ver todas
+                    </button>
+                  )}
+                </div>
+
+{activePage === 'Transações' && (
+  <div className="filters">
+    <div className="filter-field">
+      <label htmlFor="filter-month">Mês</label>
+      <input
+        id="filter-month"
+        type="month"
+        value={filterMonth}
+        onChange={event => setFilterMonth(event.target.value)}
+      />
+    </div>
+
+    <div className="filter-field">
+      <label htmlFor="filter-category">Categoria</label>
+      <select
+        id="filter-category"
+        value={filterCategory}
+        onChange={event => setFilterCategory(event.target.value)}
+      >
+        <option value="Todas">Todas</option>
+        {categories.map(item => (
+          <option key={item} value={item}>
+            {item}
+          </option>
+        ))}
+      </select>
+    </div>
+
+    <div className="filter-field">
+      <label htmlFor="filter-type">Tipo</label>
+      <select
+        id="filter-type"
+        value={filterType}
+        onChange={event => setFilterType(event.target.value)}
+      >
+        <option value="Todos">Todos</option>
+        <option value="income">Entradas</option>
+        <option value="expense">Saídas</option>
+      </select>
+    </div>
+
+    <button
+      className="clear-filters"
+      onClick={() => {
+        setFilterMonth('')
+        setFilterCategory('Todas')
+        setFilterType('Todos')
+      }}
+    >
+      Limpar filtros
+    </button>
+  </div>
+)}
+
+                <div className="transaction-list">
+                  {filteredTransactions.length === 0 ? (
+                    <div className="empty-state">
+                      <Wallet size={32} />
+                      <strong>Nenhuma transação cadastrada</strong>
+                      <p>
+                        Clique em Nova transação para começar.
+                      </p>
+                    </div>
+                  ) : (
+                    filteredTransactions
+                      .slice(
+                        0,
+                        activePage === 'Dashboard' ? 5 : undefined
+                      )
+                      .map(item => (
+                        <div className="transaction" key={item.id}>
+                          <div className="transaction-icon">
+                            {item.type === 'income' ? '💰' : '💸'}
+                          </div>
+
+                          <div className="transaction-info">
+                            <strong>{item.description}</strong>
+                            <small>{item.category}</small>
+                          </div>
+
+                          <div className="transaction-value">
+                            <strong className={item.type}>
+                              {item.type === 'income' ? '+' : '-'}{' '}
+                              {formatMoney(item.amount)}
+                            </strong>
+                            <small>{formatDate(item.date)}</small>
+                          </div>
+<button
+  className="edit-button"
+  aria-label={`Editar ${item.description}`}
+  onClick={() => openEditTransaction(item)}
+>
+  <Pencil size={16} />
+</button>
+                          <button
+                            className="delete-button"
+                            aria-label={`Excluir ${item.description}`}
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))
+                  )}
+                </div>
+              </section>
+            </>
+)}
+
+          {activePage === 'Relatórios' && (
+            <Reports transactions={transactions} />
+          )}
+
+          <footer className="footer">
+            <span>Personal Finance © 2026</span>
+            <span>Organize hoje. Conquiste amanhã.</span>
+          </footer>
+        </section>
+      </main>
+
+      {showModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div>
+                <h2 id="modal-title">Nova transação</h2>
+                <p>Registre uma movimentação financeira</p>
+              </div>
+
+              <button
+                className="modal-close"
+                aria-label="Fechar"
+                onClick={() => setShowModal(false)}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSave}>
+              <div className="type-selector">
+                <button
+                  type="button"
+                  className={`type-button ${type === 'income' ? 'selected-income' : ''}`}
+                  onClick={() => setType('income')}
+                >
+                  <ArrowDownRight size={19} />
+                  Entrada
+                </button>
+
+                <button
+                  type="button"
+                  className={`type-button ${type === 'expense' ? 'selected-expense' : ''}`}
+                  onClick={() => setType('expense')}
+                >
+                  <ArrowUpRight size={19} />
+                  Saída
+                </button>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="description">Descrição</label>
+                <input
+                  id="description"
+                  type="text"
+                  placeholder="Ex.: Supermercado"
+                  value={description}
+                  onChange={event => setDescription(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="amount">Valor (R$)</label>
+                <input
+                  id="amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0,00"
+                  value={amount}
+                  onChange={event => setAmount(event.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="category">Categoria</label>
+                  <select
+                    id="category"
+                    value={category}
+                    onChange={event => setCategory(event.target.value)}
+                  >
+                    {categories.map(item => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="date">Data</label>
+                  <input
+                    id="date"
+                    type="date"
+                    value={date}
+                    onChange={event => setDate(event.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="cancel-button"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancelar
+                </button>
+
+                <button type="submit" className="primary-button">
+                  Salvar transação
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default App

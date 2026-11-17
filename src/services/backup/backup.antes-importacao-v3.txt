@@ -1,0 +1,171 @@
+
+import {
+  getTransactions,
+  saveTransactions,
+  type Transaction,
+} from './storage'
+
+import {
+  getCards,
+  saveCards,
+  type CreditCard,
+} from './cardsStorage'
+
+import { getCardPurchases } from './cardPurchasesStorage'
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value)
+}
+
+function isValidTransaction(value: unknown): value is Transaction {
+  if (!isRecord(value)) return false
+
+  return (
+    typeof value.id === 'string' &&
+    typeof value.description === 'string' &&
+    typeof value.amount === 'number' &&
+    Number.isFinite(value.amount) &&
+    value.amount > 0 &&
+    (value.type === 'income' || value.type === 'expense') &&
+    typeof value.category === 'string' &&
+    typeof value.date === 'string' &&
+    /^\d{4}-\d{2}-\d{2}$/.test(value.date)
+  )
+}
+
+function isValidCard(value: unknown): value is CreditCard {
+  if (!isRecord(value)) return false
+
+  return (
+    typeof value.id === 'string' &&
+    value.id.length > 0 &&
+    typeof value.name === 'string' &&
+    value.name.trim().length > 0 &&
+    typeof value.bank === 'string' &&
+    value.bank.trim().length > 0 &&
+    typeof value.limit === 'number' &&
+    Number.isFinite(value.limit) &&
+    value.limit > 0 &&
+    typeof value.closingDay === 'number' &&
+    Number.isInteger(value.closingDay) &&
+    value.closingDay >= 1 &&
+    value.closingDay <= 31 &&
+    typeof value.dueDay === 'number' &&
+    Number.isInteger(value.dueDay) &&
+    value.dueDay >= 1 &&
+    value.dueDay <= 31
+  )
+}
+
+function hasUniqueIds(items: { id: string }[]): boolean {
+  return new Set(items.map(item => item.id)).size === items.length
+}
+
+export function exportBackup(): void {
+  const backup = {
+    version: 3,
+    createdAt: new Date().toISOString(),
+    transactions: getTransactions(),
+    cards: getCards(),
+    purchases: getCardPurchases(),
+  }
+
+  const blob = new Blob(
+    [JSON.stringify(backup, null, 2)],
+    { type: 'application/json' }
+  )
+
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = url
+  link.download = `personal-finance-backup-${new Date()
+    .toISOString()
+    .slice(0, 10)}.json`
+
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000)
+}
+
+export async function importBackup(
+  file: File
+): Promise<Transaction[]> {
+  const content = await file.text()
+
+  let parsed: unknown
+
+  try {
+    parsed = JSON.parse(content)
+  } catch {
+    throw new Error('O arquivo não contém um JSON válido.')
+  }
+
+  if (!isRecord(parsed)) {
+    throw new Error('Estrutura do backup inválida.')
+  }
+
+  if (parsed.version !== 1 && parsed.version !== 2) {
+    throw new Error('Versão do backup não suportada.')
+  }
+
+  if (
+    !Array.isArray(parsed.transactions) ||
+    !parsed.transactions.every(isValidTransaction)
+  ) {
+    throw new Error('O backup contém transações inválidas.')
+  }
+
+  const transactions: Transaction[] = parsed.transactions
+
+  if (!hasUniqueIds(transactions)) {
+    throw new Error('O backup contém transações duplicadas.')
+  }
+
+  let cards: CreditCard[] | undefined
+
+  if (parsed.version === 2) {
+    if (
+      !Array.isArray(parsed.cards) ||
+      !parsed.cards.every(isValidCard)
+    ) {
+      throw new Error('O backup contém cartões inválidos.')
+    }
+
+    cards = parsed.cards
+
+    if (!hasUniqueIds(cards)) {
+      throw new Error('O backup contém cartões duplicados.')
+    }
+  }
+
+  // Validamos todos os dados antes de iniciar a restauração.
+  // Se uma gravação falhar, tentamos recuperar os dados anteriores.
+  const previousTransactions = getTransactions()
+  const previousCards = getCards()
+
+  try {
+    saveTransactions(transactions)
+
+    if (cards !== undefined) {
+      saveCards(cards)
+    }
+  } catch {
+    try {
+      saveTransactions(previousTransactions)
+      saveCards(previousCards)
+    } catch {
+      throw new Error(
+        'Falha ao restaurar o backup e recuperar os dados anteriores. Não feche a página antes de verificar seus dados.'
+      )
+    }
+
+    throw new Error('Falha ao salvar o backup. Os dados anteriores foram preservados.')
+  }
+
+  return transactions
+}

@@ -1,0 +1,189 @@
+
+.pf-select {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.pf-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+
+  border: 1px solid #303746;
+  border-radius: 10px;
+
+  background: #1c202b;
+  color: #f5f6fa;
+
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.pf-select-trigger:hover {
+  border-color: var(--pf-accent);
+  background: #202432;
+}
+
+.pf-select-trigger:focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: 2px;
+}
+
+.pf-select-trigger[aria-expanded='true'] {
+  border-color: var(--pf-accent);
+  box-shadow:
+    0 0 0 2px rgba(var(--pf-accent-rgb), 0.12);
+}
+
+.pf-select-trigger svg {
+  flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+
+.pf-select-trigger svg.is-open {
+  transform: rotate(180deg);
+  color: var(--pf-accent-text);
+}
+
+.pf-select-trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Menu flutuante */
+
+.pf-select-options {
+  box-sizing: border-box;
+  padding: 6px;
+
+  border: 1px solid #353d4d;
+  border-radius: 12px;
+
+  background: #191d28;
+
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  box-shadow: 0 12px 32px #0008;
+
+  transform-origin: top center;
+  animation: pf-select-open 180ms ease-out both;
+}
+
+.pf-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  width: 100%;
+  padding: 10px 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #dce2ef;
+
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+/* Hover com cor escolhida pelo usuário */
+.pf-select-options .pf-select-option:hover {
+  background: rgba(var(--pf-accent-rgb), 0.12);
+  color: var(--pf-accent-text);
+}
+
+/* Opção selecionada */
+.pf-select-options .pf-select-option.selected {
+  background: rgba(var(--pf-accent-rgb), 0.16);
+  color: var(--pf-accent-text);
+}
+
+/* Opção selecionada em hover */
+.pf-select-options .pf-select-option.selected:hover {
+  background: rgba(var(--pf-accent-rgb), 0.22);
+  color: var(--pf-accent-text);
+}
+
+/* Ícone de confirmação */
+.pf-select-option.selected > svg {
+  color: var(--pf-accent-text);
+}
+
+.pf-select-option:focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: -2px;
+}
+
+/* Barra de rolagem */
+.pf-select-options::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pf-select-options::-webkit-scrollbar-thumb {
+  background: rgba(var(--pf-accent-rgb), 0.45);
+  border-radius: 10px;
+}
+
+/* Animação suave de descida */
+@keyframes pf-select-open {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-select-options {
+    animation: none;
+  }
+}
+
+/* Ícones das categorias */
+.pf-select-option-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.pf-select-option-content > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pf-select-option-content > svg {
+  flex-shrink: 0;
+}
+
+.pf-select-trigger > svg,
+.pf-select-option > svg {
+  flex-shrink: 0;
+}

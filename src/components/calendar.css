@@ -1,0 +1,579 @@
+
+/* CALENDÁRIO GLOBAL — PERSONAL FINANCE */
+
+.pf-calendar {
+  position: relative;
+  width: 220px;
+  max-width: 100%;
+}
+
+.pf-calendar-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 12px;
+  background: #0e121b;
+  color: #f9fafb;
+  border: 1px solid #374151;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pf-calendar-trigger:hover,
+.pf-calendar-trigger:focus-visible {
+  border-color: #a78bfa;
+}
+
+.pf-calendar-popup {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 260px;
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  padding: 14px;
+  background: #171b27;
+  border: 1px solid #3a4052;
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+}
+
+.pf-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.pf-calendar-header button,
+.pf-month-grid button,
+.pf-calendar-today {
+  border: none;
+  background: transparent;
+  color: #f9fafb;
+  cursor: pointer;
+  font: inherit;
+}
+
+.pf-calendar-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.pf-calendar-header button:hover {
+  background: #2a3042;
+}
+
+.pf-month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.pf-month-grid button {
+  padding: 10px 4px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.pf-month-grid button:hover {
+  background: #34304e;
+}
+
+.pf-month-grid button.selected {
+  background: #8055d8;
+  color: #fff;
+  font-weight: 700;
+}
+
+.pf-calendar-today {
+  margin-top: 14px;
+  padding: 8px 0;
+  color: #a78bfa;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pf-calendar-today:hover {
+  color: #c4b5fd;
+}
+
+.pf-date-picker {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.pf-date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid #343044;
+  border-radius: 10px;
+  background: #1c202b;
+  color: #f5f3ff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pf-date-trigger:hover {
+  border-color: var(--pf-accent);
+}
+
+.pf-date-trigger:focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: 2px;
+}
+
+.pf-date-popup {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  z-index: 1100;
+  width: min(310px, 90vw);
+  padding: 12px;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.35);
+  border-radius: 12px;
+  background: #191d28;
+  box-shadow: 0 12px 32px #0008;
+}
+
+.pf-date-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #f5f3ff;
+  text-transform: capitalize;
+}
+
+.pf-date-header button,
+.pf-date-footer button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(var(--pf-accent-rgb), 0.12);
+  color: var(--pf-accent-text);
+  cursor: pointer;
+}
+
+.pf-date-header button:hover,
+.pf-date-footer button:hover {
+  background: rgba(var(--pf-accent-rgb), 0.22);
+}
+
+.pf-date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  text-align: center;
+}
+
+.pf-date-weekday {
+  padding: 7px 0;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.pf-date-grid button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #e5e7eb;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pf-date-grid button:hover {
+  background: rgba(var(--pf-accent-rgb), 0.12);
+}
+
+.pf-date-grid button.selected {
+  background: var(--pf-accent);
+  color: #10131b;
+}
+
+.pf-date-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+.pf-date-validation {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* Ajuste do calendário dentro dos formulários */
+
+/* Calendário flutuante fora do modal */
+
+.pf-date-popup.pf-date-popup-portal {
+  position: fixed;
+  top: auto;
+  bottom: auto;
+  right: auto;
+  margin: 0;
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform-origin: top center;
+  animation: pf-popup-slide-down 180ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-date-popup.pf-date-popup-portal {
+    animation: none;
+  }
+}
+
+
+.transaction-modal .pf-date-picker {
+  position: relative;
+  min-width: 0;
+}
+
+.transaction-modal .pf-date-header strong {
+  font-size: 13px;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+.transaction-modal .pf-date-grid {
+  gap: 2px;
+}
+
+.transaction-modal .pf-date-grid button {
+  min-height: 32px;
+  padding: 4px;
+}
+
+
+/* Animação suave de abertura */
+
+@keyframes pf-popup-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.pf-date-popup,
+.pf-month-popup {
+  transform-origin: top center;
+  animation: pf-popup-slide-down 180ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-date-popup,
+  .pf-month-popup {
+    animation: none;
+  }
+}
+
+
+/* CALENDÁRIO — ANIMAÇÕES DE ABERTURA E FECHAMENTO */
+
+.pf-calendar-popup-opening {
+  animation: pf-calendar-open 220ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.pf-calendar-popup-closing {
+  pointer-events: none;
+  animation: pf-calendar-close 220ms ease-in both;
+}
+
+@keyframes pf-calendar-open {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pf-calendar-close {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+/* TRANSIÇÃO DOS MESES AO TROCAR DE ANO */
+
+.pf-month-grid {
+  animation: pf-month-grid-enter 350ms ease-out both;
+  will-change: opacity, transform;
+}
+
+@keyframes pf-month-grid-enter {
+  0% {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+/* ACESSIBILIDADE */
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-calendar-popup-opening,
+  .pf-calendar-popup-closing,
+  .pf-month-grid {
+    animation: none;
+  }
+}
+
+/* ANIMAÇÃO DE NAVEGAÇÃO DO CALENDÁRIO DE DIAS */
+
+.pf-date-grid-animated {
+  animation: pf-date-grid-enter 320ms ease-out both;
+}
+
+@keyframes pf-date-grid-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-date-grid-animated {
+    animation: none;
+  }
+}
+
+/* =========================================
+   PERSONAL FINANCE
+   CALENDÁRIO DE MESES RESPONSIVO
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .pf-calendar {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pf-calendar-trigger {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .pf-calendar-trigger span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pf-calendar-trigger svg {
+    flex-shrink: 0;
+  }
+
+  .pf-calendar-popup {
+    width: min(300px, calc(100vw - 32px));
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 14px;
+    overflow-x: hidden;
+  }
+
+  .pf-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .pf-calendar-header button {
+    flex-shrink: 0;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .pf-month-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .pf-month-grid button {
+    min-width: 0;
+    min-height: 42px;
+    padding: 8px 4px;
+    box-sizing: border-box;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .pf-calendar-popup > .pf-calendar-today {
+    width: 100%;
+    min-height: 40px;
+    margin-top: 10px;
+  }
+}
+
+/* =========================================
+   PERSONAL FINANCE
+   DATE PICKER — RESPONSIVIDADE MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .pf-date-picker {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .pf-date-trigger {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 12px;
+    gap: 8px;
+    box-sizing: border-box;
+    font-size: 13px;
+  }
+
+  .pf-date-trigger span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pf-date-trigger svg {
+    flex-shrink: 0;
+  }
+
+  .pf-date-popup.pf-date-popup-portal {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 24px);
+    padding: 12px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .pf-date-header {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .pf-date-header strong {
+    min-width: 0;
+    font-size: 13px;
+    text-align: center;
+    text-transform: capitalize;
+  }
+
+  .pf-date-header button {
+    min-width: 36px;
+    min-height: 36px;
+    flex-shrink: 0;
+  }
+
+  .pf-date-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+  }
+
+  .pf-date-weekday {
+    padding: 6px 0;
+    font-size: 11px;
+  }
+
+  .pf-date-grid button {
+    min-width: 0;
+    min-height: 36px;
+    padding: 4px 0;
+    font-size: 12px;
+  }
+
+  .pf-date-footer {
+    margin-top: 10px;
+  }
+
+  .pf-date-footer button {
+    min-height: 36px;
+    padding: 7px 14px;
+  }
+}
+
+/* =========================================
+   MONTH PICKER — AJUSTE FINAL MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+  .pf-calendar[data-month-picker] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .pf-calendar[data-month-picker] .pf-calendar-popup {
+    left: 0;
+    right: auto;
+    width: min(260px, calc(100vw - 32px));
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}

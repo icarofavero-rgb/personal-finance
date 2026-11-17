@@ -1,0 +1,484 @@
+
+.pf-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0d0f14;
+  opacity: 1;
+  transition: opacity 300ms ease;
+}
+
+.pf-splash-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pf-splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  animation: pf-splash-appear 900ms ease both;
+}
+
+.pf-splash-icon {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color, #8b5cf6);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow:
+    0 0 24px color-mix(
+      in srgb,
+      var(--accent-color, #8b5cf6) 22%,
+      transparent
+    );
+  animation: pf-splash-pulse 1.6s ease-in-out both;
+}
+
+.pf-splash-name {
+  color: #eef0f7;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.5px;
+}
+
+.pf-splash-name span {
+  color: var(--accent-color, #8b5cf6);
+}
+
+@keyframes pf-splash-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pf-splash-pulse {
+  0% {
+    filter: brightness(0.8);
+    transform: scale(0.94);
+  }
+
+  55% {
+    filter: brightness(1.3);
+    transform: scale(1.04);
+  }
+
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-splash,
+  .pf-splash-content,
+  .pf-splash-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+.pf-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #0d0f14;
+  opacity: 1;
+  transition: opacity 300ms ease;
+}
+
+.pf-splash-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pf-splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.pf-splash-icon {
+  position: relative;
+
+  width: 106px;
+  height: 106px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--accent-color, #8b5cf6);
+
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.025);
+
+  animation:
+    pf-wallet-appear 900ms ease-out both,
+    pf-wallet-glow 1600ms ease-in-out 900ms both;
+}
+
+.pf-splash-icon::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 36px;
+
+  background: radial-gradient(
+    circle,
+    color-mix(
+      in srgb,
+      var(--accent-color, #8b5cf6) 30%,
+      transparent
+    ),
+    transparent 72%
+  );
+
+  filter: blur(18px);
+  z-index: -1;
+
+  animation: pf-halo-glow 1700ms ease-in-out 700ms both;
+}
+
+.pf-splash-name {
+  color: #eef0f7;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.6px;
+
+  opacity: 0;
+
+  animation: pf-name-appear 800ms ease-out 1900ms both;
+}
+
+.pf-splash-name span {
+  color: var(--accent-color, #8b5cf6);
+}
+
+@keyframes pf-wallet-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pf-wallet-glow {
+  0% {
+    box-shadow: 0 0 8px
+      color-mix(
+        in srgb,
+        var(--accent-color, #8b5cf6) 15%,
+        transparent
+      );
+  }
+
+  50% {
+    box-shadow:
+      0 0 32px
+        color-mix(
+          in srgb,
+          var(--accent-color, #8b5cf6) 65%,
+          transparent
+        ),
+      0 0 75px
+        color-mix(
+          in srgb,
+          var(--accent-color, #8b5cf6) 30%,
+          transparent
+        );
+  }
+
+  100% {
+    box-shadow: 0 0 24px
+      color-mix(
+        in srgb,
+        var(--accent-color, #8b5cf6) 25%,
+        transparent
+      );
+  }
+}
+
+@keyframes pf-halo-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+}
+
+@keyframes pf-name-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-splash,
+  .pf-splash-icon,
+  .pf-splash-icon::before,
+  .pf-splash-name {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .pf-splash-name {
+    opacity: 1;
+  }
+
+  .pf-splash-icon::before {
+    display: none;
+  }
+}
+
+.pf-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #0d0f14;
+  opacity: 1;
+  transition: opacity 300ms ease;
+}
+
+.pf-splash-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pf-splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.pf-splash-icon {
+  position: relative;
+  isolation: isolate;
+
+  width: 106px;
+  height: 106px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: var(--pf-accent, #8b5cf6);
+
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.025);
+
+  animation:
+    pf-wallet-appear 900ms ease-out both,
+    pf-wallet-glow 1600ms ease-in-out 900ms both;
+}
+
+.pf-splash-icon::before {
+  content: '';
+  position: absolute;
+  inset: -12px;
+
+  border-radius: 36px;
+
+  background: radial-gradient(
+    circle,
+    rgba(
+      var(--pf-accent-rgb, 139, 92, 246),
+      0.35
+    ),
+    transparent 72%
+  );
+
+  filter: blur(18px);
+  z-index: -1;
+
+  animation:
+    pf-halo-glow 1700ms ease-in-out 700ms both;
+}
+
+.pf-splash-name {
+  color: #eef0f7;
+
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.6px;
+
+  opacity: 0;
+
+  animation:
+    pf-name-appear 800ms ease-out 1900ms both;
+}
+
+.pf-splash-name span {
+  color: var(--pf-accent, #8b5cf6);
+}
+
+/* Surgimento da carteira */
+
+@keyframes pf-wallet-appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.82);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Brilho baseado na intensidade escolhida */
+
+@keyframes pf-wallet-glow {
+  0% {
+    box-shadow:
+      0 0 8px rgba(
+        var(--pf-accent-rgb, 139, 92, 246),
+        0.08
+      );
+  }
+
+  50% {
+    box-shadow:
+      0 0 32px rgba(
+        var(--pf-accent-rgb, 139, 92, 246),
+        calc(var(--pf-neon-strength, 0.15) * 1.6)
+      ),
+      0 0 75px rgba(
+        var(--pf-accent-rgb, 139, 92, 246),
+        var(--pf-neon-strength, 0.15)
+      );
+  }
+
+  100% {
+    box-shadow:
+      0 0 24px rgba(
+        var(--pf-accent-rgb, 139, 92, 246),
+        var(--pf-neon-strength, 0.15)
+      );
+  }
+}
+
+/* Halo de iluminação */
+
+@keyframes pf-halo-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: calc(
+      var(--pf-neon-strength, 0.15) * 2
+    );
+    transform: scale(1.15);
+  }
+
+  100% {
+    opacity: var(--pf-neon-strength, 0.15);
+    transform: scale(1);
+  }
+}
+
+/* Nome aparece depois da carteira */
+
+@keyframes pf-name-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Animações reduzidas ou desativadas */
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-splash,
+  .pf-splash-icon,
+  .pf-splash-icon::before,
+  .pf-splash-name {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .pf-splash-name {
+    opacity: 1;
+  }
+
+  .pf-splash-icon::before {
+    display: none;
+  }
+}
+
+:root[data-pf-animations='reduced'] .pf-splash,
+:root[data-pf-animations='reduced'] .pf-splash-icon,
+:root[data-pf-animations='reduced'] .pf-splash-icon::before,
+:root[data-pf-animations='reduced'] .pf-splash-name,
+:root[data-pf-animations='off'] .pf-splash,
+:root[data-pf-animations='off'] .pf-splash-icon,
+:root[data-pf-animations='off'] .pf-splash-icon::before,
+:root[data-pf-animations='off'] .pf-splash-name {
+  animation: none !important;
+  transition: none !important;
+}
+
+:root[data-pf-animations='reduced'] .pf-splash-name,
+:root[data-pf-animations='off'] .pf-splash-name {
+  opacity: 1;
+}
+
+:root[data-pf-animations='reduced'] .pf-splash-icon::before,
+:root[data-pf-animations='off'] .pf-splash-icon::before {
+  display: none;
+}

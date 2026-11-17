@@ -1,0 +1,147 @@
+
+.app-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  animation: app-dialog-overlay-in 220ms ease both;
+}
+
+.app-dialog {
+  width: 100%;
+  max-width: 420px;
+  padding: 25px;
+  border-radius: 20px;
+  background: #1b2030;
+  border: 1px solid #42405e;
+  color: #f5f3ff;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.3);
+  animation: app-dialog-in 220ms ease both;
+}
+
+.app-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.app-dialog-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #32254c;
+  color: #b59aff;
+}
+
+.app-dialog-close {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #42405e;
+  border-radius: 9px;
+  background: transparent;
+  color: inherit;
+}
+
+.app-dialog h2 {
+  margin: 0 0 10px;
+  font-size: 19px;
+}
+
+.app-dialog p {
+  margin: 0 0 24px;
+  color: #b4bdd0;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
+.app-dialog-confirm {
+  display: block;
+  margin-left: auto;
+  padding: 11px 20px;
+  border: none;
+  border-radius: 10px;
+  background: #7c3aed;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.app-dialog-confirm:hover {
+  background: #6d28d9;
+  box-shadow: 0 0 14px rgba(124, 58, 237, 0.25);
+}
+
+:root[data-pf-theme="light"] .app-dialog {
+  background: #ffffff;
+  color: #172033;
+  border-color: #aab4c5;
+}
+
+:root[data-pf-theme="light"] .app-dialog p {
+  color: #475569;
+}
+
+:root[data-pf-theme="light"] .app-dialog-icon {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+:root[data-pf-theme="light"] .app-dialog-close {
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+@keyframes app-dialog-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes app-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.app-dialog-overlay.is-closing {
+  animation: app-dialog-overlay-out 220ms ease both;
+}
+
+.app-dialog-overlay.is-closing .app-dialog {
+  animation: app-dialog-out 220ms ease both;
+}
+
+@keyframes app-dialog-overlay-out {
+  to { opacity: 0; }
+}
+
+@keyframes app-dialog-out {
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-dialog-overlay,
+  .app-dialog,
+  .app-dialog-overlay.is-closing,
+  .app-dialog-overlay.is-closing .app-dialog {
+    animation-duration: 1ms;
+  }
+}

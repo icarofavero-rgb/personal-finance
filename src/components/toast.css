@@ -1,0 +1,200 @@
+
+/* PERSONAL FINANCE — TOAST CENTRALIZADO */
+
+.pf-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 99999;
+
+  width: min(380px, calc(100vw - 32px));
+  box-sizing: border-box;
+
+  background: #1b1f2b;
+  color: #f5f3ff;
+
+  border: 1px solid #343044;
+  border-radius: 12px;
+
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+
+  transform: translateX(-50%);
+  animation: pf-toast-enter 250ms ease-out both;
+}
+
+.pf-toast-success {
+  --toast-color: #22c55e;
+}
+
+.pf-toast-error {
+  --toast-color: #ef4444;
+}
+
+.pf-toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.pf-toast-content > svg {
+  flex-shrink: 0;
+  color: var(--toast-color);
+}
+
+.pf-toast-content > span {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pf-toast-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+
+  background: transparent;
+  color: #aab4c5;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.pf-toast-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.pf-toast-progress {
+  height: 3px;
+  width: 100%;
+  background: var(--toast-color);
+  transform-origin: left;
+  animation: pf-toast-countdown 4s linear forwards;
+}
+
+/* ENTRADA — DE BAIXO PARA CIMA */
+@keyframes pf-toast-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* SAÍDA — DE CIMA PARA BAIXO */
+.pf-toast-exit {
+  animation: pf-toast-exit 250ms ease-in both;
+}
+
+@keyframes pf-toast-exit {
+  from {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+}
+
+/* BARRA DE CONTAGEM */
+@keyframes pf-toast-countdown {
+  from {
+    transform: scaleX(1);
+  }
+
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-toast {
+    bottom: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-toast,
+  .pf-toast-exit {
+    animation: none;
+  }
+}
+
+
+/* ==========================================
+   ETAPA 105.7.4.3
+   TOASTS — TEMA CLARO
+   ========================================== */
+
+/* Fundo, bordas e texto */
+:root[data-pf-theme="light"] .pf-toast {
+  background: #ffffff;
+  color: #172033;
+
+  border: 1px solid #aab4c5;
+
+  box-shadow:
+    0 14px 40px rgba(23, 32, 51, 0.20);
+}
+
+/* Texto da mensagem */
+:root[data-pf-theme="light"]
+.pf-toast-content > span {
+  color: #172033;
+}
+
+/* Botão de fechar */
+:root[data-pf-theme="light"]
+.pf-toast-close {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+/* Hover do botão X */
+:root[data-pf-theme="light"]
+.pf-toast-close:hover {
+  background: #ede9fe;
+  color: #7c3aed;
+  border-color: #a78bfa;
+
+  box-shadow:
+    0 0 10px rgba(124, 58, 237, 0.12);
+}
+
+/* Verde de sucesso no tema claro */
+:root[data-pf-theme="light"]
+.pf-toast-success {
+  --toast-color: #15803d;
+}
+
+/* Vermelho de erro no tema claro */
+:root[data-pf-theme="light"]
+.pf-toast-error {
+  --toast-color: #dc2626;
+}
+
+/* Foco acessível no botão X */
+.pf-toast-close:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}

@@ -1,0 +1,150 @@
+
+import type { Transaction } from './storage'
+import type { CreditCard } from './cardsStorage'
+import type { CardPayment } from './cardPaymentsStorage'
+import type { CardInvoice } from './cardInvoices'
+
+function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return false
+  }
+
+  const [year, month, day] = value.split('-').map(Number)
+
+  if (year < 100 || year > 9999) {
+    return false
+  }
+
+  const date = new Date(Date.UTC(year, month - 1, day))
+
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() + 1 === month &&
+    date.getUTCDate() === day
+  )
+}
+
+export function validateBackupPayments(
+  payments: CardPayment[],
+  cards: CreditCard[],
+  transactions: Transaction[],
+  invoices: CardInvoice[]
+): void {
+
+  const cardIds = new Set(cards.map(card => card.id))
+
+  const transactionMap = new Map(
+    transactions.map(transaction => [
+      transaction.id,
+      transaction,
+    ])
+  )
+
+  const paymentIds = new Set<string>()
+  const linkedTransactionIds = new Set<string>()
+
+  for (const payment of payments) {
+    if (
+      typeof payment.id !== 'string' ||
+      payment.id.trim().length === 0 ||
+      typeof payment.cardId !== 'string' ||
+      !cardIds.has(payment.cardId)
+    ) {
+      throw new Error(
+        'O backup contém um pagamento ou cartão inválido.'
+      )
+    }
+
+    if (paymentIds.has(payment.id)) {
+      throw new Error(
+        'O backup contém pagamentos duplicados.'
+      )
+    }
+
+    paymentIds.add(payment.id)
+
+
+const invoiceExists = invoices.some(
+  invoice =>
+    invoice.cardId === payment.cardId &&
+    invoice.invoiceMonth === payment.invoiceMonth
+)
+
+if (!invoiceExists) {
+  throw new Error(
+    'O backup contém um pagamento vinculado a uma fatura inexistente.'
+  )
+}
+
+
+    if (
+      !Number.isFinite(payment.amount) ||
+      payment.amount <= 0 ||
+      !Number.isSafeInteger(
+        Math.round(payment.amount * 100)
+      ) ||
+      Math.abs(
+        payment.amount * 100 -
+        Math.round(payment.amount * 100)
+      ) > 0.000001
+    ) {
+      throw new Error(
+        'O backup contém valores de pagamento inválidos.'
+      )
+    }
+
+    if (
+      typeof payment.invoiceMonth !== 'string' ||
+      !/^\d{4}-(0[1-9]|1[0-2])$/.test(
+        payment.invoiceMonth
+      )
+    ) {
+      throw new Error(
+        'O backup contém um mês de fatura inválido.'
+      )
+    }
+
+   if (
+  typeof payment.date !== 'string' ||
+  !isValidDate(payment.date)
+) {
+  throw new Error(
+    'O backup contém uma data de pagamento inválida.'
+  )
+}
+
+    if (payment.transactionId !== undefined) {
+      if (
+        typeof payment.transactionId !== 'string' ||
+        payment.transactionId.trim().length === 0
+      ) {
+        throw new Error(
+          'O backup contém um vínculo de transação inválido.'
+        )
+      }
+
+      if (linkedTransactionIds.has(payment.transactionId)) {
+        throw new Error(
+          'Mais de um pagamento utiliza a mesma transação.'
+        )
+      }
+
+      linkedTransactionIds.add(payment.transactionId)
+
+      const transaction = transactionMap.get(
+        payment.transactionId
+      )
+
+      if (
+        !transaction ||
+        transaction.type !== 'expense' ||
+        transaction.amount !== payment.amount ||
+        transaction.date !== payment.date
+      ) {
+        throw new Error(
+          'O pagamento não corresponde à despesa vinculada.'
+        )
+      }
+    }
+  }
+}

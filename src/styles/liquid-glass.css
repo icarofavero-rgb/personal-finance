@@ -1,0 +1,3930 @@
+
+/* =========================================
+   PERSONAL FINANCE — LIQUID GLASS
+   Estilos isolados do tema clássico
+   ========================================= */
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-blur: 20px;
+  --glass-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+}
+
+/* Apple Liquid Glass */
+:root[data-pf-style='apple-glass'] {
+  --glass-bg: rgba(210, 225, 255, 0.09);
+  --glass-border: rgba(235, 245, 255, 0.24);
+  --glass-blur: 24px;
+  --glass-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* Fundo principal */
+:root[data-pf-style='apple-glass'] .app {
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(95, 145, 255, 0.2),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 85% 85%,
+      rgba(170, 120, 255, 0.12),
+      transparent 45%
+    ),
+    var(--pf-bg);
+}
+
+/* Superfícies translúcidas */
+:root[data-pf-style='apple-glass'] :is(
+  .sidebar,
+  .topbar,
+  .summary-card,
+  .panel,
+  .modal,
+  .settings-content
+) {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
+}
+
+/* Reflexo discreto nos cartões */
+:root[data-pf-style='apple-glass'] :is(
+  .summary-card,
+  .panel
+) {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-pf-style='apple-glass'] :is(
+  .summary-card,
+  .panel
+)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.1),
+    transparent 48%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Navegação */
+:root[data-pf-style='apple-glass'] .nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-pf-style='apple-glass'] .nav-item.active {
+  background: rgba(var(--pf-accent-rgb), 0.13);
+  border-color: rgba(var(--pf-accent-rgb), 0.22);
+}
+
+/* Menos efeitos em dispositivos com preferência
+   por movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-pf-style='apple-glass'] *,
+  :root[data-pf-style='apple-glass'] *::before,
+  :root[data-pf-style='apple-glass'] *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================
+   PERSONAL FINANCE — NEON LIQUID GLASS
+   ========================================= */
+
+:root[data-pf-style='neon-glass'] {
+  --glass-bg: rgba(24, 20, 48, 0.52);
+  --glass-border: rgba(175, 135, 255, 0.28);
+  --glass-blur: 24px;
+  --glass-shadow:
+    0 12px 38px rgba(0, 0, 0, 0.24),
+    0 0 24px rgba(139, 92, 246, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Fundo com iluminação colorida */
+:root[data-pf-style='neon-glass'] .app {
+  background:
+    radial-gradient(
+      ellipse at 15% 20%,
+      rgba(115, 65, 255, 0.24),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 85% 25%,
+      rgba(255, 65, 170, 0.17),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 55% 90%,
+      rgba(35, 195, 255, 0.16),
+      transparent 50%
+    ),
+    var(--pf-bg);
+
+  background-size: 140% 140%;
+  animation: pf-neon-background 24s ease-in-out infinite alternate;
+}
+
+/* Cartões e superfícies de vidro */
+:root[data-pf-style='neon-glass'] :is(
+  .sidebar,
+  .topbar,
+  .summary-card,
+  .panel,
+  .modal,
+  .settings-content
+) {
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
+}
+
+/* Reflexo sobre os cartões */
+:root[data-pf-style='neon-glass'] :is(
+  .summary-card,
+  .panel
+) {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-pf-style='neon-glass'] :is(
+  .summary-card,
+  .panel
+)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.11),
+    rgba(180, 110, 255, 0.05) 45%,
+    transparent 75%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Iluminação ao passar o mouse */
+:root[data-pf-style='neon-glass'] :is(
+  .summary-card,
+  .panel
+) {
+  transition:
+    box-shadow 300ms ease,
+    border-color 300ms ease,
+    transform 300ms ease;
+}
+
+@media (hover: hover) {
+  :root[data-pf-style='neon-glass'] :is(
+    .summary-card,
+    .panel
+  ):hover {
+    border-color: rgba(190, 140, 255, 0.45);
+    box-shadow:
+      0 16px 42px rgba(0, 0, 0, 0.28),
+      0 0 30px rgba(155, 95, 255, 0.17),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
+}
+
+/* Navegação */
+:root[data-pf-style='neon-glass'] .nav-item:hover {
+  background: rgba(155, 95, 255, 0.12);
+}
+
+:root[data-pf-style='neon-glass'] .nav-item.active {
+  background: rgba(var(--pf-accent-rgb), 0.15);
+  border-color: rgba(var(--pf-accent-rgb), 0.3);
+}
+
+/* Animação lenta do fundo */
+@keyframes pf-neon-background {
+  0% {
+    background-position: 0% 20%;
+  }
+
+  50% {
+    background-position: 70% 50%;
+  }
+
+  100% {
+    background-position: 100% 80%;
+  }
+}
+
+/* Respeitar preferência de movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-pf-style='neon-glass'] .app {
+    animation: none;
+  }
+
+  :root[data-pf-style='neon-glass'] :is(
+    .summary-card,
+    .panel
+  ) {
+    transition: none;
+  }
+}
+
+/* =========================================
+   NEON LIQUID GLASS — AURORA V2
+   ========================================= */
+
+/* Fundo luminoso fixo, atrás do conteúdo */
+:root[data-pf-style='neon-glass'] .app {
+  position: relative;
+  isolation: isolate;
+  background: #0d0f18;
+}
+
+:root[data-pf-style='neon-glass'] .app::before {
+  content: '';
+  position: fixed;
+  inset: -15%;
+  z-index: -1;
+  pointer-events: none;
+
+  background:
+    radial-gradient(
+      ellipse at 25% 20%,
+      rgba(123, 75, 255, 0.24),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 80% 35%,
+      rgba(255, 65, 165, 0.15),
+      transparent 43%
+    ),
+    radial-gradient(
+      ellipse at 55% 85%,
+      rgba(35, 200, 255, 0.14),
+      transparent 48%
+    );
+
+  animation: pf-aurora-drift 28s ease-in-out infinite alternate;
+}
+
+/* Cartões financeiros e painéis */
+:root[data-pf-style='neon-glass'] :is(
+  .summary-card,
+  .panel
+) {
+  background-color: rgba(25, 29, 45, 0.58);
+  backdrop-filter: blur(22px) saturate(135%);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+  border-color: rgba(180, 160, 255, 0.20);
+}
+
+/* Superfícies de navegação */
+:root[data-pf-style='neon-glass'] :is(
+  .sidebar,
+  .topbar
+) {
+  background: rgba(18, 19, 32, 0.62);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Brilho suave nas bordas */
+:root[data-pf-style='neon-glass'] :is(
+  .summary-card,
+  .panel
+) {
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    0 0 18px rgba(145, 90, 255, 0.07);
+}
+
+/* Movimento lento da iluminação */
+@keyframes pf-aurora-drift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+
+  50% {
+    transform: translate3d(2%, 2%, 0) scale(1.05);
+  }
+
+  100% {
+    transform: translate3d(-1%, 3%, 0) scale(1.02);
+  }
+}
+
+/* Desempenho e acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-pf-style='neon-glass'] .app::before {
+    animation: none;
+  }
+}
+
+/* =========================================
+   LIQUID GLASS — PAINÉIS DO DASHBOARD
+   Refinamento isolado
+   ========================================= */
+
+/* Painéis inferiores */
+:root[data-pf-style='neon-glass'] :is(
+  .monthly-forecast-panel,
+  .dashboard-cards-panel
+) {
+  background: linear-gradient(
+    145deg,
+    rgba(38, 35, 66, 0.58),
+    rgba(17, 24, 42, 0.42)
+  );
+
+  border: 1px solid rgba(185, 155, 255, 0.25);
+
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+
+  box-shadow:
+    0 18px 45px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 22px rgba(145, 90, 255, 0.06);
+}
+
+/* Reflexo interno, sem cobrir o conteúdo */
+:root[data-pf-style='neon-glass'] :is(
+  .monthly-forecast-panel,
+  .dashboard-cards-panel
+) {
+  position: relative;
+  isolation: isolate;
+}
+
+:root[data-pf-style='neon-glass'] :is(
+  .monthly-forecast-panel,
+  .dashboard-cards-panel
+)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.055),
+    transparent 48%
+  );
+
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Blocos internos das previsões */
+:root[data-pf-style='neon-glass']
+.monthly-forecast-grid .monthly-forecast-item {
+  background: rgba(255, 255, 255, 0.045);
+  border-color: rgba(200, 190, 255, 0.12);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Quatro cartões superiores */
+:root[data-pf-style='neon-glass']
+.summary-grid .summary-card {
+  background: linear-gradient(
+    145deg,
+    rgba(37, 34, 65, 0.56),
+    rgba(19, 26, 43, 0.43)
+  );
+
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+
+  border-color: rgba(185, 155, 255, 0.23);
+
+  box-shadow:
+    0 14px 35px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+/* Mantém as barras coloridas originais dos cartões */
+:root[data-pf-style='neon-glass']
+.summary-grid .summary-card::before {
+  z-index: 1;
+}
+
+/* =========================================
+   CONTROLE DE ANIMAÇÕES — LIQUID GLASS
+   ========================================= */
+
+/* Movimento reduzido */
+:root[data-pf-animations='reduced']
+[data-pf-style='neon-glass'] .app {
+  animation-duration: 60s;
+}
+
+/* Compatível com atributos no elemento raiz */
+:root[data-pf-style='neon-glass']
+[data-pf-animations='reduced'] .app::before {
+  animation-duration: 60s;
+}
+
+/* Regras efetivas: atributos no :root */
+:root[data-pf-style='neon-glass'][data-pf-animations='reduced']
+.app {
+  animation-duration: 60s;
+}
+
+:root[data-pf-style='neon-glass'][data-pf-animations='reduced']
+.app::before {
+  animation-duration: 60s;
+}
+
+/* Desativar movimentos decorativos */
+:root[data-pf-style='neon-glass'][data-pf-animations='off']
+.app,
+:root[data-pf-style='neon-glass'][data-pf-animations='off']
+.app::before {
+  animation: none !important;
+}
+
+/* Respeitar preferência do sistema operacional */
+@media (prefers-reduced-motion: reduce) {
+  :root[data-pf-style='neon-glass'] .app,
+  :root[data-pf-style='neon-glass'] .app::before {
+    animation: none !important;
+  }
+}
+
+/* Navegação inferior do Personal Finance */
+
+.pf-mobile-nav {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .pf-mobile-nav {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    left: 14px;
+    right: 14px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    z-index: 900;
+    padding: 9px 12px;
+    border-radius: 28px;
+    border: 1px solid rgba(180, 150, 255, 0.24);
+    background: rgba(24, 19, 43, 0.82);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 12px 38px rgba(0, 0, 0, 0.35);
+  }
+
+  .pf-mobile-nav-scroll {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+  }
+
+  .pf-mobile-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-mobile-nav-item {
+    display: flex;
+    flex: 0 0 76px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    min-height: 54px;
+    border: 0;
+    border-radius: 17px;
+    background: transparent;
+    color: rgba(225, 215, 245, 0.72);
+    cursor: pointer;
+  }
+
+  .pf-mobile-nav-item span {
+    font-size: 10px;
+    white-space: nowrap;
+  }
+
+  .pf-mobile-nav-item.active {
+    color: #ffffff;
+    background: rgba(151, 94, 255, 0.22);
+  }
+
+  .pf-mobile-nav-add {
+    display: flex;
+    flex: 0 0 58px;
+    width: 58px;
+    height: 58px;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 20px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #9b75ff, #7543e9);
+    box-shadow: 0 0 22px rgba(155, 117, 255, 0.38);
+    cursor: pointer;
+  }
+
+  .app > .sidebar {
+    display: none;
+  }
+
+  .app > .main {
+    margin-left: 0;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app > .main .content {
+    padding-bottom: calc(110px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-mobile-nav {
+    left: 10px;
+    right: 10px;
+    padding: 7px 9px;
+    border-radius: 25px;
+  }
+
+  .pf-mobile-nav-item {
+    flex-basis: 68px;
+  }
+
+  .pf-mobile-nav-add {
+    flex-basis: 54px;
+    width: 54px;
+    height: 54px;
+  }
+}
+
+/* Botão central da navegação mobile */
+
+@media (max-width: 1100px) {
+  .pf-mobile-nav {
+    overflow: visible;
+    gap: 6px;
+  }
+
+  .pf-mobile-nav-scroll {
+    flex: 1 1 0;
+    min-width: 0;
+    overscroll-behavior-x: contain;
+  }
+
+  .pf-mobile-nav-add {
+    flex: 0 0 62px;
+    width: 62px;
+    height: 62px;
+    border-radius: 22px;
+    transform: translateY(-7px);
+    position: relative;
+    z-index: 2;
+    box-shadow:
+      0 0 22px rgba(155, 117, 255, 0.38),
+      0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  .pf-mobile-nav-add:active {
+    transform: translateY(-5px) scale(0.96);
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-mobile-nav {
+    gap: 4px;
+  }
+
+  .pf-mobile-nav-add {
+    flex-basis: 60px;
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-mobile-nav-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+/* =========================================
+   PERSONAL FINANCE — MOBILE NAV REFINADA
+   ========================================= */
+
+@media (max-width: 1100px) {
+  .pf-mobile-nav {
+    left: 10px;
+    right: 10px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1fr);
+    align-items: center;
+    gap: 4px;
+    padding: 7px 8px;
+    border-radius: 28px;
+    overflow: visible;
+  }
+
+  .pf-mobile-nav-scroll {
+    display: flex;
+    min-width: 0;
+    width: 100%;
+    gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pf-mobile-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-mobile-nav-item {
+    flex: 0 0 52px;
+    min-width: 52px;
+    min-height: 49px;
+    padding: 5px 2px;
+    gap: 4px;
+    border-radius: 14px;
+    scroll-snap-align: start;
+  }
+
+  .pf-mobile-nav-item svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .pf-mobile-nav-item span {
+    max-width: 52px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  .pf-mobile-nav-add {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    flex: none;
+    justify-self: center;
+    border-radius: 21px;
+    transform: translateY(-6px);
+  }
+
+  .pf-mobile-nav-add svg {
+    width: 27px;
+    height: 27px;
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-mobile-nav {
+    left: 8px;
+    right: 8px;
+    grid-template-columns: minmax(0, 1fr) 58px minmax(0, 1fr);
+    padding: 7px;
+    gap: 3px;
+  }
+
+  .pf-mobile-nav-add {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+  }
+
+  .pf-mobile-nav-item {
+    flex-basis: 48px;
+    min-width: 48px;
+  }
+
+  .pf-mobile-nav-item span {
+    max-width: 48px;
+    font-size: 8px;
+  }
+}
+
+/* Configurações fixas à direita,
+   Personal Finance centralizado */
+
+@media (max-width: 1100px) {
+  .pf-mobile-nav {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      60px
+      minmax(0, 1fr);
+    gap: 4px;
+    position: fixed;
+  }
+
+  .pf-mobile-nav-scroll {
+    min-width: 0;
+  }
+
+  .pf-mobile-nav-scroll:last-of-type {
+    padding-right: 49px;
+  }
+
+  .pf-mobile-nav-settings {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 44px;
+    min-width: 44px;
+    transform: translateY(-50%);
+    z-index: 3;
+  }
+
+  .pf-mobile-nav-add {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: translateY(-6px);
+    justify-self: center;
+  }
+
+  .pf-mobile-nav-add:active {
+    transform: translateY(-6px) scale(0.96);
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-mobile-nav {
+    grid-template-columns:
+      minmax(0, 1fr)
+      58px
+      minmax(0, 1fr);
+  }
+}
+
+/* Configurações no cabeçalho mobile */
+
+.pf-mobile-settings-button {
+  display: none;
+}
+
+@media (max-width: 1100px) {
+  .pf-mobile-settings-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    order: 2;
+  }
+
+  .top-actions .notification-wrapper {
+    order: 1;
+  }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .pf-mobile-nav {
+    grid-template-columns:
+      minmax(0, 1fr)
+      60px
+      minmax(0, 1fr);
+  }
+
+  .pf-mobile-nav-scroll:last-of-type {
+    padding-right: 0;
+  }
+
+  .pf-mobile-nav-add {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: translateY(-6px);
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-mobile-nav {
+    grid-template-columns:
+      minmax(0, 1fr)
+      58px
+      minmax(0, 1fr);
+  }
+}
+
+/* =========================================
+   CABEÇALHO MOBILE — ALINHAMENTO DOS ÍCONES
+   ========================================= */
+
+@media (max-width: 1100px) {
+  .topbar .top-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .topbar .notification-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    order: 1;
+  }
+
+  .topbar .pf-mobile-settings-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    order: 2;
+  }
+
+  .topbar .notification-wrapper > .icon-button,
+  .topbar .pf-mobile-settings-button {
+    box-sizing: border-box;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+    vertical-align: middle;
+  }
+
+  .topbar .notification-wrapper > .icon-button svg,
+  .topbar .pf-mobile-settings-button svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+  }
+}
+
+/* =========================================
+   BARRA INFERIOR — LIQUID GLASS REFINADO
+   ========================================= */
+
+@media (max-width: 1100px) {
+  .pf-mobile-nav {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 1fr)
+      60px
+      minmax(0, 1fr);
+    align-items: center;
+    gap: 5px;
+
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+
+    padding: 8px;
+    border-radius: 28px;
+    overflow: visible;
+  }
+
+  .pf-mobile-nav-scroll {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    gap: 3px;
+    padding: 0 2px;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pf-mobile-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-mobile-nav-item {
+    display: flex;
+    flex: 0 0 48px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    min-width: 48px;
+    min-height: 50px;
+    padding: 5px 2px;
+
+    border: 0;
+    border-radius: 15px;
+    background: transparent;
+    color: rgba(225, 215, 245, 0.76);
+
+    transition:
+      background-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .pf-mobile-nav-item svg {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+  }
+
+  .pf-mobile-nav-item span {
+    max-width: 48px;
+    font-size: 8px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pf-mobile-nav-item.active {
+    background: rgba(155, 117, 255, 0.20);
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(155, 117, 255, 0.12);
+  }
+
+  .pf-mobile-nav-add {
+    position: relative;
+    left: auto;
+    top: auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    justify-self: center;
+
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    border-radius: 21px;
+
+    transform: translateY(-6px);
+    z-index: 2;
+  }
+
+  .pf-mobile-nav-add svg {
+    width: 27px;
+    height: 27px;
+  }
+
+  .pf-mobile-nav-add:active {
+    transform: translateY(-6px) scale(0.96);
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-mobile-nav {
+    grid-template-columns:
+      minmax(0, 1fr)
+      58px
+      minmax(0, 1fr);
+
+    left: 8px;
+    right: 8px;
+    gap: 3px;
+    padding: 7px;
+  }
+
+  .pf-mobile-nav-add {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-mobile-nav-item {
+    transition: none;
+  }
+
+  .pf-mobile-nav-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+/* =========================================
+   PERSONAL FINANCE
+   NOTIFICAÇÕES RESPONSIVAS
+   ========================================= */
+
+@media (max-width: 1100px) {
+
+  /* Mantém o sino como referência */
+  .notification-wrapper {
+    position: relative;
+  }
+
+  /* Painel alinhado ao cabeçalho */
+  .notification-wrapper #notification-panel {
+    position: fixed;
+    top: calc(76px + env(safe-area-inset-top, 0px));
+    left: 16px;
+    right: 16px;
+
+    width: auto;
+    max-width: none;
+    max-height: calc(
+      100dvh - 180px - env(safe-area-inset-bottom, 0px)
+    );
+
+    z-index: 2000;
+  }
+
+  /* Estrutura Liquid Glass */
+  .notification-wrapper .notification-panel {
+    width: 100%;
+    max-height: inherit;
+    border-radius: 20px;
+
+    background: var(--notification-bg);
+    border: 1px solid var(--notification-border);
+
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.32),
+      0 0 22px rgba(
+        var(--pf-accent-rgb, 139, 92, 246),
+        0.12
+      );
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Área interna rolável */
+  .notification-panel-content {
+    min-height: 0;
+    max-height: calc(100dvh - 290px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* Cabeçalho do painel */
+  .notification-panel-header {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .notification-panel-header h3 {
+    font-size: 15px;
+  }
+
+  /* Estado sem notificações */
+  .notification-panel-empty {
+    min-height: 110px;
+    padding: 16px 10px;
+  }
+
+  /* Rodapé */
+  .notification-panel-footer {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 650px) {
+
+  .notification-wrapper #notification-panel {
+    top: calc(82px + env(safe-area-inset-top, 0px));
+    left: 12px;
+    right: 12px;
+
+    width: auto;
+    max-width: none;
+    border-radius: 18px;
+  }
+
+  .notification-panel-content {
+    max-height: calc(100dvh - 300px);
+  }
+}
+
+@media (max-width: 360px) {
+  .notification-wrapper #notification-panel {
+    left: 8px;
+    right: 8px;
+  }
+}
+
+/* Teste de sobreposição das notificações */
+
+@media (max-width: 1100px) {
+  .topbar {
+    position: relative;
+    z-index: 2100;
+    overflow: visible;
+  }
+
+  .topbar .top-actions,
+  .topbar .notification-wrapper {
+    overflow: visible;
+  }
+
+  .notification-wrapper #notification-panel {
+    z-index: 2200;
+  }
+}
+
+/* =========================================
+   NOTIFICAÇÕES — CENTRALIZAÇÃO MOBILE
+   ========================================= */
+
+@media (max-width: 1100px) {
+  .notification-wrapper #notification-panel {
+    position: fixed;
+
+    left: 50%;
+    right: auto;
+
+    width: min(380px, calc(100vw - 24px));
+    max-width: none;
+
+    transform: translateX(-50%);
+    box-sizing: border-box;
+
+    z-index: 2200;
+  }
+}
+
+@media (max-width: 650px) {
+  .notification-wrapper #notification-panel {
+    width: calc(100vw - 24px);
+    left: 50%;
+    right: auto;
+  }
+}
+
+/* Notificações centralizadas na área visível */
+
+@media (max-width: 1100px) {
+  .notification-wrapper #notification-panel {
+    position: fixed;
+    top: calc(82px + env(safe-area-inset-top, 0px));
+
+    left: 12px;
+    right: 12px;
+
+    width: auto;
+    max-width: none;
+    margin: 0;
+    transform: none;
+
+    box-sizing: border-box;
+    z-index: 2200;
+  }
+}
+
+@media (min-width: 651px) and (max-width: 1100px) {
+  .notification-wrapper #notification-panel {
+    left: max(12px, calc((100vw - 380px) / 2));
+    right: max(12px, calc((100vw - 380px) / 2));
+  }
+}
+
+/* Painel de notificações fora do cabeçalho */
+
+.pf-notification-portal {
+  position: fixed;
+  top: 76px;
+  right: 24px;
+  width: 380px;
+  max-width: calc(100vw - 24px);
+  z-index: 3000;
+  box-sizing: border-box;
+}
+
+.pf-notification-portal .notification-panel {
+  width: 100%;
+  max-height: calc(100dvh - 110px);
+  overflow: hidden;
+}
+
+.pf-notification-portal .notification-panel-content {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (max-width: 1100px) {
+  .pf-notification-portal {
+    top: calc(90px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    right: auto;
+    width: min(380px, calc(100vw - 24px));
+    transform: translateX(-50%);
+  }
+
+  .pf-notification-portal .notification-panel-content {
+    max-height: calc(100dvh - 250px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-notification-portal .notification-panel {
+    animation: none;
+  }
+}
+
+/* =========================================
+   NOTIFICAÇÕES — VISUAL DO REACT PORTAL
+   ========================================= */
+
+.pf-notification-portal {
+  box-sizing: border-box;
+  color: var(--notification-text);
+}
+
+.pf-notification-portal .notification-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+  min-height: 0;
+  max-height: calc(100dvh - 120px);
+
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid var(--notification-border);
+
+  background: var(--notification-bg);
+  color: var(--notification-text);
+
+  box-shadow:
+    0 18px 48px rgba(0, 0, 0, 0.35),
+    0 0 18px rgba(
+      var(--pf-accent-rgb, 139, 92, 246),
+      0.10
+    );
+}
+
+.pf-notification-portal .notification-panel-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 1100px) {
+  .pf-notification-portal {
+    z-index: 3000;
+  }
+
+  .pf-notification-portal .notification-panel {
+    max-height: calc(
+      100dvh - 170px - env(safe-area-inset-bottom, 0px)
+    );
+  }
+}
+
+/* =========================================
+   DASHBOARD — RESUMO FINANCEIRO MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .summary-grid .summary-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 132px;
+    height: auto;
+    padding: 11px 10px 12px;
+    overflow: hidden;
+    border-radius: 15px;
+  }
+
+  /* Título e ícone superior */
+
+  .summary-grid .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  .summary-grid .card-top > span {
+    min-width: 0;
+    font-size: 10px;
+    line-height: 1.35;
+    overflow-wrap: break-word;
+  }
+
+  .summary-grid .card-icon {
+    flex-shrink: 0;
+    width: 29px;
+    height: 29px;
+    border-radius: 10px;
+  }
+
+  .summary-grid .card-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Valores financeiros */
+
+  .summary-grid .summary-card h2 {
+    margin: 12px 0 7px;
+    font-size: clamp(14px, 3.8vw, 19px);
+    line-height: 1.25;
+    letter-spacing: -0.4px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Descrições */
+
+  .summary-grid .summary-card .positive,
+  .summary-grid .summary-card .negative {
+    font-size: 10px;
+    line-height: 1.4;
+    padding-right: 27px;
+  }
+
+  .summary-grid .card-caption {
+    display: block;
+    font-size: 9px;
+    line-height: 1.5;
+    color: var(--notification-muted, #a5aec6);
+    padding-right: 25px;
+    overflow-wrap: break-word;
+  }
+
+  /* Receitas e despesas do resultado mensal */
+
+  .summary-grid .summary-balance-details {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .summary-grid .summary-balance-details span {
+    display: block;
+  }
+
+  /* Saldo projetado */
+
+  .summary-grid .projected-caption {
+    max-width: 100%;
+  }
+
+  /* Botão de histórico */
+
+  .summary-grid .history-icon-button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 29px;
+    height: 29px;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  .summary-grid .history-icon-button svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* =========================================
+   DASHBOARD — PREVISÕES FINANCEIRAS MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Painel principal */
+  .dashboard-financial-layout,
+  .monthly-forecast-panel {
+    min-width: 0;
+  }
+
+  .monthly-forecast-panel {
+    padding: 16px 13px;
+    border-radius: 20px;
+  }
+
+  /* Cabeçalho */
+  .monthly-forecast-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .monthly-forecast-heading > div:first-child {
+    min-width: 0;
+  }
+
+  .monthly-forecast-eyebrow {
+    font-size: 10px;
+    letter-spacing: 1.2px;
+  }
+
+  .monthly-forecast-heading h3 {
+    margin: 6px 0;
+    font-size: 21px;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+  }
+
+  .monthly-forecast-heading p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* Botão Nova previsão */
+  .monthly-forecast-heading-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .monthly-forecast-heading-actions .primary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 40px;
+    padding: 9px 13px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .monthly-forecast-heading-actions > svg {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Quatro indicadores em 2 x 2 */
+  .monthly-forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    width: 100%;
+  }
+
+  .monthly-forecast-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    min-height: 105px;
+    padding: 12px 10px;
+    border-radius: 13px;
+  }
+
+  .monthly-forecast-item > span {
+    font-size: 11px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+  }
+
+  .monthly-forecast-item > strong {
+    display: block;
+    margin-top: 12px;
+    font-size: clamp(13px, 3.7vw, 17px);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  /* Planejamento manual */
+  .manual-forecast-summary {
+    min-width: 0;
+    padding: 14px 12px;
+    border-radius: 15px;
+  }
+
+  .manual-forecast-summary-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .manual-forecast-summary-heading h4 {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  .manual-forecast-summary-heading > span {
+    font-size: 11px;
+  }
+
+  .manual-forecast-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .manual-forecast-summary-item {
+    min-width: 0;
+    padding: 11px 9px;
+  }
+
+  .manual-forecast-summary-item > span {
+    display: block;
+    font-size: 10px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+  }
+
+  .manual-forecast-summary-item > strong {
+    display: block;
+    margin-top: 9px;
+    font-size: clamp(13px, 3.7vw, 17px);
+    overflow-wrap: anywhere;
+  }
+
+  .manual-forecast-summary-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+    min-width: 0;
+    padding: 12px 10px;
+  }
+
+  .manual-forecast-summary-result strong {
+    font-size: 17px;
+    overflow-wrap: anywhere;
+  }
+
+  /* Resultado previsto do mês */
+  .monthly-forecast-footer {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+    padding: 13px 10px;
+  }
+
+  .monthly-forecast-footer strong {
+    font-size: 19px;
+    overflow-wrap: anywhere;
+  }
+
+  .monthly-forecast-note {
+    font-size: 11px;
+    line-height: 1.6;
+  }
+
+  /* Previsões manuais cadastradas */
+  .manual-forecast-section {
+    min-width: 0;
+  }
+
+  .manual-forecast-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .manual-forecast-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .manual-forecast-info {
+    min-width: 0;
+  }
+
+  .manual-forecast-info strong {
+    overflow-wrap: anywhere;
+  }
+
+  .manual-forecast-item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .manual-forecast-item-actions > strong {
+    margin-right: auto;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .manual-forecast-item-actions .history-icon-button {
+    position: static;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* =========================================
+   DASHBOARD — CARTÕES BANCÁRIOS MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Painel principal */
+  .dashboard-cards-panel {
+    min-width: 0;
+    padding: 15px 12px;
+    border-radius: 20px;
+  }
+
+  /* Cabeçalho */
+  .dashboard-cards-heading {
+    margin-bottom: 12px;
+  }
+
+  .dashboard-cards-heading h3 {
+    margin: 5px 0;
+    font-size: 21px;
+    line-height: 1.25;
+  }
+
+  .dashboard-cards-heading p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* Componente de cartões */
+  .dashboard-cards-panel .dashboard-card-stack {
+    max-width: 100%;
+    min-width: 0;
+    margin-bottom: 12px;
+  }
+
+  /* Resumo dos limites */
+  .dashboard-card-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 12px;
+  }
+
+  .dashboard-card-summary-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 0;
+    min-height: 76px;
+    padding: 11px 10px;
+    border-radius: 13px;
+  }
+
+  .dashboard-card-summary-item:first-child {
+    grid-column: 1 / -1;
+    min-height: 66px;
+  }
+
+  .dashboard-card-summary-item > span {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .dashboard-card-summary-item > strong {
+    display: block;
+    margin-top: 7px;
+    font-size: clamp(14px, 4vw, 18px);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  /* Utilização do limite */
+  .dashboard-limit-usage {
+    margin-top: 15px;
+    padding-top: 12px;
+  }
+
+  .dashboard-limit-usage-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 9px;
+  }
+
+  .dashboard-limit-usage-heading span {
+    font-size: 11px;
+  }
+
+  .dashboard-limit-usage-heading strong {
+    font-size: 13px;
+  }
+
+  .dashboard-limit-usage-track {
+    width: 100%;
+    max-width: 100%;
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+  }
+
+  .dashboard-limit-usage-fill {
+    height: 100%;
+    border-radius: inherit;
+  }
+}
+
+/* =========================================
+   FINANCE CHARTS — RESPONSIVIDADE MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .finance-charts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .finance-chart-card {
+    min-width: 0;
+    width: 100%;
+    padding: 15px 11px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .finance-chart-card h3 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+  }
+
+  .finance-chart-card > p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* Área dos gráficos */
+  .finance-chart-card .chart-container {
+    width: 100%;
+    min-width: 0;
+    height: 310px;
+    margin-top: 12px;
+  }
+
+  /* Legendas do Recharts */
+  .finance-chart-card .recharts-legend-wrapper {
+    max-width: 100%;
+  }
+
+  .finance-chart-card .recharts-default-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 5px 10px;
+    padding: 0 !important;
+  }
+
+  .finance-chart-card .recharts-legend-item {
+    margin-right: 0 !important;
+    font-size: 10px;
+    line-height: 1.5;
+  }
+
+  /* Legenda das categorias */
+  .finance-chart-card .category-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .finance-chart-card .category-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    padding: 9px 7px;
+  }
+
+  .finance-chart-card .category-row > span:nth-of-type(2) {
+    flex: 1;
+    min-width: 0;
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  .finance-chart-card .category-row > strong {
+    flex-shrink: 0;
+    max-width: 48%;
+    font-size: 11px;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .finance-chart-card .category-row > svg,
+  .finance-chart-card .category-color {
+    flex-shrink: 0;
+  }
+}
+
+/* =========================================
+   FINANCIAL COMPARISON — MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .financial-comparison-charts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .financial-comparison-charts .finance-chart-card {
+    min-width: 0;
+    width: 100%;
+    padding: 15px 11px;
+    overflow: hidden;
+    border-radius: 18px;
+  }
+
+  .financial-comparison-charts .finance-chart-card h3 {
+    font-size: 17px;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+  }
+
+  .financial-comparison-charts .finance-chart-card > p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* Contêiner dos gráficos */
+  .financial-comparison-chart-container {
+    width: 100%;
+    min-width: 0;
+    height: 300px;
+    margin-top: 12px;
+  }
+
+  /* Legenda personalizada do Gradiente Luxo */
+  .category-line-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 7px 10px;
+    width: 100%;
+    max-width: 100%;
+    padding: 4px 2px;
+  }
+
+  .category-line-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    max-width: 100%;
+    font-size: 10px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .category-line-legend-item svg,
+  .category-line-legend-dot {
+    flex-shrink: 0;
+  }
+
+  .financial-comparison-charts .recharts-legend-wrapper {
+    max-width: 100%;
+  }
+}
+
+/* Ajuste adicional para celulares estreitos */
+@media (max-width: 380px) {
+
+  .financial-comparison-chart-container {
+    height: 290px;
+  }
+
+  .category-line-legend {
+    gap: 6px 8px;
+  }
+
+  .category-line-legend-item {
+    font-size: 9px;
+  }
+}
+
+/* =========================================
+   AJUSTES FINOS — GRÁFICOS MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Gráficos com altura mais equilibrada */
+  .finance-charts .finance-chart-card .chart-container {
+    height: 285px;
+  }
+
+  /* Gráfico de categorias: área mais compacta */
+  .finance-charts .finance-chart-card:nth-child(2)
+  .chart-container {
+    height: 245px;
+    margin-top: 4px;
+    margin-bottom: 8px;
+  }
+
+  /* Evitar excesso de espaço nas legendas */
+  .finance-charts .recharts-default-legend {
+    gap: 4px 8px;
+  }
+
+  .finance-charts .recharts-legend-item-text {
+    font-size: 10px;
+  }
+
+  /* Legenda de categorias */
+  .finance-charts .category-legend {
+    margin-top: 10px;
+    padding-bottom: 12px;
+  }
+
+  /* Espaço para conteúdo próximo à navegação fixa */
+  .main-content {
+    padding-bottom: max(
+      110px,
+      calc(95px + env(safe-area-inset-bottom))
+    );
+  }
+}
+
+/* =========================================
+   DASHBOARD — TRANSAÇÕES RECENTES MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Painel de transações do Dashboard */
+  .dashboard-section-heading.dashboard-movements-heading {
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .dashboard-movements-heading h2 {
+    font-size: 20px;
+    line-height: 1.25;
+  }
+
+  .dashboard-movements-heading p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .transactions-panel {
+    min-width: 0;
+    padding: 14px 11px;
+    border-radius: 18px;
+  }
+
+  .transactions-panel .panel-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 9px;
+    margin-bottom: 14px;
+  }
+
+  .transactions-panel .panel-heading > div {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .transactions-panel .panel-heading h3 {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+
+  .transactions-panel .panel-heading p {
+    font-size: 11px;
+  }
+
+  .transactions-panel .text-button {
+    flex-shrink: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  /* Lista */
+  .transactions-panel .transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-width: 0;
+  }
+
+  /* Cada transação ocupa duas linhas */
+  .transactions-panel .transaction {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "icon info actions"
+      "value value value";
+    align-items: center;
+    gap: 10px 8px;
+    min-width: 0;
+    padding: 12px 10px;
+    border-radius: 14px;
+  }
+
+  .transactions-panel .transaction-icon {
+    grid-area: icon;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    font-size: 17px;
+  }
+
+  .transactions-panel .transaction-info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .transactions-panel .transaction-info strong {
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .transactions-panel .transaction-info small {
+    font-size: 10px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  /* Valor e data */
+  .transactions-panel .transaction-value {
+    grid-area: value;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+    padding-top: 9px;
+    border-top: 1px solid rgba(155, 117, 255, 0.12);
+  }
+
+  .transactions-panel .transaction-value strong {
+    min-width: 0;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .transactions-panel .transaction-value small {
+    flex-shrink: 0;
+    font-size: 10px;
+  }
+
+  /* Botões de editar e excluir */
+  .transactions-panel .transaction-actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .transactions-panel .edit-button,
+  .transactions-panel .delete-button {
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 9px;
+  }
+
+  .transactions-panel .edit-button svg,
+  .transactions-panel .delete-button svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* =========================================
+   DASHBOARD — TÍTULO DE TRANSAÇÕES
+   ========================================= */
+
+.dashboard-recent-transactions
+.panel-heading h3 {
+  display: none;
+}
+
+.dashboard-recent-transactions
+.panel-heading {
+  align-items: center;
+}
+
+/* Preservar o título na página Transações */
+.transactions-panel:not(.dashboard-recent-transactions)
+.panel-heading h3 {
+  display: block;
+}
+
+
+/* =========================================
+   ETAPA 3.1.1 — FILTROS DE TRANSAÇÕES MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Organização compacta dos filtros */
+  .transactions-panel .filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 13px 10px;
+    margin: 16px 0;
+    padding: 14px 12px;
+    border-radius: 15px;
+    min-width: 0;
+  }
+
+  /* Mês ocupa toda a primeira linha */
+  .transactions-panel .filters > .filter-field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Categoria e Tipo lado a lado */
+  .transactions-panel .filter-field {
+    width: 100%;
+    min-width: 0;
+    gap: 7px;
+  }
+
+  .transactions-panel .filter-field label {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  /* Evitar que os seletores ultrapassem a coluna */
+  .transactions-panel .filter-field > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Campos nativos */
+  .transactions-panel .filter-field input,
+  .transactions-panel .filter-field select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    font-size: 12px;
+  }
+
+  /* Botão ocupa a última linha */
+  .transactions-panel .clear-filters {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 42px;
+    margin: 0;
+    font-size: 11px;
+  }
+}
+
+/* Celulares muito estreitos */
+@media (max-width: 350px) {
+
+  .transactions-panel .filters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .transactions-panel .filters > .filter-field:first-child,
+  .transactions-panel .clear-filters {
+    grid-column: 1;
+  }
+}
+
+/* =========================================
+   ETAPA 3.1.2 — MODAL DE TRANSAÇÕES MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Área externa do modal */
+  .modal-overlay {
+    padding: 16px 12px;
+    align-items: center;
+    overflow: hidden;
+  }
+
+  /* Modal centralizado e com rolagem interna */
+  .modal-overlay .modal {
+    width: 100%;
+    max-width: 440px;
+    max-height: calc(100dvh - 32px);
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 20px 18px;
+    border-radius: 22px;
+
+    /* Rolagem discreta */
+    scrollbar-width: thin;
+    scrollbar-color:
+      rgba(var(--pf-accent-rgb, 139, 92, 246), 0.35)
+      transparent;
+  }
+
+  /* Barra de rolagem no Chrome e Brave */
+  .modal-overlay .modal::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .modal-overlay .modal::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .modal-overlay .modal::-webkit-scrollbar-thumb {
+    background: rgba(
+      var(--pf-accent-rgb, 139, 92, 246),
+      0.35
+    );
+    border-radius: 10px;
+  }
+
+  /* Cabeçalho */
+  .modal-overlay .modal-header {
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .modal-overlay .modal-header h2 {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+
+  .modal-overlay .modal-header p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  /* Entrada e Saída */
+  .modal-overlay .type-selector {
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .modal-overlay .type-button {
+    min-width: 0;
+    min-height: 48px;
+    padding: 11px 8px;
+    font-size: 13px;
+  }
+
+  /* Campos */
+  .modal-overlay .form-group {
+    gap: 7px;
+    margin-bottom: 15px;
+  }
+
+  .modal-overlay .form-group input,
+  .modal-overlay .form-group select {
+    min-height: 44px;
+    font-size: 14px;
+  }
+
+  /* Rodapé */
+  .modal-overlay .modal-footer {
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+
+  .modal-overlay .modal-footer button {
+    min-height: 44px;
+  }
+}
+
+/* =========================================
+   NOVA TRANSAÇÃO — EVITAR BOTÃO DUPLICADO
+   ========================================= */
+
+/* Celulares com navegação inferior */
+@media (max-width: 650px) {
+  .page-new-transaction-button {
+    display: none !important;
+  }
+}
+
+/* =========================================
+   CARTÕES — FORMULÁRIO RESPONSIVO
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .cards-register-section {
+    min-width: 0;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .cards-register-section h3 {
+    margin-bottom: 16px;
+    font-size: 15px;
+  }
+
+  .cards-register-section .cards-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .cards-register-section .cards-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  .cards-register-section .cards-form input {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    font-size: 13px;
+  }
+}
+
+/* =========================================
+   CARTÕES — CADASTRO RECOLHÍVEL
+   ========================================= */
+
+.cards-register-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cards-register-toggle:focus-visible {
+  outline: 2px solid var(--pf-accent, #9b75ff);
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+
+.cards-register-chevron {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(155, 117, 255, 0.12);
+  color: var(--pf-accent, #9b75ff);
+  font-size: 20px;
+}
+
+@media (min-width: 651px) {
+  .cards-register-toggle {
+    pointer-events: none;
+  }
+
+  .cards-register-content {
+    display: block !important;
+    margin-top: 16px;
+  }
+}
+
+@media (max-width: 650px) {
+  .cards-register-chevron {
+    display: flex;
+  }
+
+  .cards-register-content {
+    display: none;
+  }
+
+  .cards-register-expanded .cards-register-content {
+    display: block;
+    margin-top: 16px;
+    animation: pf-card-form-enter 220ms ease-out both;
+  }
+}
+
+@keyframes pf-card-form-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-register-expanded .cards-register-content {
+    animation: none;
+  }
+}
+
+/* =========================================
+   CARTÕES — ORDEM DAS SEÇÕES NO MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .cards-page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .cards-page > .cards-page-heading {
+    order: 0;
+  }
+
+  .cards-page > .cards-owned-section {
+    order: 1;
+  }
+
+  .cards-page > .cards-register-section {
+    order: 2;
+  }
+
+  .cards-page > .cards-purchases-section {
+    order: 3;
+  }
+
+  .cards-page > .cards-invoices-section {
+    order: 4;
+  }
+}
+
+/* =========================================
+   CARTÕES — CARROSSEL RESPONSIVO
+   ========================================= */
+
+@media (max-width: 650px) {
+  .cards-owned-section {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .card-carousel {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .card-carousel-navigation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .card-carousel-stage {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .card-carousel-visual {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    aspect-ratio: 1.586;
+  }
+
+  .card-carousel-arrow {
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+  }
+
+  .card-carousel-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .card-carousel-info-grid > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .card-carousel-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .card-carousel-actions > button {
+    min-width: 0;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .card-carousel-actions > .card-delete-button {
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================================
+   CARTÕES — COMPRAS E FATURAS MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+  .cards-purchases-section,
+  .cards-invoices-section {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 16px;
+  }
+
+  .cards-purchases-section h3,
+  .cards-invoices-section h3 {
+    font-size: 15px;
+  }
+
+  .monthly-groups,
+  .monthly-group,
+  .monthly-group-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .monthly-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    text-align: left;
+  }
+
+  .monthly-group-header > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .purchase-item,
+  .invoice-item {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+  }
+
+  .purchase-installment-row,
+  .invoice-installment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .invoice-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .invoice-payment-form,
+  .invoice-payment-summary {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .invoice-payment-form input,
+  .invoice-payment-form button {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* =========================================
+   CARTÕES — MODAIS RESPONSIVOS
+   ========================================= */
+
+@media (max-width: 650px) {
+  .card-modal-overlay {
+    padding: 12px;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .card-customization-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+    box-sizing: border-box;
+    padding: 18px;
+    margin: auto;
+  }
+
+  .card-customization-modal .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-customization-modal .modal-header > div {
+    min-width: 0;
+  }
+
+  .card-customization-modal .modal-header h2 {
+    font-size: 18px;
+    overflow-wrap: anywhere;
+  }
+
+  .card-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .card-edit-form label {
+    min-width: 0;
+  }
+
+  .card-edit-form input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .card-edit-days {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .card-customization-preview {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .card-customization-image-section {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .card-customization-save,
+  .card-edit-form .primary-button {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 360px) {
+  .card-edit-days {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   DEVEDORES — CABEÇALHO E RESUMO MOBILE
+   ========================================= */
+
+@media (max-width: 650px) {
+  .debtors-page {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .debtors-page-heading {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    min-width: 0;
+  }
+
+  .debtors-heading-content {
+    min-width: 0;
+  }
+
+  .debtors-heading-content h1 {
+    font-size: clamp(22px, 6vw, 28px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .debtors-heading-content p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .debtors-new-button {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-sizing: border-box;
+  }
+
+  .debtors-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .debtors-summary > .panel {
+    min-width: 0;
+    padding: 14px;
+    box-sizing: border-box;
+  }
+
+  .debtors-summary > .panel:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .debtors-summary > .panel h3 {
+    font-size: clamp(16px, 4.5vw, 22px);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+
+  .debtors-summary > .panel p {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+}
+
+/* =========================================
+   PERSONAL FINANCE — NAVEGAÇÃO MOBILE
+   CORREÇÃO DE ITENS OCULTOS
+   ========================================= */
+
+@media (max-width: 1100px) {
+  .pf-mobile-nav {
+    grid-template-columns:
+      minmax(0, 1fr)
+      60px
+      minmax(0, 1fr);
+  }
+
+  .pf-mobile-nav-scroll {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    scroll-behavior: smooth;
+  }
+
+  .pf-mobile-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .pf-mobile-nav-item {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 650px) {
+  .pf-mobile-nav {
+    grid-template-columns:
+      minmax(0, 1fr)
+      58px
+      minmax(0, 1fr);
+  }
+
+  .pf-mobile-nav-scroll {
+    scroll-padding-inline: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-mobile-nav-scroll {
+    scroll-behavior: auto;
+  }
+}
+
+/* =========================================
+   DEVEDORES — CARTÕES E HISTÓRICO MOBILE
+   Etapa 3.3.3
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Evita elementos ultrapassando a tela */
+  .debtors-list,
+  .debtor-item,
+  .debtor-expand-content,
+  .debtor-expand-inner,
+  .debtor-debts,
+  .debtor-debt-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Cabeçalho do devedor */
+  .debtor-compact-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .debtor-compact-header > div {
+    min-width: 0;
+    flex: 1 1 100%;
+    overflow-wrap: anywhere;
+  }
+
+  /* Botões mais confortáveis para toque */
+  .debtor-expand-button {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 12px;
+    box-sizing: border-box;
+  }
+
+  /* Informações de cada dívida */
+  .debtor-debt-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .debtor-debt-header > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .debtor-debt-values {
+    min-width: 0;
+  }
+
+  .debtor-debt-values > div {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .debtor-debt-values strong {
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  /* Histórico de pagamentos */
+  .debtor-payment-history {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .debtor-payment-history summary {
+    min-height: 40px;
+    align-content: center;
+    cursor: pointer;
+  }
+
+  .debtor-payment-history-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .debtor-payment-history-item > div {
+    flex: 1 1 100%;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .debtor-payment-history-value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  /* Ações finais */
+  .debtor-actions {
+    min-width: 0;
+  }
+
+  .debtor-actions > .primary-button,
+  .debtor-debt-footer > .primary-button {
+    min-height: 44px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 360px) {
+  .debtor-compact-header > .debtor-expand-button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: 11px;
+  }
+
+  .debtor-debt-header > .debtor-expand-button {
+    width: 100%;
+  }
+}
+
+/* =========================================
+   DEVEDORES — FILTROS COMPACTOS
+   ========================================= */
+
+@media (max-width: 650px) {
+  .debtors-toolbar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 10px;
+    width: 100%;
+    min-width: 0;
+    margin-bottom: 18px;
+  }
+
+  .debtors-toolbar > .form-group {
+    min-width: 0;
+    margin: 0;
+    gap: 6px;
+  }
+
+  /* Pesquisa ocupa toda a primeira linha */
+  .debtors-toolbar > .form-group:first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Situação e Ordenação ficam lado a lado */
+  .debtors-toolbar input,
+  .debtors-toolbar select {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    font-size: 13px;
+  }
+
+  .debtors-toolbar label {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .debtors-toolbar select {
+    padding-right: 24px;
+    text-overflow: ellipsis;
+  }
+}
+
+/* =========================================
+   DEVEDORES — CORES DINÂMICAS DOS FILTROS
+   ========================================= */
+
+.debtors-toolbar input:focus,
+.debtors-toolbar select:focus {
+  border-color: var(--pf-accent);
+  box-shadow:
+    0 0 0 3px rgba(var(--pf-accent-rgb), 0.12),
+    0 0 14px rgba(var(--pf-accent-rgb), 0.08);
+}
+
+.debtors-toolbar input:focus-visible,
+.debtors-toolbar select:focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: 2px;
+}
+
+.debtors-toolbar select {
+  accent-color: var(--pf-accent);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .debtors-toolbar select {
+    transition: none;
+  }
+}
+
+/* =========================================
+   DEVEDORES — MODAIS RESPONSIVOS
+   Etapa 3.3.8
+   ========================================= */
+
+@media (max-width: 650px) {
+  .debtor-modal-overlay {
+    box-sizing: border-box;
+    padding: 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+
+  .debtor-modal-overlay > .modal {
+    width: 100%;
+    max-width: 420px;
+    max-height: calc(100dvh - 24px);
+    margin: auto;
+    padding: 18px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .debtor-modal-overlay .modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .debtor-modal-overlay .modal-header > div {
+    min-width: 0;
+  }
+
+  .debtor-modal-overlay .modal-header h2 {
+    font-size: 19px;
+    line-height: 1.3;
+  }
+
+  .debtor-modal-overlay .modal-header p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .debtor-modal-overlay .transaction-modal-content {
+    min-width: 0;
+  }
+
+  .debtor-modal-overlay .form-group {
+    min-width: 0;
+  }
+
+  .debtor-modal-overlay input,
+  .debtor-modal-overlay textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+
+  .debtor-modal-overlay textarea {
+    resize: vertical;
+    min-height: 88px;
+  }
+
+  .debtor-modal-overlay .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .debtor-modal-overlay .modal-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .debtor-modal-overlay .modal-footer button {
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .debtor-modal-overlay > .modal {
+    padding: 14px;
+  }
+
+  .debtor-modal-overlay .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================================
+   ORÇAMENTOS — INDICADORES MOBILE
+   Etapa 3.4.1
+   ========================================= */
+
+@media (max-width: 650px) {
+  .budgets-page {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .budgets-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .budgets-summary > .panel {
+    min-width: 0;
+    max-width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Limite total ocupa a primeira linha inteira */
+  .budgets-summary > .panel:first-child {
+    grid-column: 1 / -1;
+  }
+
+  /* Valores e descrições */
+  .budgets-summary > .panel p {
+    margin: 0 0 10px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .budgets-summary > .panel h3 {
+    margin: 0;
+    font-size: clamp(16px, 4.5vw, 22px);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .budgets-summary > .panel:first-child h3 {
+    font-size: clamp(20px, 5.5vw, 26px);
+  }
+}
+
+@media (max-width: 360px) {
+  .budgets-summary {
+    gap: 8px;
+  }
+
+  .budgets-summary > .panel {
+    padding: 12px;
+  }
+
+  .budgets-summary > .panel h3 {
+    font-size: 15px;
+  }
+}
+
+/* =========================================
+   ORÇAMENTOS — CARTÕES RESPONSIVOS
+   Etapa 3.4.2
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .budget-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .budget-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Nome, ações e situação */
+  .budget-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .budget-card-header > strong {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 15px;
+  }
+
+  .budget-card-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .budget-edit-button,
+  .budget-delete-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* Situação abaixo do título */
+  .budget-card-header > .budget-status {
+    flex: 0 0 auto;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 11px;
+  }
+
+  /* Valores utilizados e limites */
+  .budget-card-values {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px 12px;
+    min-width: 0;
+  }
+
+  .budget-card-values > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+  }
+
+  /* Barra de progresso */
+  .budget-progress-track {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  /* Rodapé com percentual e saldo */
+  .budget-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .budget-card-footer > span,
+  .budget-card-footer > strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .budget-card {
+    padding: 12px;
+  }
+
+  .budget-card-header > strong {
+    flex-basis: 100%;
+  }
+
+  .budget-card-actions {
+    gap: 6px;
+  }
+
+  .budget-card-footer > strong {
+    font-size: 11px;
+  }
+}
+
+/* ORÇAMENTOS — CABEÇALHO PADRONIZADO NO MOBILE */
+
+@media (max-width: 650px) {
+  .budget-card-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .budget-card-header > strong {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .budget-card-actions {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    gap: 8px;
+  }
+
+  .budget-card-header > .budget-status {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+    max-width: 100%;
+  }
+}
+
+/* =========================================
+   ORÇAMENTOS — COMPARAÇÃO MENSAL COMPACTA
+   Etapa 3.4.3.4
+   ========================================= */
+
+@media (max-width: 650px) {
+  .budget-comparison-panel {
+    padding: 16px;
+  }
+
+  .budget-comparison-panel .panel-heading {
+    margin-bottom: 12px;
+  }
+
+  .budget-comparison-panel .panel-heading h3 {
+    margin-bottom: 4px;
+  }
+
+  .budget-comparison-empty {
+    gap: 6px;
+    padding: 12px 14px;
+    margin: 0;
+    border-radius: 12px;
+    border-color: rgba(var(--pf-accent-rgb), 0.22);
+    background: rgba(var(--pf-accent-rgb), 0.045);
+  }
+
+  .budget-comparison-empty p {
+    margin: 0;
+    color: var(--pf-text);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.45;
+  }
+
+  .budget-comparison-empty span {
+    color: var(--pf-text-secondary);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+
+/* =========================================
+   METAS — CABEÇALHO E INDICADORES MOBILE
+   Etapa 3.5.1
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  .goals-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  /* Botões superiores */
+  .goals-header-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .goals-header-actions > .primary-button {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .goals-header-actions > .goals-import-button {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .goals-header-actions > .goals-export-button {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .goals-header-actions > .primary-button,
+  .goals-header-actions > .goals-import-button,
+  .goals-header-actions > .goals-export-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 8px;
+    box-sizing: border-box;
+    font-size: 12px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  /* Indicadores */
+  .goals-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .goals-summary > .goals-summary-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    min-width: 0;
+    max-width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Metas ativas na primeira linha */
+  .goals-summary > .goals-summary-card:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .goals-summary-card svg {
+    flex-shrink: 0;
+  }
+
+  .goals-summary-card span {
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .goals-summary-card strong {
+    max-width: 100%;
+    font-size: clamp(15px, 4.2vw, 21px);
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+
+  .goals-summary > .goals-summary-card:first-child strong {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 360px) {
+  .goals-summary {
+    gap: 8px;
+  }
+
+  .goals-summary > .goals-summary-card {
+    padding: 12px;
+  }
+
+  .goals-summary-card strong {
+    font-size: 15px;
+  }
+
+  .goals-header-actions {
+    gap: 8px;
+  }
+
+  .goals-header-actions > .goals-import-button,
+  .goals-header-actions > .goals-export-button {
+    font-size: 11px;
+  }
+}
+
+/* =========================================
+   METAS — CARTÕES E HISTÓRICO MOBILE
+   Etapa 3.5.2
+   ========================================= */
+
+@media (max-width: 650px) {
+  .goals-list {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    min-width: 0;
+  }
+
+  .goals-item {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Título, percentual e edição */
+  .goals-item-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .goals-item-heading > strong {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 15px;
+  }
+
+  .goals-item-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .goals-edit-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* Barra de progresso */
+  .goals-progress {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Valores reservados e objetivo */
+  .goals-item-values {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .goals-item-values > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Botões de movimentação */
+  .goals-movement-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .goals-movement-actions > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 6px;
+    box-sizing: border-box;
+    font-size: 11px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .goals-movement-actions > button svg {
+    flex-shrink: 0;
+  }
+
+  /* Histórico de movimentações */
+  .goals-history {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .goals-history-toggle {
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .goals-history-toggle > span {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    min-width: 0;
+    text-align: left;
+    font-size: 12px;
+  }
+
+  .goals-history-content {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .goals-history-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .goals-history-info {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
+
+  .goals-history-info > div {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .goals-history-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .goals-history-amount {
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .goals-history-note {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+}
+
+@media (max-width: 360px) {
+  .goals-item {
+    padding: 12px;
+  }
+
+  .goals-item-heading-actions {
+    gap: 6px;
+  }
+
+  .goals-movement-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .goals-history-item-actions {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* =========================================
+   RELATÓRIOS — INDICADORES MOBILE
+   Etapa 3.6.1
+   ========================================= */
+
+@media (max-width: 650px) {
+  .reports-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .reports-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .reports-summary > .reports-summary-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 105px;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Resultado financeiro ocupa a primeira linha */
+  .reports-summary > .reports-summary-card:nth-child(3) {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  /* Entradas e saídas na segunda linha */
+  .reports-summary > .reports-summary-card:nth-child(1) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .reports-summary > .reports-summary-card:nth-child(2) {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .reports-summary-card span {
+    font-size: 12px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .reports-summary-card strong {
+    max-width: 100%;
+    font-size: clamp(15px, 4.2vw, 21px);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .reports-summary > .reports-summary-card:nth-child(3) strong {
+    font-size: clamp(20px, 5.5vw, 26px);
+  }
+}
+
+@media (max-width: 360px) {
+  .reports-summary {
+    gap: 8px;
+  }
+
+  .reports-summary > .reports-summary-card {
+    padding: 12px;
+  }
+
+  .reports-summary-card strong {
+    font-size: 15px;
+  }
+}
+
+/* =========================================
+   RELATÓRIOS — GRÁFICOS RESPONSIVOS
+   Etapa 3.6.2.1
+   ========================================= */
+
+@media (max-width: 650px) {
+
+  /* Painéis dos gráficos */
+  .reports-page .finance-chart-card {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  /* Títulos */
+  .reports-page .finance-chart-card h3 {
+    font-size: 16px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .reports-page .finance-chart-card > p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  /* Fluxo financeiro e despesas por categoria */
+  .reports-page .chart-container {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 260px;
+  }
+
+  /* Comparação e evolução */
+  .reports-page .financial-comparison-chart-container {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 260px;
+  }
+
+  /* Legendas das categorias */
+  .reports-page .category-legend,
+  .reports-page .category-line-legend {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .reports-page .category-row,
+  .reports-page .category-line-legend-item {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 360px) {
+
+  .reports-page .finance-chart-card {
+    padding: 12px;
+  }
+
+  .reports-page .chart-container,
+  .reports-page .financial-comparison-chart-container {
+    height: 240px;
+  }
+}
