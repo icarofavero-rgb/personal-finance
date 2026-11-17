@@ -6,6 +6,11 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import AppSplash from './components/AppSplash'
+import { installChangeTracking } from './services/sync/changeTracker'
+
+// Registra quando cada dado foi criado/alterado/excluído (base da sincronização).
+// Não interfere nas gravações do app: só observa.
+installChangeTracking()
 
 import {
   getAppearancePreferences,
