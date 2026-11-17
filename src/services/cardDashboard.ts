@@ -14,17 +14,62 @@ export type CardDashboardInfo = {
   paidInvoice: number
 }
 
+function toDateKey(date: Date): string {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-')
+}
+
+/**
+ * Cálculo ÚNICO do limite utilizado de um cartão (em centavos).
+ *
+ * Toda compra consome limite (inclusive as de data futura, pois o banco
+ * reserva o valor total da compra parcelada). Pagamentos já realizados
+ * (data até hoje) liberam limite. Use esta função em todas as telas para
+ * que Dashboard, Cartões e o formulário de compra mostrem o mesmo valor.
+ */
+export function calculateCardUsedLimitCents(
+  cardId: string,
+  purchases: CardPurchase[],
+  payments: CardPayment[],
+  referenceDate = new Date()
+): number {
+  const today = toDateKey(referenceDate)
+
+  const purchasesCents = purchases
+    .filter(purchase => purchase.cardId === cardId)
+    .reduce((sum, purchase) => sum + Math.round(purchase.amount * 100), 0)
+
+  const paymentsCents = payments
+    .filter(payment => payment.cardId === cardId && payment.date <= today)
+    .reduce((sum, payment) => sum + Math.round(payment.amount * 100), 0)
+
+  return Math.max(0, purchasesCents - paymentsCents)
+}
+
+/** Limite disponível do cartão (em centavos), nunca negativo. */
+export function calculateCardAvailableLimitCents(
+  card: CreditCard,
+  purchases: CardPurchase[],
+  payments: CardPayment[],
+  referenceDate = new Date()
+): number {
+  return Math.max(
+    0,
+    Math.round(card.limit * 100) -
+      calculateCardUsedLimitCents(card.id, purchases, payments, referenceDate)
+  )
+}
+
 export function calculateCardDashboard(
   card: CreditCard,
   purchases: CardPurchase[],
   payments: CardPayment[],
   referenceDate = new Date()
 ): CardDashboardInfo {
-  const today = [
-    referenceDate.getFullYear(),
-    String(referenceDate.getMonth() + 1).padStart(2, '0'),
-    String(referenceDate.getDate()).padStart(2, '0'),
-  ].join('-')
+  const today = toDateKey(referenceDate)
 
   const currentMonth = today.slice(0, 7)
 
@@ -40,21 +85,11 @@ export function calculateCardDashboard(
       payment.date <= today
   )
 
-  const totalPurchasesCents = cardPurchases.reduce(
-    (sum, purchase) =>
-      sum + Math.round(purchase.amount * 100),
-    0
-  )
-
-  const totalPaymentsCents = cardPayments.reduce(
-    (sum, payment) =>
-      sum + Math.round(payment.amount * 100),
-    0
-  )
-
-  const usedCents = Math.max(
-    0,
-    totalPurchasesCents - totalPaymentsCents
+  const usedCents = calculateCardUsedLimitCents(
+    card.id,
+    purchases,
+    payments,
+    referenceDate
   )
 
   const limitCents = Math.round(card.limit * 100)

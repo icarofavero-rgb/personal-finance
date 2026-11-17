@@ -5,7 +5,7 @@ import {
   buildCategoryValue,
 } from './services/categories'
 import { createPortal } from 'react-dom'
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import {
   LayoutDashboard,
   ArrowLeftRight,
@@ -112,7 +112,10 @@ import {
   DEFAULT_CARD_COLOR,
 } from './services/cardsStorage'
 
-import { calculateCardDashboard } from './services/cardDashboard'
+import {
+  calculateCardDashboard,
+  calculateCardAvailableLimitCents,
+} from './services/cardDashboard'
 import { calculateMonthlyDashboard } from './services/monthlyDashboard'
 import { calculateMonthlyForecast } from './services/monthlyForecast'
 import CardPaymentForm from './components/CardPaymentForm'
@@ -760,6 +763,9 @@ const [forecastToDelete, setForecastToDelete] =
 
 const [toast, setToast] = useState<ToastMessage | null>(null)
 
+// Referência estável: evita reiniciar o temporizador do aviso a cada renderização.
+const closeToast = useCallback(() => setToast(null), [])
+
 const [pendingBackupFile, setPendingBackupFile] =
   useState<File | null>(null)
 
@@ -1096,16 +1102,12 @@ const previewAmount = Number(amount)
 
 const previewInstallments = Number(cardInstallments)
 
-const previewPurchases = getCardPurchases()
-
-const previewUsedLimit = previewCard
-  ? previewPurchases
-      .filter(purchase => purchase.cardId === previewCard.id)
-      .reduce((total, purchase) => total + purchase.amount, 0)
-  : 0
-
 const previewAvailableLimit = previewCard
-  ? Math.round((previewCard.limit - previewUsedLimit) * 100) / 100
+  ? calculateCardAvailableLimitCents(
+      previewCard,
+      getCardPurchases(),
+      getCardPayments()
+    ) / 100
   : 0
 
 const previewRemainingLimit =
@@ -1484,19 +1486,11 @@ function openEditTransaction(transaction: Transaction) {
   }
 
   // Verifica o limite disponível do cartão
-const cardPurchases = getCardPurchases()
-
-const usedLimitCents = cardPurchases
-  .filter(purchase => purchase.cardId === selectedCard.id)
-  .reduce(
-    (total, purchase) =>
-      total + Math.round(purchase.amount * 100),
-    0
-  )
-
-const totalLimitCents = Math.round(selectedCard.limit * 100)
-
-const availableLimitCents = totalLimitCents - usedLimitCents
+const availableLimitCents = calculateCardAvailableLimitCents(
+  selectedCard,
+  getCardPurchases(),
+  getCardPayments()
+)
 
 if (amountCents > availableLimitCents) {
   setLimitAlert({
@@ -3313,12 +3307,6 @@ background:
   }}
 />
 
-<Toast
-  key={toast?.id ?? 'empty-toast'}
-  toast={toast}
-  onClose={() => setToast(null)}
-/>
-
       <div className="backup-feature-card">
         <div className="backup-feature-icon import-icon">
           <Upload size={24} />
@@ -4037,6 +4025,13 @@ options={[
   message={appAlert?.message ?? ''}
   onClose={() => setAppAlert(null)}
 />
+
+    {/* Aviso global: precisa ficar fora das páginas para aparecer em todas. */}
+    <Toast
+      key={toast?.id ?? 'empty-toast'}
+      toast={toast}
+      onClose={closeToast}
+    />
     </div>
   )
 }

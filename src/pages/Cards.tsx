@@ -39,14 +39,7 @@ import { registerCardPayment } from '../services/cardPaymentOperations'
 
 import { checkPaymentSafety } from '../services/cardPaymentSafety'
 
-function calculateUsedLimit(
-  cardId: string,
-  purchases: CardPurchase[]
-): number {
-  return purchases
-    .filter(purchase => purchase.cardId === cardId)
-    .reduce((total, purchase) => total + purchase.amount, 0)
-}
+import { calculateCardUsedLimitCents } from '../services/cardDashboard'
 
 const formatMoney = (value: number) =>
   new Intl.NumberFormat('pt-BR', {
@@ -1197,7 +1190,7 @@ return (
             <span>Limite utilizado</span>
             <strong>
               {formatMoney(
-                calculateUsedLimit(activeCard.id, purchases)
+                calculateCardUsedLimitCents(activeCard.id, purchases, payments) / 100
               )}
             </strong>
           </div>
@@ -1206,8 +1199,11 @@ return (
             <span>Limite disponível</span>
             <strong>
               {formatMoney(
-                activeCard.limit -
-                  calculateUsedLimit(activeCard.id, purchases)
+                Math.max(
+                  0,
+                  Math.round(activeCard.limit * 100) -
+                    calculateCardUsedLimitCents(activeCard.id, purchases, payments)
+                ) / 100
               )}
             </strong>
           </div>
