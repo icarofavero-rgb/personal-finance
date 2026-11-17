@@ -12,6 +12,7 @@ import {
   type Budget,
 } from '../services/budgetsStorage'
 import { calculateBudgetSummary } from '../services/budgetsCalculations'
+import { formatDecimal } from '../services/format'
 import { calculateBudgetsHistory } from '../services/budgetsHistory'
 
 import {
@@ -379,7 +380,7 @@ className={
 
                   <div className="budget-card-footer">
                     <span>
-                      {summary.progressPercent.toFixed(1)}% utilizado
+                      {formatDecimal(summary.progressPercent)}% utilizado
                     </span>
                     <strong>
                       {summary.remainingCents >= 0
@@ -505,7 +506,7 @@ className={
 
     <strong>
       {budgetComparison.progressDifference > 0.000001 ? '+' : ''}
-      {budgetComparison.progressDifference.toFixed(1)}
+      {formatDecimal(budgetComparison.progressDifference)}
       {' '}p.p.
     </strong>
   </div>
@@ -566,7 +567,7 @@ className={
               
 <td>
   <div className="budget-history-consumption">
-    <span>{item.progressPercent.toFixed(1)}%</span>
+    <span>{formatDecimal(item.progressPercent)}%</span>
 
     <div
       className="budget-history-track"

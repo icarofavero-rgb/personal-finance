@@ -1,4 +1,5 @@
 import AccentSelect from '../components/AccentSelect'
+import { formatDecimal } from '../services/format'
 import { useEffect, useRef, useState } from 'react'
 import {
   UsersRound,
@@ -792,7 +793,7 @@ const filteredDebtors = debtors
   <div className="debtor-debt-progress">
     <div className="debtor-debt-progress-label">
       <span>Progresso de recebimento</span>
-      <strong>{summary.progressPercent.toFixed(1)}%</strong>
+      <strong>{formatDecimal(summary.progressPercent)}%</strong>
     </div>
 
     <div

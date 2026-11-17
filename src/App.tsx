@@ -117,6 +117,7 @@ import {
   calculateCardAvailableLimitCents,
 } from './services/cardDashboard'
 import { calculateMonthlyDashboard } from './services/monthlyDashboard'
+import { formatDecimal } from './services/format'
 import { calculateMonthlyForecast } from './services/monthlyForecast'
 import CardPaymentForm from './components/CardPaymentForm'
 import { registerCardPayment } from './services/cardPaymentOperations'
@@ -1063,12 +1064,20 @@ const historyTransactions = transactions
       return transaction.date.startsWith(dashboardMonth)
     }
 
+    // Os cards são "do mês", então o histórico também mostra só o mês
+    // selecionado — assim o total do histórico bate com o valor do card.
     if (historySection === 'income') {
-      return transaction.type === 'income'
+      return (
+        transaction.type === 'income' &&
+        transaction.date.startsWith(dashboardMonth)
+      )
     }
 
     if (historySection === 'expense') {
-      return transaction.type === 'expense'
+      return (
+        transaction.type === 'expense' &&
+        transaction.date.startsWith(dashboardMonth)
+      )
     }
 
     return false
@@ -1336,9 +1345,9 @@ function handleOpenDashboardCard(cardId: string) {
       b.invoiceMonth.localeCompare(a.invoiceMonth)
     )
 
-  const currentMonth = new Date()
-    .toISOString()
-    .slice(0, 7)
+  // Usa a data local (toISOString usaria UTC e erraria o mês após 21h no Brasil).
+  const now = new Date()
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
   const initialMonth = cardInvoices.some(
     invoice => invoice.invoiceMonth === currentMonth
@@ -1412,6 +1421,20 @@ const availableInvoiceMonths = selectedCardInvoices
 
   return matchesMonth && matchesCategory && matchesType
 })
+
+// Abre o formulário sempre limpo (evita herdar dados de uma edição cancelada).
+function openNewTransaction() {
+  setEditingId(null)
+  setType('expense')
+  setCategory(lastExpenseCategory)
+  setDescription('')
+  setAmount('')
+  setDate(new Date().toLocaleDateString('en-CA'))
+  setPaymentMethod('cash')
+  setSelectedCardId('')
+  setCardInstallments('1')
+  setShowModal(true)
+}
 
 function openEditTransaction(transaction: Transaction) {
   const protection = checkTransactionProtection(transaction.id)
@@ -1820,12 +1843,7 @@ function handleDashboardInvoicePayment(
     className="pf-mobile-nav-add"
     aria-label="Nova transação"
     title="Nova transação"
-    onClick={() => {
-      setEditingId(null)
-      setType('expense')
-      setCategory(lastExpenseCategory)
-      setShowModal(true)
-    }}
+    onClick={openNewTransaction}
   >
     <Wallet size={27} />
   </button>
@@ -2034,14 +2052,7 @@ function handleDashboardInvoicePayment(
 <button
   type="button"
   className="primary-button page-new-transaction-button"
-      
-onClick={() => {
-  setEditingId(null)
-  setType('expense')
-  setCategory(lastExpenseCategory)
-  setShowModal(true)
-}}
-
+  onClick={openNewTransaction}
     >
       <Plus size={18} />
       Nova transação
@@ -2479,13 +2490,11 @@ onClick={() => {
     <span>Utilização do limite</span>
 
     <strong>
-      {dashboardCardsSummary.limit > 0
-        ? (
-            (dashboardCardsSummary.used /
-              dashboardCardsSummary.limit) *
-            100
-          ).toFixed(1)
-        : '0,0'}
+      {formatDecimal(
+        dashboardCardsSummary.limit > 0
+          ? (dashboardCardsSummary.used / dashboardCardsSummary.limit) * 100
+          : 0
+      )}
       %
     </strong>
   </div>
@@ -3878,7 +3887,7 @@ options={[
 <p>
   {historySection === 'projected'
     ? 'Evolução financeira dos próximos meses'
-    : 'Movimentações financeiras registradas'}
+    : `Movimentações de ${new Date(`${dashboardMonth}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`}
 </p>
 
         </div>
