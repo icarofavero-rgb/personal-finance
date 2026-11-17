@@ -1,4 +1,6 @@
 
+// Deve ser o primeiro import: garante crypto.randomUUID na rede local (HTTP).
+import './polyfills'
 import { StrictMode, useCallback, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
