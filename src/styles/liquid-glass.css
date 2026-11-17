@@ -48,8 +48,8 @@
 ) {
   background: var(--glass-bg);
   border-color: var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-shadow);
 }
 
@@ -149,8 +149,8 @@
 ) {
   background: var(--glass-bg);
   border-color: var(--glass-border);
-  backdrop-filter: blur(var(--glass-blur));
   -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
   box-shadow: var(--glass-shadow);
 }
 
@@ -288,8 +288,8 @@
   .panel
 ) {
   background-color: rgba(25, 29, 45, 0.58);
-  backdrop-filter: blur(22px) saturate(135%);
   -webkit-backdrop-filter: blur(22px) saturate(135%);
+  backdrop-filter: blur(22px) saturate(135%);
   border-color: rgba(180, 160, 255, 0.20);
 }
 
@@ -299,8 +299,8 @@
   .topbar
 ) {
   background: rgba(18, 19, 32, 0.62);
-  backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
 }
 
 /* Brilho suave nas bordas */
@@ -354,8 +354,8 @@
 
   border: 1px solid rgba(185, 155, 255, 0.25);
 
-  backdrop-filter: blur(22px) saturate(140%);
   -webkit-backdrop-filter: blur(22px) saturate(140%);
+  backdrop-filter: blur(22px) saturate(140%);
 
   box-shadow:
     0 18px 45px rgba(0, 0, 0, 0.20),
@@ -397,8 +397,8 @@
   background: rgba(255, 255, 255, 0.045);
   border-color: rgba(200, 190, 255, 0.12);
 
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 /* Quatro cartões superiores */
@@ -410,8 +410,8 @@
     rgba(19, 26, 43, 0.43)
   );
 
-  backdrop-filter: blur(18px) saturate(135%);
   -webkit-backdrop-filter: blur(18px) saturate(135%);
+  backdrop-filter: blur(18px) saturate(135%);
 
   border-color: rgba(185, 155, 255, 0.23);
 
@@ -489,8 +489,8 @@
     border-radius: 28px;
     border: 1px solid rgba(180, 150, 255, 0.24);
     background: rgba(24, 19, 43, 0.82);
-    backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(24px);
     box-shadow: 0 12px 38px rgba(0, 0, 0, 0.35);
   }
 
@@ -1075,8 +1075,8 @@
         0.12
       );
 
-    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
   }
 
   /* Área interna rolável */

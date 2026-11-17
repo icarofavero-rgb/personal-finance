@@ -1,0 +1,749 @@
+/* =========================================================
+   TUTORIAL DE BOAS-VINDAS
+   ========================================================= */
+
+.pf-onb-overlay {
+  --onb-bg: rgba(18, 20, 30, 0.72);
+  --onb-surface: rgba(28, 31, 44, 0.78);
+  --onb-border: rgba(255, 255, 255, 0.12);
+  --onb-text: #f4f2fb;
+  --onb-muted: #a3abc0;
+  --onb-chip: rgba(255, 255, 255, 0.08);
+
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  background: var(--onb-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  color: var(--onb-text);
+  animation: pf-onb-fade-in 0.45s ease both;
+  overflow: hidden;
+}
+
+:root[data-pf-theme='light'] .pf-onb-overlay {
+  --onb-bg: rgba(232, 236, 248, 0.7);
+  --onb-surface: rgba(255, 255, 255, 0.82);
+  --onb-border: rgba(24, 32, 51, 0.1);
+  --onb-text: #182033;
+  --onb-muted: #5b6780;
+  --onb-chip: rgba(24, 32, 51, 0.05);
+}
+
+.pf-onb-overlay.is-leaving {
+  animation: pf-onb-fade-out 0.42s ease forwards;
+}
+
+.pf-onb-overlay.is-leaving .pf-onb-dialog {
+  animation: pf-onb-dialog-out 0.42s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Luz colorida que acompanha a cor de cada passo */
+.pf-onb-aurora {
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--onb-color) 45%, transparent), transparent 40%),
+    radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--onb-color) 30%, #ec4899 10%), transparent 45%);
+  filter: blur(40px);
+  opacity: 0.55;
+  transition: background 0.8s ease;
+  animation: pf-onb-aurora 16s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.pf-onb-dialog {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 24px 18px;
+  border-radius: 28px;
+  background: var(--onb-surface);
+  border: 1px solid var(--onb-border);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 60px color-mix(in srgb, var(--onb-color) 18%, transparent);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  outline: none;
+  animation: pf-onb-dialog-in 0.6s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+  transition: box-shadow 0.6s ease;
+}
+
+.pf-onb-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pf-onb-progress {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--onb-chip);
+  overflow: hidden;
+}
+
+.pf-onb-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--onb-color), color-mix(in srgb, var(--onb-color) 50%, #ffffff));
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.3, 1.3, 0.5, 1), background 0.6s ease;
+}
+
+.pf-onb-skip-all {
+  border: 0;
+  background: none;
+  color: var(--onb-muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 4px;
+  border-radius: 8px;
+}
+
+.pf-onb-skip-all:hover {
+  color: var(--onb-text);
+}
+
+/* ---------- Palco com as cartas ---------- */
+
+.pf-onb-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 2px;
+  perspective: 1200px;
+}
+
+/* Baralho: a janela é a carta da frente; duas cartas aparecem atrás */
+.pf-onb-deck {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: 100%;
+  display: flex;
+}
+
+.pf-onb-deck .pf-onb-dialog {
+  width: 100%;
+}
+
+.pf-onb-ghost {
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  background: var(--onb-surface);
+  border: 1px solid var(--onb-border);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  /* encolhe a partir da base: a carta "espia" por baixo da janela */
+  transform-origin: 50% 100%;
+  transition:
+    transform 0.55s cubic-bezier(0.3, 1.2, 0.5, 1),
+    opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.pf-onb-ghost-1 {
+  transform: translateY(14px) scale(0.95);
+  opacity: 0.7;
+}
+
+.pf-onb-ghost-2 {
+  transform: translateY(28px) scale(0.9);
+  opacity: 0.4;
+}
+
+/* Na tela final as cartas de trás já foram "usadas" */
+.pf-onb-deck.is-last .pf-onb-ghost {
+  transform: translateY(0) scale(0.98);
+  opacity: 0;
+}
+
+.pf-onb-card {
+  position: relative;
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 4px 4px 12px;
+  will-change: transform, opacity;
+}
+
+.pf-onb-card h2 {
+  margin: 0;
+  font-size: clamp(20px, 4.6vw, 26px);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.pf-onb-card > p {
+  margin: 0;
+  color: var(--onb-muted);
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 420px;
+}
+
+.pf-onb-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--onb-color);
+  transition: color 0.6s ease;
+}
+
+.pf-onb-tips {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pf-onb-tips li {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--onb-chip);
+  border: 1px solid var(--onb-border);
+  font-size: 12.5px;
+  color: var(--onb-text);
+  animation: pf-onb-tip-in 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  animation-delay: calc(0.25s + var(--tip-index) * 0.08s);
+}
+
+/* ---------- Ilustração animada ---------- */
+
+.pf-onb-art {
+  position: relative;
+  width: 168px;
+  height: 168px;
+  margin: 4px 0 8px;
+  display: grid;
+  place-items: center;
+}
+
+.pf-onb-core {
+  position: relative;
+  z-index: 2;
+  width: 92px;
+  height: 92px;
+  border-radius: 30px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  background: linear-gradient(145deg, var(--onb-color), color-mix(in srgb, var(--onb-color) 55%, #1e1b4b));
+  box-shadow:
+    0 18px 40px color-mix(in srgb, var(--onb-color) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  animation:
+    pf-onb-pop 0.7s cubic-bezier(0.2, 1.4, 0.4, 1) both,
+    pf-onb-float 4s ease-in-out 0.7s infinite;
+}
+
+.pf-onb-glow {
+  position: absolute;
+  inset: 18px;
+  border-radius: 50%;
+  background: var(--onb-color);
+  filter: blur(34px);
+  opacity: 0.45;
+  animation: pf-onb-breathe 3.6s ease-in-out infinite;
+}
+
+.pf-onb-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--onb-color) 45%, transparent);
+}
+
+.pf-onb-ring-1 {
+  inset: 18px;
+  animation: pf-onb-ring 3s ease-out infinite;
+}
+
+.pf-onb-ring-2 {
+  inset: 0;
+  opacity: 0.5;
+  border-style: dashed;
+  animation: pf-onb-spin 26s linear infinite;
+}
+
+.pf-onb-orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  animation: pf-onb-spin 18s linear infinite;
+  animation-delay: calc(var(--orbit-index) * -6s);
+}
+
+.pf-onb-orbit-chip {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 38px;
+  height: 38px;
+  margin-left: -19px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--onb-color);
+  background: var(--onb-surface);
+  border: 1px solid var(--onb-border);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  /* gira ao contrário para o ícone ficar sempre em pé */
+  animation: pf-onb-spin 18s linear infinite reverse;
+  animation-delay: calc(var(--orbit-index) * -6s);
+}
+
+/* ---------- Pontos de progresso ---------- */
+
+.pf-onb-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-onb-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--onb-border);
+  transition: width 0.4s cubic-bezier(0.3, 1.4, 0.5, 1), background 0.4s ease;
+}
+
+.pf-onb-dot.is-done {
+  background: color-mix(in srgb, var(--onb-color) 55%, transparent);
+}
+
+.pf-onb-dot.is-active {
+  width: 26px;
+  background: var(--onb-color);
+}
+
+.pf-onb-dot-attention {
+  background: color-mix(in srgb, #f59e0b 35%, transparent);
+}
+
+/* ---------- Botões ---------- */
+
+.pf-onb-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pf-onb-primary {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+  border: 0;
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--onb-color), color-mix(in srgb, var(--onb-color) 60%, #312e81));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--onb-color) 40%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background 0.6s ease;
+}
+
+.pf-onb-primary:hover {
+  transform: translateY(-2px);
+}
+
+.pf-onb-primary:active {
+  transform: scale(0.97);
+}
+
+.pf-onb-primary svg {
+  transition: transform 0.25s ease;
+}
+
+.pf-onb-primary:hover svg {
+  transform: translateX(3px);
+}
+
+.pf-onb-secondary {
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  border: 1px solid var(--onb-border);
+  background: var(--onb-chip);
+  color: var(--onb-text);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.pf-onb-secondary:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.pf-onb-link {
+  border: 0;
+  background: none;
+  color: var(--onb-muted);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 8px;
+  min-height: 50px;
+}
+
+.pf-onb-link:hover {
+  color: var(--onb-text);
+}
+
+.pf-onb-counter {
+  text-align: center;
+  font-size: 12px;
+  color: var(--onb-muted);
+}
+
+/* ---------- Tela final "Atenção" ---------- */
+
+.pf-onb-attention {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-align: left;
+  width: 100%;
+}
+
+.pf-onb-attention-badge {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  animation: pf-onb-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both, pf-onb-alert 2.4s ease-in-out 0.6s infinite;
+}
+
+:root:not([data-pf-theme='light']) .pf-onb-attention-badge {
+  color: #fbbf24;
+}
+
+.pf-onb-attention h2 {
+  text-align: center;
+  margin: 0;
+  font-size: clamp(20px, 4.6vw, 24px);
+}
+
+.pf-onb-attention-intro {
+  margin: 0;
+  text-align: center;
+  color: var(--onb-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.pf-onb-platforms {
+  display: grid;
+  gap: 10px;
+}
+
+.pf-onb-platform {
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--onb-chip);
+  border: 1px solid var(--onb-border);
+  animation: pf-onb-rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+}
+
+.pf-onb-platform:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.pf-onb-platform.is-current {
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
+}
+
+.pf-onb-platform header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--onb-text);
+}
+
+.pf-onb-current {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: #f59e0b;
+}
+
+.pf-onb-platform ul {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 5px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--onb-muted);
+}
+
+.pf-onb-platform strong {
+  color: var(--onb-text);
+}
+
+.pf-onb-attention-footer {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--onb-muted);
+  background: color-mix(in srgb, #22c55e 10%, transparent);
+  border: 1px solid color-mix(in srgb, #22c55e 30%, transparent);
+  animation: pf-onb-rise 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.1) 0.2s both;
+}
+
+.pf-onb-attention-footer svg {
+  flex-shrink: 0;
+  color: #22c55e;
+}
+
+.pf-onb-finish {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  box-shadow: 0 12px 28px rgba(245, 158, 11, 0.35);
+}
+
+/* ---------- Movimentos das cartas ---------- */
+
+/* Computador: suave, com leve aproximação */
+.pf-onb-card.motion-next { animation: pf-onb-in-right 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+.pf-onb-card.motion-back { animation: pf-onb-in-left 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+.pf-onb-card.motion-jump { animation: pf-onb-zoom-in 0.5s ease both; }
+
+/* Pular etapa: a carta anterior "é jogada" e a nova cai na mesa */
+.pf-onb-card.motion-skip-step { animation: pf-onb-flick-in 0.6s cubic-bezier(0.2, 1.2, 0.4, 1) both; }
+
+/* Pular tutorial: o aviso final chega com destaque */
+.pf-onb-card.motion-skip-all { animation: pf-onb-land 0.7s cubic-bezier(0.2, 1.3, 0.4, 1) both; }
+
+/* Celular e tablet: deslizar de lado, como passar páginas */
+:root[data-pf-device='phone'] .pf-onb-card.motion-next,
+:root[data-pf-device='tablet'] .pf-onb-card.motion-next {
+  animation: pf-onb-slide-right 0.42s cubic-bezier(0.25, 1, 0.3, 1) both;
+}
+
+:root[data-pf-device='phone'] .pf-onb-card.motion-back,
+:root[data-pf-device='tablet'] .pf-onb-card.motion-back {
+  animation: pf-onb-slide-left 0.42s cubic-bezier(0.25, 1, 0.3, 1) both;
+}
+
+/* Ao pular o tutorial, as cartas restantes se espalham */
+.pf-onb-deck.is-shuffling .pf-onb-card {
+  animation: pf-onb-shuffle-out 0.5s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+}
+
+/* As cartas de trás voam para os lados, como embaralhar */
+.pf-onb-deck.is-shuffling .pf-onb-ghost-1 {
+  transform: translate(-75%, -30px) rotate(-16deg) scale(0.9);
+  opacity: 0;
+}
+
+.pf-onb-deck.is-shuffling .pf-onb-ghost-2 {
+  transform: translate(75%, -10px) rotate(18deg) scale(0.85);
+  opacity: 0;
+}
+
+/* Centraliza o conteúdo sem cortar o topo quando ele for maior que a tela */
+.pf-onb-stage {
+  align-content: safe center;
+}
+
+/* ---------- Celular: ocupa a tela, como um app ---------- */
+
+@media (max-width: 650px) {
+  .pf-onb-overlay {
+    padding: 0;
+    align-items: stretch;
+  }
+
+  .pf-onb-deck {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Tela cheia: as cartas de trás não aparecem */
+  .pf-onb-ghost {
+    display: none;
+  }
+
+  .pf-onb-dialog {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    border: 0;
+    padding: max(18px, env(safe-area-inset-top)) 18px max(16px, env(safe-area-inset-bottom));
+    animation: pf-onb-sheet-in 0.55s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+  }
+
+  .pf-onb-art {
+    width: 150px;
+    height: 150px;
+  }
+}
+
+@media (max-height: 640px) {
+  .pf-onb-art {
+    width: 120px;
+    height: 120px;
+  }
+
+  .pf-onb-core {
+    width: 72px;
+    height: 72px;
+    border-radius: 24px;
+  }
+}
+
+/* ---------- Preferência de animação ---------- */
+
+:root[data-pf-animations='off'] .pf-onb-overlay *,
+:root[data-pf-animations='off'] .pf-onb-overlay {
+  animation: none !important;
+  transition: none !important;
+}
+
+:root[data-pf-animations='reduced'] .pf-onb-overlay *,
+:root[data-pf-animations='reduced'] .pf-onb-overlay {
+  animation-duration: 0.2s !important;
+  animation-iteration-count: 1 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-onb-overlay *,
+  .pf-onb-overlay {
+    animation-duration: 0.2s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes pf-onb-fade-in { from { opacity: 0; } }
+@keyframes pf-onb-fade-out { to { opacity: 0; } }
+
+@keyframes pf-onb-dialog-in {
+  from { opacity: 0; transform: translateY(30px) scale(0.94); }
+}
+
+@keyframes pf-onb-dialog-out {
+  to { opacity: 0; transform: translateY(20px) scale(0.92); }
+}
+
+@keyframes pf-onb-sheet-in {
+  from { opacity: 0; transform: translateY(8%); }
+}
+
+@keyframes pf-onb-aurora {
+  from { transform: translate(-4%, -3%) rotate(0deg); }
+  to { transform: translate(4%, 3%) rotate(12deg); }
+}
+
+@keyframes pf-onb-in-right {
+  from { opacity: 0; transform: translateX(40px) rotateY(-12deg) scale(0.96); }
+}
+
+@keyframes pf-onb-in-left {
+  from { opacity: 0; transform: translateX(-40px) rotateY(12deg) scale(0.96); }
+}
+
+@keyframes pf-onb-slide-right {
+  from { opacity: 0; transform: translateX(70%); }
+}
+
+@keyframes pf-onb-slide-left {
+  from { opacity: 0; transform: translateX(-70%); }
+}
+
+@keyframes pf-onb-zoom-in {
+  from { opacity: 0; transform: scale(0.92); }
+}
+
+@keyframes pf-onb-flick-in {
+  0% { opacity: 0; transform: translateY(-60px) rotate(-6deg) scale(0.9); }
+  60% { opacity: 1; transform: translateY(6px) rotate(1deg) scale(1.01); }
+}
+
+@keyframes pf-onb-land {
+  0% { opacity: 0; transform: translateY(80px) scale(0.85); }
+  60% { opacity: 1; transform: translateY(-8px) scale(1.02); }
+}
+
+@keyframes pf-onb-shuffle-out {
+  to { opacity: 0; transform: translateY(-40px) rotate(8deg) scale(0.9); }
+}
+
+@keyframes pf-onb-tip-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.9); }
+}
+
+@keyframes pf-onb-rise {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+@keyframes pf-onb-pop {
+  from { opacity: 0; transform: scale(0.5); }
+}
+
+@keyframes pf-onb-float {
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes pf-onb-breathe {
+  50% { opacity: 0.7; transform: scale(1.08); }
+}
+
+@keyframes pf-onb-ring {
+  from { transform: scale(0.8); opacity: 0.9; }
+  to { transform: scale(1.25); opacity: 0; }
+}
+
+@keyframes pf-onb-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pf-onb-alert {
+  50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12); }
+}

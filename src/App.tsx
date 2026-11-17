@@ -7,11 +7,7 @@ import {
 import { createPortal } from 'react-dom'
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import {
-  LayoutDashboard,
   ArrowLeftRight,
-  CreditCard,
-  UsersRound,
-  Target,
   ChartNoAxesCombined,
   Bell,
   Plus,
@@ -124,6 +120,9 @@ import { registerCardPayment } from './services/cardPaymentOperations'
 import { checkPaymentSafety } from './services/cardPaymentSafety'
 import Debtors from './pages/Debtors'
 import Sync from './pages/Sync'
+import AppBackdrop from './components/AppBackdrop'
+import AppNavigation, { PAGE_ORDER } from './components/AppNavigation'
+import { useDeviceClass } from './hooks/useDeviceClass'
 import DatePicker from './components/DatePicker'
 import ConfirmDialog from './components/ConfirmDialog'
 import Toast, { type ToastMessage } from './components/Toast'
@@ -151,16 +150,6 @@ import {
   deleteManualForecast,
   type ManualForecast,
 } from './services/manualForecastStorage'
-
-const navigation = [
-  { name: 'Dashboard', icon: LayoutDashboard },
-  { name: 'Transações', icon: ArrowLeftRight },
-  { name: 'Cartões', icon: CreditCard },
-  { name: 'Devedores', icon: UsersRound },
-  { name: 'Orçamentos', icon: Wallet },
-  { name: 'Metas', icon: Target },
-  { name: 'Relatórios', icon: ChartNoAxesCombined },
-]
 
 const sidebarAvatarIcons = {
   user: UserRound,
@@ -349,6 +338,17 @@ useEffect(() => {
   applyAppTheme(savedAppearance.theme)
   applyVisualStyle(savedAppearance.visualStyle)
   applyAnimationPreference(savedAppearance.animations)
+
+  // Tema "Sistema": acompanha quando o aparelho troca entre claro e escuro.
+  const media = window.matchMedia('(prefers-color-scheme: dark)')
+
+  function followSystemTheme() {
+    const current = getAppearancePreferences()
+    if (current.theme === 'system') applyAppTheme('system')
+  }
+
+  media.addEventListener('change', followSystemTheme)
+  return () => media.removeEventListener('change', followSystemTheme)
 }, [])
 
 useEffect(() => {
@@ -518,6 +518,26 @@ const [selectedInvoiceMonth, setSelectedInvoiceMonth] =
   useState('')
 
   const [activePage, setActivePage] = useState('Dashboard')
+
+const device = useDeviceClass()
+
+// Direção da transição: avançar no menu desliza para um lado, voltar para o outro.
+const [previousPage, setPreviousPage] = useState(activePage)
+const [pageDirection, setPageDirection] = useState<'forward' | 'back'>('forward')
+
+if (previousPage !== activePage) {
+  setPreviousPage(activePage)
+  setPageDirection(
+    PAGE_ORDER.indexOf(activePage) >= PAGE_ORDER.indexOf(previousPage)
+      ? 'forward'
+      : 'back'
+  )
+}
+
+// Cada página nova começa do topo.
+useEffect(() => {
+  window.scrollTo({ top: 0 })
+}, [activePage])
 
 const [userPreferences, setUserPreferences] = useState(
   () => getUserPreferences()
@@ -1782,119 +1802,25 @@ function handleDashboardInvoicePayment(
 }
 
   return (
+    <>
+    <AppBackdrop />
     <div className="app">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-icon">
-            <Wallet size={23} />
-          </div>
-          <span>
-            personal<span className="brand-light">finance</span>
-          </span>
-        </div>
+      <AppNavigation
+        device={device}
+        activePage={activePage}
+        onNavigate={setActivePage}
+        onNewTransaction={openNewTransaction}
+        profileName={userName}
+        profileBackground={sidebarAvatarGradient}
+        profileAvatar={
+          SidebarAvatarIcon ? (
+            <SidebarAvatarIcon size={22} strokeWidth={1.8} />
+          ) : (
+            userName.trim().charAt(0).toLocaleUpperCase('pt-BR') || 'U'
+          )
+        }
+      />
 
-        <div className="menu-label">MENU PRINCIPAL</div>
-
-        <nav className="navigation">
-          {navigation.map(({ name, icon: Icon }) => (
-            <button
-              key={name}
-              className={`nav-item ${activePage === name ? 'active' : ''}`}
-              onClick={() => setActivePage(name)}
-            >
-              <Icon size={19} />
-              <span>{name}</span>
-            </button>
-          ))}
-        </nav>
-
-
-<div className="sidebar-bottom">
-  <button
-    type="button"
-    className="profile-main-button"
-    onClick={() => setActivePage('Configurações')}
-    aria-label="Abrir meu perfil"
-    title="Abrir meu perfil"
-  >
-
-<div
-  className="avatar"
-  style={{
-    background: sidebarAvatarGradient,
-    color: '#ffffff',
-  }}
->
-  {SidebarAvatarIcon ? (
-    <SidebarAvatarIcon size={22} strokeWidth={1.8} />
-  ) : (
-    userName.trim().charAt(0).toLocaleUpperCase('pt-BR') || 'U'
-  )}
-</div>
-
-
-    <div className="profile-info">
-      <strong>{userName || 'Meu perfil'}</strong>
-      <small>Usuário</small>
-    </div>
-  </button>
-</div>
-
-</aside>
-
-
-<nav
-  className="pf-mobile-nav"
-  aria-label="Navegação principal do aplicativo"
->
-  <div className="pf-mobile-nav-scroll">
-    {navigation.slice(0, 4).map(({ name, icon: Icon }) => (
-      <button
-        key={name}
-        type="button"
-        className={`pf-mobile-nav-item ${
-          activePage === name ? 'active' : ''
-        }`}
-        onClick={() => setActivePage(name)}
-        aria-current={activePage === name ? 'page' : undefined}
-        title={name}
-      >
-        <Icon size={21} />
-        <span>{name === 'Dashboard' ? 'Início' : name}</span>
-      </button>
-    ))}
-  </div>
-
-  <button
-    type="button"
-    className="pf-mobile-nav-add"
-    aria-label="Nova transação"
-    title="Nova transação"
-    onClick={openNewTransaction}
-  >
-    <Wallet size={27} />
-  </button>
-
-  <div className="pf-mobile-nav-scroll">
-    {navigation.slice(4).map(({ name, icon: Icon }) => (
-      <button
-        key={name}
-        type="button"
-        className={`pf-mobile-nav-item ${
-          activePage === name ? 'active' : ''
-        }`}
-        onClick={() => setActivePage(name)}
-        aria-current={activePage === name ? 'page' : undefined}
-        title={name}
-      >
-        <Icon size={21} />
-        <span>{name}</span>
-      </button>
-    ))}
-
-
-  </div>
-</nav>
 
 <main className="main">
         <header className="topbar">
@@ -1987,6 +1913,8 @@ function handleDashboardInvoicePayment(
 </header>
 
         <section className="content">
+        {/* A chave troca a cada página: a página "entra" com a animação do aparelho. */}
+        <div key={activePage} className="pf-page" data-direction={pageDirection}>
 
         {localStorage.getItem(
   'personal-finance-pending-backup-snapshot'
@@ -3429,6 +3357,8 @@ background:
             <Reports transactions={transactions} />
           )}
 
+          </div>
+
           <footer className="footer">
             <span>Personal Finance © 2026</span>
             <span>Organize hoje. Conquiste amanhã.</span>
@@ -4088,6 +4018,7 @@ options={[
       onClose={closeToast}
     />
     </div>
+    </>
   )
 }
 

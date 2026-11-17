@@ -18,9 +18,11 @@ import {
   CheckCircle2,
   DatabaseBackup,
   RefreshCw,
+  GraduationCap,
 } from 'lucide-react'
 
 import AvatarColorPicker from '../components/AvatarColorPicker'
+import { requestOpenTutorial } from '../services/onboardingStorage'
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
 import {
@@ -973,6 +975,24 @@ return (
   >
     <RefreshCw size={18} />
     Abrir Sincronização
+  </button>
+</div>
+
+<div className="settings-appearance-group">
+  <h3>Tutorial e ajuda</h3>
+
+  <p>
+    Reveja o passo a passo do app e o aviso sobre onde
+    seus dados ficam guardados (no app e no navegador).
+  </p>
+
+  <button
+    type="button"
+    className="primary-button"
+    onClick={requestOpenTutorial}
+  >
+    <GraduationCap size={18} />
+    Ver tutorial novamente
   </button>
 </div>
 
