@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "rede": "tsc -b && vite build && vite preview --host --port 4173",
+    "arquivo": "tsc -b && vite build --mode arquivo",
     "test": "vitest run"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "oxlint": "^1.89.0",
     "typescript": "~7.0.2",
     "vite": "^8.3.5",
+    "vite-plugin-singlefile": "^2.3.4",
     "vitest": "^5.1.0"
   }
 }
