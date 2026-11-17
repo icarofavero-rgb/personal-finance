@@ -41,6 +41,7 @@ export default defineConfig({
       'src/services/backup.test.ts',
       'src/services/backupRestoreV5Integration.test.ts',
       'src/services/cardLimit.test.ts',
+      'src/services/backupModules.test.ts',
     ],
   },
 })

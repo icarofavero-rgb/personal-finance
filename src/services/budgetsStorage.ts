@@ -47,6 +47,17 @@ export function getBudgetsStrict(): Budget[] {
     throw new Error(errorMessage)
   }
 
+  return validateBudgetsData(data)
+}
+
+/**
+ * Valida uma lista de orçamentos já convertida de JSON.
+ * Lança erro se algum item for inválido, duplicado ou repetir mês+categoria.
+ */
+export function validateBudgetsData(data: unknown): Budget[] {
+  const errorMessage =
+    'Não foi possível validar os orçamentos armazenados.'
+
   if (!Array.isArray(data)) {
     throw new Error(errorMessage)
   }

@@ -50,6 +50,12 @@ import { safelyAuditBackupRestore } from './backupRestoreSafeAudit'
 
 import { hasValidRestoreStructure } from './backupRestoreStructure'
 
+import {
+  collectBackupModules,
+  restoreBackupModules,
+  validateBackupModules,
+} from './backupModules'
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' &&
     value !== null &&
@@ -158,7 +164,11 @@ export function createBackupV4(): BackupV4 {
 }
 
 export async function exportBackup(): Promise<'web' | 'android'> {
-  const backup = createBackupV5()
+  const backup = {
+    ...createBackupV5(),
+    // Metas, Orçamentos, Previsões e preferências (campo opcional).
+    modules: collectBackupModules(),
+  }
 
   const json = JSON.stringify(backup, null, 2)
 
@@ -256,9 +266,18 @@ if (parsed.version === 5) {
     )
   }
 
+  // Valida os módulos complementares ANTES de alterar qualquer dado.
+  const modules = validateBackupModules(
+    (parsed as Record<string, unknown>).modules
+  )
+
   // O executor realiza novamente as verificações
   // de segurança e cria o snapshot antes da gravação.
   executeBackupRestore(parsed)
+
+  if (modules !== null) {
+    restoreBackupModules(modules)
+  }
 
   return parsed.transactions
 }

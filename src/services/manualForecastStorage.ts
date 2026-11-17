@@ -22,7 +22,7 @@ function isValidDate(value: string): boolean {
   )
 }
 
-function isManualForecast(value: unknown): value is ManualForecast {
+export function isManualForecast(value: unknown): value is ManualForecast {
   if (typeof value !== 'object' || value === null) return false
 
   const item = value as Record<string, unknown>

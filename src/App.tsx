@@ -747,7 +747,16 @@ return {
 
 
 const [manualForecasts, setManualForecasts] =
-  useState<ManualForecast[]>(() => getManualForecasts())
+  useState<ManualForecast[]>(() => {
+    // Dados corrompidos não podem derrubar o app inteiro (tela branca).
+    // Os dados originais continuam preservados no armazenamento.
+    try {
+      return getManualForecasts()
+    } catch (error) {
+      console.error('Erro ao carregar previsões manuais:', error)
+      return []
+    }
+  })
 
 const [showForecastModal, setShowForecastModal] =
   useState(false)
@@ -1697,6 +1706,23 @@ async function handleConfirmImportBackup() {
 
     setTransactions(restored)
     setCardsRevision(previous => previous + 1)
+
+    // Atualiza também os módulos complementares restaurados.
+    try {
+      setManualForecasts(getManualForecasts())
+    } catch {
+      setManualForecasts([])
+    }
+
+    setUserPreferences(getUserPreferences())
+    setNotificationPreferencesRevision(previous => previous + 1)
+
+    const appearance = getAppearancePreferences()
+    applyAccentColor(appearance.accentColor)
+    applyNeonIntensity(appearance.neonIntensity)
+    applyAppTheme(appearance.theme)
+    applyVisualStyle(appearance.visualStyle)
+    applyAnimationPreference(appearance.animations)
 
     showToast(
       'success',
@@ -3297,13 +3323,13 @@ background:
   open={pendingBackupFile !== null}
   title="Restaurar backup?"
   message={
-    'A restauração poderá substituir seus dados ' +
-    'financeiros atuais, incluindo transações, ' +
-    'cartões, compras, pagamentos de faturas e, ' +
-    'quando presentes no arquivo, devedores, ' +
-    'dívidas e recebimentos. ' +
-    'Metas e Orçamentos não fazem parte do ' +
-    'Backup V5. Deseja continuar?'
+    'A restauração substituirá seus dados atuais: ' +
+    'transações, cartões, compras, pagamentos de faturas, ' +
+    'devedores e, quando presentes no arquivo, metas, ' +
+    'orçamentos, previsões e preferências. ' +
+    'Backups antigos não contêm metas e orçamentos; ' +
+    'nesse caso eles serão mantidos como estão. ' +
+    'Deseja continuar?'
   }
   confirmLabel="Restaurar dados"
   onConfirm={() => {
@@ -3368,7 +3394,7 @@ background:
       <ShieldCheck size={18} />
       <span>
         Seus registros financeiros são armazenados
-        localmente neste navegador.
+        apenas neste aparelho. Faça backups com frequência.
       </span>
     </div>
   </div>
