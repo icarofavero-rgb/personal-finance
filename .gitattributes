@@ -1,0 +1,13 @@
+# Normaliza finais de linha (evita avisos LF/CRLF no Windows)
+* text=auto
+
+# Scripts de shell do Android precisam de LF
+*.sh text eol=lf
+android/gradlew text eol=lf
+
+# Binários
+*.png binary
+*.jpg binary
+*.zip binary
+*.jar binary
+*.apk binary

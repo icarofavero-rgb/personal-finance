@@ -1,48 +1,9 @@
-
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    include: [
-      'src/services/budgetsComparison.test.ts',
-      'src/services/budgetsHistory.test.ts',
-      'src/services/budgetsStorage.test.ts',
-      'src/services/cardPaymentTransactionProtection.test.ts',
-      'src/services/financialProfileMigrationValidation.test.ts',
-      'src/services/financialProfileMigrationInventory.test.ts',
-      'src/services/financialProfileData.test.ts',
-      'src/services/financialProfileKeys.test.ts',
-      'src/services/cardPaymentValidation.test.ts',
-      'src/services/cardPaymentRecoveryCheck.test.ts',
-      'src/services/cardPaymentOperations.test.ts',
-      'src/services/monthlyDashboard.test.ts',
-      'src/services/monthlyForecast.test.ts',
-      'src/services/debtors/debtorsCalculations.test.ts',
-      'src/services/debtors/debtorsStorage.test.ts',
-      'src/services/debtors/debtorsCardLink.test.ts',
-      'src/services/backupRestoreSnapshot.test.ts',
-      'src/services/backupRestoreDebtorsRecovery.test.ts',
-      'src/services/backupDebtorsValidation.test.ts',
-      'src/services/backupRestoreV5Audit.test.ts',
-      'src/services/backupRestoreVerification.test.ts',
-      'src/services/backupRestoreWriterV5.test.ts',
-      'src/services/notificationEngine.test.ts',
-      'src/services/cardInvoiceDueDate.test.ts',
-      'src/services/notificationReadStorage.test.ts',
-      'src/services/notificationHistoryStorage.test.ts',
-      'src/services/notificationHistoryLock.test.ts',
-      'src/services/notificationHistoryBackup.test.ts',
-      'src/services/backupRestoreExecutorSafety.test.ts',
-      'src/services/backupV5Builder.test.ts',
-      'src/services/backupRestoreV5Recovery.test.ts',
-      'src/services/backupImportV5Safety.test.ts',
-      'src/services/backupDebtorsTransactionLinks.test.ts',
-      'src/services/backupV5IntegratedAudit.test.ts',
-      'src/services/backup.test.ts',
-      'src/services/backupRestoreV5Integration.test.ts',
-      'src/services/cardLimit.test.ts',
-      'src/services/backupModules.test.ts',
-    ],
+    // Todos os testes do projeto. Os roteiros antigos (*.check.ts)
+    // são executados por src/services/legacyChecks.test.ts.
+    include: ['src/**/*.test.ts'],
   },
 })
-

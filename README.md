@@ -1,32 +1,53 @@
-# React + TypeScript + Vite
+# Personal Finance
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Aplicativo de controle financeiro pessoal, para navegador e Android.
 
-Currently, two official plugins are available:
+## Módulos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Dashboard**: resumo do mês, saldo projetado, previsões e cartões
+- **Transações**: entradas e saídas, com categorias e subcategorias
+- **Cartões**: cartões de crédito, compras parceladas, faturas e pagamentos
+- **Devedores**: quem te deve, dívidas e recebimentos
+- **Orçamentos**: limite de gastos por categoria e mês
+- **Metas**: objetivos de economia com depósitos e retiradas
+- **Relatórios**: gráficos e comparativos por período
+- **Configurações**: perfil, aparência, notificações e backup
 
-## React Compiler
+Os dados ficam salvos **apenas no aparelho** (localStorage). Use
+*Configurações → Backup* para exportar uma cópia de segurança.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tecnologias
 
-## Expanding the Oxlint configuration
+React 19 + TypeScript + Vite · Recharts (gráficos) · Capacitor (Android) · Vitest (testes)
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+## Comandos
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+| Comando              | O que faz                                          |
+| -------------------- | -------------------------------------------------- |
+| `npm install`        | Instala as dependências (só na primeira vez)        |
+| `npm run dev`        | Abre o app no navegador para desenvolvimento        |
+| `npm test`           | Roda todos os testes automáticos                    |
+| `npm run lint`       | Procura problemas no código                         |
+| `npm run build`      | Gera a versão final em `dist/`                      |
+| `npx cap sync android` | Copia a versão final para o projeto Android       |
+
+## Estrutura
+
+```
+src/
+  App.tsx          Tela principal, navegação, Dashboard e Transações
+  pages/           Demais telas (Cartões, Devedores, Metas, ...)
+  components/      Peças reutilizáveis (seletores, diálogos, gráficos)
+  services/        Regras de negócio, cálculos e armazenamento
+    *.test.ts      Testes automáticos
+    *.check.ts     Verificações antigas, executadas por legacyChecks.test.ts
+  styles/          Estilos por módulo
+android/           Projeto Android (Capacitor)
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## Backup
+
+O arquivo de backup (versão 5) contém transações, cartões, compras,
+pagamentos e devedores, além de um campo `modules` com Metas, Orçamentos,
+Previsões manuais e preferências. Backups antigos, sem `modules`,
+continuam podendo ser importados.
