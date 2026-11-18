@@ -59,6 +59,8 @@ const COLLECTION_LABELS: Record<string, string> = {
   goals: 'metas',
   budgets: 'orçamentos',
   manualForecasts: 'previsões',
+  savings: 'movimentações do Guardado',
+  reminders: 'lembretes',
   userPreferences: 'perfil',
   appearance: 'aparência',
   notificationPreferences: 'notificações',

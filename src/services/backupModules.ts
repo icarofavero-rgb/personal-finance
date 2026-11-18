@@ -13,6 +13,8 @@
 import { validateBudgetsData } from './budgetsStorage'
 import { validateGoalsBackup } from './goalsBackup'
 import { isManualForecast } from './manualForecastStorage'
+import { validateSavingsData } from './savingsStorage'
+import { validateRemindersData } from './remindersStorage'
 
 type ModuleDefinition = {
   key: string
@@ -66,6 +68,20 @@ export const BACKUP_MODULES: readonly ModuleDefinition[] = [
       if (new Set(ids).size !== ids.length) {
         throw new Error('O backup contém previsões manuais duplicadas.')
       }
+    },
+  },
+  {
+    key: 'personal-finance-savings-v1',
+    label: 'Guardado',
+    validate: value => {
+      validateSavingsData(value)
+    },
+  },
+  {
+    key: 'personal-finance-reminders-v1',
+    label: 'Lembretes do Calendário',
+    validate: value => {
+      validateRemindersData(value)
     },
   },
   {
