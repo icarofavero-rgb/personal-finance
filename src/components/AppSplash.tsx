@@ -15,11 +15,11 @@ type AppSplashProps = {
 const SECTION_ICONS = 7
 
 /** Tempos da animação normal (ms). Ícones: 1 a cada STEP. */
-const STEP = 170
-const FIRST_ICON = 260
+const STEP = 260
+const FIRST_ICON = 400
 const FINAL_AT = FIRST_ICON + SECTION_ICONS * STEP
-const CLOSE_AT = FINAL_AT + 1250
-const FADE = 420
+const CLOSE_AT = FINAL_AT + 1700
+const FADE = 550
 
 /**
  * Animação de entrada: os ícones das seções do menu vão se transformando
