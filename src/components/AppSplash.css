@@ -1,484 +1,205 @@
+/* =========================================================
+   ANIMAÇÃO DE ENTRADA
+   Ícones das seções se transformam um no outro até virar o
+   ícone do Personal Finance na cor de destaque.
+   Só transform e opacity: roda na placa de vídeo, sem travar
+   mesmo enquanto o app carrega por trás.
+   ========================================================= */
 
 .pf-splash {
+  --splash-bg: #0d0f16;
+  --splash-text: #eef0f7;
+  --splash-tile: rgba(255, 255, 255, 0.07);
+  --splash-tile-border: rgba(255, 255, 255, 0.14);
+  --splash-icon: #c9cede;
+
   position: fixed;
   inset: 0;
   z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #0d0f14;
-  opacity: 1;
-  transition: opacity 300ms ease;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--splash-bg);
+  color: var(--splash-text);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
+:root[data-pf-theme='light'] .pf-splash {
+  --splash-bg: #f2f4fa;
+  --splash-text: #182033;
+  --splash-tile: rgba(255, 255, 255, 0.85);
+  --splash-tile-border: rgba(24, 32, 51, 0.1);
+  --splash-icon: #475569;
+}
+
+/* Saída: o conteúdo aproxima e tudo some, revelando o Dashboard */
 .pf-splash-closing {
+  pointer-events: none;
+  animation: pf-splash-out 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.pf-splash-closing .pf-splash-content {
+  animation: pf-splash-zoom-out 0.42s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Luz suave na cor de destaque (gradiente, sem filtro de desfoque) */
+.pf-splash-glow {
+  position: absolute;
+  width: 140vmax;
+  height: 140vmax;
+  left: 50%;
+  top: 50%;
+  margin: -70vmax 0 0 -70vmax;
+  background: radial-gradient(circle, rgba(var(--pf-accent-rgb, 139, 92, 246), 0.28) 0%, transparent 34%);
   opacity: 0;
+  transform: scale(0.6);
+  animation: pf-splash-glow 0.9s ease-out var(--splash-final) forwards;
   pointer-events: none;
 }
 
 .pf-splash-content {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 22px;
-  animation: pf-splash-appear 900ms ease both;
 }
 
-.pf-splash-icon {
-  width: 100px;
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--accent-color, #8b5cf6);
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.025);
+/* ---------- O "ícone do app" ---------- */
+
+.pf-splash-tile {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  display: grid;
+  place-items: center;
+  animation: pf-splash-tile-in 0.5s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+.pf-splash-tile > * {
+  grid-area: 1 / 1;
+}
+
+.pf-splash-tile-glass,
+.pf-splash-tile-accent {
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+}
+
+.pf-splash-tile-glass {
+  background: var(--splash-tile);
+  border: 1px solid var(--splash-tile-border);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+/* A cor de destaque "acende" quando chega o ícone final */
+.pf-splash-tile-accent {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 55%),
+    var(--pf-accent, #8b5cf6);
   box-shadow:
-    0 0 24px color-mix(
-      in srgb,
-      var(--accent-color, #8b5cf6) 22%,
-      transparent
-    );
-  animation: pf-splash-pulse 1.6s ease-in-out both;
-}
-
-.pf-splash-name {
-  color: #eef0f7;
-  font-size: 20px;
-  font-weight: 650;
-  letter-spacing: -0.5px;
-}
-
-.pf-splash-name span {
-  color: var(--accent-color, #8b5cf6);
-}
-
-@keyframes pf-splash-appear {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes pf-splash-pulse {
-  0% {
-    filter: brightness(0.8);
-    transform: scale(0.94);
-  }
-
-  55% {
-    filter: brightness(1.3);
-    transform: scale(1.04);
-  }
-
-  100% {
-    filter: brightness(1);
-    transform: scale(1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pf-splash,
-  .pf-splash-content,
-  .pf-splash-icon {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-.pf-splash {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #0d0f14;
-  opacity: 1;
-  transition: opacity 300ms ease;
-}
-
-.pf-splash-closing {
+    0 18px 44px rgba(var(--pf-accent-rgb, 139, 92, 246), 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
   opacity: 0;
-  pointer-events: none;
+  transform: scale(0.85);
+  animation: pf-splash-accent 0.5s cubic-bezier(0.2, 1.2, 0.4, 1) var(--splash-final) forwards;
 }
 
-.pf-splash-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-}
-
-.pf-splash-icon {
-  position: relative;
-
-  width: 106px;
-  height: 106px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--accent-color, #8b5cf6);
-
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.025);
-
-  animation:
-    pf-wallet-appear 900ms ease-out both,
-    pf-wallet-glow 1600ms ease-in-out 900ms both;
-}
-
-.pf-splash-icon::before {
-  content: '';
+/* Onda que se espalha quando o ícone final aparece */
+.pf-splash-ring {
   position: absolute;
-  inset: -12px;
-  border-radius: 36px;
-
-  background: radial-gradient(
-    circle,
-    color-mix(
-      in srgb,
-      var(--accent-color, #8b5cf6) 30%,
-      transparent
-    ),
-    transparent 72%
-  );
-
-  filter: blur(18px);
-  z-index: -1;
-
-  animation: pf-halo-glow 1700ms ease-in-out 700ms both;
-}
-
-.pf-splash-name {
-  color: #eef0f7;
-  font-size: 21px;
-  font-weight: 650;
-  letter-spacing: -0.6px;
-
-  opacity: 0;
-
-  animation: pf-name-appear 800ms ease-out 1900ms both;
-}
-
-.pf-splash-name span {
-  color: var(--accent-color, #8b5cf6);
-}
-
-@keyframes pf-wallet-appear {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.82);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes pf-wallet-glow {
-  0% {
-    box-shadow: 0 0 8px
-      color-mix(
-        in srgb,
-        var(--accent-color, #8b5cf6) 15%,
-        transparent
-      );
-  }
-
-  50% {
-    box-shadow:
-      0 0 32px
-        color-mix(
-          in srgb,
-          var(--accent-color, #8b5cf6) 65%,
-          transparent
-        ),
-      0 0 75px
-        color-mix(
-          in srgb,
-          var(--accent-color, #8b5cf6) 30%,
-          transparent
-        );
-  }
-
-  100% {
-    box-shadow: 0 0 24px
-      color-mix(
-        in srgb,
-        var(--accent-color, #8b5cf6) 25%,
-        transparent
-      );
-  }
-}
-
-@keyframes pf-halo-glow {
-  0% {
-    opacity: 0;
-    transform: scale(0.85);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.15);
-  }
-
-  100% {
-    opacity: 0.35;
-    transform: scale(1);
-  }
-}
-
-@keyframes pf-name-appear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-    filter: blur(6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pf-splash,
-  .pf-splash-icon,
-  .pf-splash-icon::before,
-  .pf-splash-name {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  .pf-splash-name {
-    opacity: 1;
-  }
-
-  .pf-splash-icon::before {
-    display: none;
-  }
-}
-
-.pf-splash {
-  position: fixed;
   inset: 0;
-  z-index: 99999;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: #0d0f14;
-  opacity: 1;
-  transition: opacity 300ms ease;
-}
-
-.pf-splash-closing {
+  border-radius: 30px;
+  border: 2px solid rgba(var(--pf-accent-rgb, 139, 92, 246), 0.7);
   opacity: 0;
-  pointer-events: none;
+  animation: pf-splash-ring 0.9s ease-out calc(var(--splash-final) + 0.15s) forwards;
 }
 
-.pf-splash-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-}
-
-.pf-splash-icon {
+/* Ícones das seções: cada um aparece, gira um pouco e dá lugar ao próximo */
+.pf-splash-section-icon {
   position: relative;
-  isolation: isolate;
-
-  width: 106px;
-  height: 106px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: var(--pf-accent, #8b5cf6);
-
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.025);
-
-  animation:
-    pf-wallet-appear 900ms ease-out both,
-    pf-wallet-glow 1600ms ease-in-out 900ms both;
+  display: grid;
+  place-items: center;
+  color: var(--splash-icon);
+  opacity: 0;
+  animation: pf-splash-morph calc(var(--splash-step) * 2.1) cubic-bezier(0.4, 0, 0.2, 1)
+    calc(var(--splash-first) + var(--i) * var(--splash-step)) both;
 }
 
-.pf-splash-icon::before {
-  content: '';
-  position: absolute;
-  inset: -12px;
-
-  border-radius: 36px;
-
-  background: radial-gradient(
-    circle,
-    rgba(
-      var(--pf-accent-rgb, 139, 92, 246),
-      0.35
-    ),
-    transparent 72%
-  );
-
-  filter: blur(18px);
-  z-index: -1;
-
-  animation:
-    pf-halo-glow 1700ms ease-in-out 700ms both;
+.pf-splash-final-icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  color: var(--pf-accent-contrast, #ffffff);
+  opacity: 0;
+  animation: pf-splash-final 0.6s cubic-bezier(0.2, 1.5, 0.4, 1) var(--splash-final) forwards;
 }
 
 .pf-splash-name {
-  color: #eef0f7;
-
-  font-size: 21px;
-  font-weight: 650;
-  letter-spacing: -0.6px;
-
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   opacity: 0;
-
-  animation:
-    pf-name-appear 800ms ease-out 1900ms both;
+  animation: pf-splash-name 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) calc(var(--splash-final) + 0.2s) forwards;
 }
 
 .pf-splash-name span {
-  color: var(--pf-accent, #8b5cf6);
+  color: var(--pf-accent-ink, var(--pf-accent, #8b5cf6));
+  font-weight: 400;
 }
 
-/* Surgimento da carteira */
+/* ---------- Animações reduzidas: só o ícone final ---------- */
 
-@keyframes pf-wallet-appear {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.82);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.pf-splash.is-reduced {
+  --splash-final: 0ms;
 }
 
-/* Brilho baseado na intensidade escolhida */
-
-@keyframes pf-wallet-glow {
-  0% {
-    box-shadow:
-      0 0 8px rgba(
-        var(--pf-accent-rgb, 139, 92, 246),
-        0.08
-      );
-  }
-
-  50% {
-    box-shadow:
-      0 0 32px rgba(
-        var(--pf-accent-rgb, 139, 92, 246),
-        calc(var(--pf-neon-strength, 0.15) * 1.6)
-      ),
-      0 0 75px rgba(
-        var(--pf-accent-rgb, 139, 92, 246),
-        var(--pf-neon-strength, 0.15)
-      );
-  }
-
-  100% {
-    box-shadow:
-      0 0 24px rgba(
-        var(--pf-accent-rgb, 139, 92, 246),
-        var(--pf-neon-strength, 0.15)
-      );
-  }
+.pf-splash.is-reduced * {
+  animation-duration: 0.3s !important;
 }
 
-/* Halo de iluminação */
+/* ---------- Keyframes ---------- */
 
-@keyframes pf-halo-glow {
-  0% {
-    opacity: 0;
-    transform: scale(0.85);
-  }
-
-  50% {
-    opacity: calc(
-      var(--pf-neon-strength, 0.15) * 2
-    );
-    transform: scale(1.15);
-  }
-
-  100% {
-    opacity: var(--pf-neon-strength, 0.15);
-    transform: scale(1);
-  }
+@keyframes pf-splash-tile-in {
+  from { opacity: 0; transform: scale(0.6); }
 }
 
-/* Nome aparece depois da carteira */
-
-@keyframes pf-name-appear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-    filter: blur(6px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
+@keyframes pf-splash-morph {
+  0% { opacity: 0; transform: scale(0.55) rotate(-25deg); }
+  35% { opacity: 1; transform: scale(1) rotate(0deg); }
+  65% { opacity: 1; transform: scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: scale(1.3) rotate(18deg); }
 }
 
-/* Animações reduzidas ou desativadas */
-
-@media (prefers-reduced-motion: reduce) {
-  .pf-splash,
-  .pf-splash-icon,
-  .pf-splash-icon::before,
-  .pf-splash-name {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  .pf-splash-name {
-    opacity: 1;
-  }
-
-  .pf-splash-icon::before {
-    display: none;
-  }
+@keyframes pf-splash-final {
+  0% { opacity: 0; transform: scale(0.3) rotate(-40deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
 }
 
-:root[data-pf-animations='reduced'] .pf-splash,
-:root[data-pf-animations='reduced'] .pf-splash-icon,
-:root[data-pf-animations='reduced'] .pf-splash-icon::before,
-:root[data-pf-animations='reduced'] .pf-splash-name,
-:root[data-pf-animations='off'] .pf-splash,
-:root[data-pf-animations='off'] .pf-splash-icon,
-:root[data-pf-animations='off'] .pf-splash-icon::before,
-:root[data-pf-animations='off'] .pf-splash-name {
-  animation: none !important;
-  transition: none !important;
+@keyframes pf-splash-accent {
+  to { opacity: 1; transform: scale(1); }
 }
 
-:root[data-pf-animations='reduced'] .pf-splash-name,
-:root[data-pf-animations='off'] .pf-splash-name {
-  opacity: 1;
+@keyframes pf-splash-ring {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.7); }
 }
 
-:root[data-pf-animations='reduced'] .pf-splash-icon::before,
-:root[data-pf-animations='off'] .pf-splash-icon::before {
-  display: none;
+@keyframes pf-splash-glow {
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pf-splash-name {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pf-splash-out {
+  to { opacity: 0; }
+}
+
+@keyframes pf-splash-zoom-out {
+  to { transform: scale(1.12); }
 }

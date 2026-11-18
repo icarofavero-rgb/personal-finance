@@ -550,8 +550,8 @@
 /* ---------- Movimentos das cartas ---------- */
 
 /* Computador: suave, com leve aproximação */
-.pf-onb-card.motion-next { animation: pf-onb-in-right 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) both; }
-.pf-onb-card.motion-back { animation: pf-onb-in-left 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) both; }
+.pf-onb-card.motion-next { animation: pf-onb-in-right 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) 0.1s both; }
+.pf-onb-card.motion-back { animation: pf-onb-in-left 0.5s cubic-bezier(0.2, 0.9, 0.25, 1) 0.1s both; }
 .pf-onb-card.motion-jump { animation: pf-onb-zoom-in 0.5s ease both; }
 
 /* Pular etapa: a carta anterior "é jogada" e a nova cai na mesa */
@@ -747,4 +747,142 @@
 
 @keyframes pf-onb-alert {
   50% { box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12); }
+}
+
+/* =========================================================
+   TROCA DE CARTAS SEM "PISCAR"
+   A carta antiga continua visível saindo enquanto a nova entra.
+   ========================================================= */
+
+.pf-onb-card {
+  backface-visibility: hidden;
+}
+
+.pf-onb-card.is-exiting {
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pf-onb-card.is-exiting.exit-next,
+.pf-onb-card.is-exiting.exit-skip-step {
+  animation: pf-onb-out-left 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.pf-onb-card.is-exiting.exit-back {
+  animation: pf-onb-out-right 0.2s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.pf-onb-card.is-exiting.exit-jump {
+  animation: pf-onb-fade-out 0.18s ease forwards;
+}
+
+/* Na carta que sai, as animações internas param (menos trabalho) */
+.pf-onb-card.is-exiting * {
+  animation-play-state: paused !important;
+}
+
+@keyframes pf-onb-out-left {
+  to { opacity: 0; transform: translate3d(-26%, 0, 0); }
+}
+
+@keyframes pf-onb-out-right {
+  to { opacity: 0; transform: translate3d(26%, 0, 0); }
+}
+
+/* Brilho atrás do ícone: gradiente em vez de filtro de desfoque */
+.pf-onb-glow {
+  filter: none;
+  background: radial-gradient(circle, var(--onb-color) 0%, transparent 68%);
+  inset: 0;
+}
+
+/* Enquanto o tutorial está aberto, o fundo do app não anima */
+:root[data-pf-onboarding] :is(.pf-blob, .pf-waves, .pf-snow, .pf-snowflake, .pf-xmas-light, .pf-backdrop-sheen),
+:root[data-pf-onboarding] .pf-lightshow * {
+  animation-play-state: paused !important;
+}
+
+/* =========================================================
+   CELULAR / TELA DE TOQUE: versão leve
+   ========================================================= */
+
+@media (max-width: 650px), (pointer: coarse) {
+  /* Sem desfoque de tela cheia: era recalculado a cada quadro porque a
+     luz colorida se move por baixo. Fundo sólido no lugar. */
+  .pf-onb-overlay,
+  .pf-onb-dialog {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .pf-onb-overlay {
+    --onb-bg: rgba(14, 16, 24, 0.94);
+    --onb-surface: rgba(26, 29, 42, 0.9);
+  }
+
+  :root[data-pf-theme='light'] .pf-onb-overlay {
+    --onb-bg: rgba(236, 239, 248, 0.96);
+    --onb-surface: rgba(255, 255, 255, 0.9);
+  }
+
+  /* Sombra fixa: animar sombra grande redesenha a tela inteira */
+  .pf-onb-dialog {
+    transition: none;
+    box-shadow: none;
+  }
+
+  /* Luz colorida: movimento mais lento e só com transform */
+  .pf-onb-aurora {
+    transition: none;
+    animation-duration: 28s;
+  }
+
+  /* Menos animações infinitas ao mesmo tempo */
+  .pf-onb-ring-2 {
+    animation: none;
+  }
+
+  .pf-onb-core {
+    animation: pf-onb-pop 0.6s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  }
+
+  .pf-onb-glow {
+    animation: none;
+    opacity: 0.4;
+  }
+
+  .pf-onb-orbit-chip {
+    box-shadow: none;
+  }
+
+  /* Troca de carta: deslize curto, rápido e suave */
+  :root[data-pf-device] .pf-onb-card.motion-next,
+  :root[data-pf-device] .pf-onb-card.motion-skip-step {
+    animation: pf-onb-lite-in-right 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+  }
+
+  :root[data-pf-device] .pf-onb-card.motion-back {
+    animation: pf-onb-lite-in-left 0.34s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+  }
+
+  .pf-onb-tips li {
+    animation-duration: 0.35s;
+  }
+
+  /* O app por trás fica escondido (não precisa ser desenhado) */
+  :root[data-pf-onboarding] .app {
+    visibility: hidden;
+  }
+
+  :root[data-pf-onboarding] :is(.pf-blob, .pf-waves, .pf-snow, .pf-xmas-light, .pf-light) {
+    animation: none !important;
+  }
+}
+
+@keyframes pf-onb-lite-in-right {
+  from { opacity: 0; transform: translate3d(22%, 0, 0); }
+}
+
+@keyframes pf-onb-lite-in-left {
+  from { opacity: 0; transform: translate3d(-22%, 0, 0); }
 }

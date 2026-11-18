@@ -205,6 +205,28 @@ function AttentionCard() {
   )
 }
 
+function CardContent({ index }: { index: number }) {
+  if (index === ATTENTION) return <AttentionCard />
+
+  const step = STEPS[index]
+
+  return (
+    <>
+      <StepIllustration step={step} />
+      <span className="pf-onb-eyebrow">{step.eyebrow}</span>
+      <h2>{step.title}</h2>
+      <p>{step.text}</p>
+      <ul className="pf-onb-tips">
+        {step.tips.map((tip, tipIndex) => (
+          <li key={tip} style={{ '--tip-index': tipIndex } as React.CSSProperties}>
+            {tip}
+          </li>
+        ))}
+      </ul>
+    </>
+  )
+}
+
 export default function Onboarding({ onFinish }: OnboardingProps) {
   const [index, setIndex] = useState(0)
   const [motion, setMotion] = useState<Motion>('jump')
@@ -212,14 +234,37 @@ export default function Onboarding({ onFinish }: OnboardingProps) {
   const [leaving, setLeaving] = useState(false)
   const touchStart = useRef<{ x: number; y: number } | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
+  // Carta que está saindo: fica na tela até a nova chegar (sem "piscar")
+  const [outgoing, setOutgoing] = useState<number | null>(null)
+  const outgoingTimer = useRef<number | null>(null)
 
   const isAttention = index === ATTENTION
   const step = STEPS[Math.min(index, STEPS.length - 1)]
   const progress = Math.min(1, index / ATTENTION)
 
   const goTo = useCallback((target: number, kind: Motion) => {
+    const nextIndex = Math.max(0, Math.min(ATTENTION, target))
+    if (nextIndex === index) return
+
+    if (outgoingTimer.current !== null) window.clearTimeout(outgoingTimer.current)
+    setOutgoing(kind === 'skip-all' ? null : index)
+    outgoingTimer.current = window.setTimeout(() => {
+      setOutgoing(null)
+      outgoingTimer.current = null
+    }, 260)
+
     setMotion(kind)
-    setIndex(Math.max(0, Math.min(ATTENTION, target)))
+    setIndex(nextIndex)
+  }, [index])
+
+  // Enquanto o tutorial está aberto, o app por trás para de animar
+  useEffect(() => {
+    const root = document.documentElement
+    root.setAttribute('data-pf-onboarding', '')
+    return () => {
+      root.removeAttribute('data-pf-onboarding')
+      if (outgoingTimer.current !== null) window.clearTimeout(outgoingTimer.current)
+    }
   }, [])
 
   const next = useCallback(() => goTo(index + 1, 'next'), [goTo, index])
@@ -318,25 +363,20 @@ export default function Onboarding({ onFinish }: OnboardingProps) {
         </div>
 
         <div className="pf-onb-stage">
-          <div key={index} className={`pf-onb-card motion-${motion}`}>
-            {isAttention ? (
-              <AttentionCard />
-            ) : (
-              <>
-                <StepIllustration step={step} />
-                <span className="pf-onb-eyebrow">{step.eyebrow}</span>
-                <h2>{step.title}</h2>
-                <p>{step.text}</p>
-                <ul className="pf-onb-tips">
-                  {step.tips.map((tip, tipIndex) => (
-                    <li key={tip} style={{ '--tip-index': tipIndex } as React.CSSProperties}>
-                      {tip}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
+          {/* Mesma chave = mesma carta na tela: a que sai só troca de classe */}
+          {(outgoing !== null && outgoing !== index ? [outgoing, index] : [index]).map(cardIndex => (
+            <div
+              key={cardIndex}
+              className={
+                cardIndex === index
+                  ? `pf-onb-card motion-${motion}`
+                  : `pf-onb-card is-exiting exit-${motion}`
+              }
+              aria-hidden={cardIndex !== index}
+            >
+              <CardContent index={cardIndex} />
+            </div>
+          ))}
         </div>
 
         <div className="pf-onb-dots" aria-hidden={isAttention}>

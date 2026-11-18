@@ -1293,3 +1293,176 @@
     justify-content: center;
   }
 }
+
+/* ---------- 16. Pop-ups de exclusão/confirmação na cor escolhida ---------- */
+
+/* Botão de confirmar (Excluir, Confirmar exclusão, Pagar...) */
+:root :is(
+  .pf-confirm-accept,
+  .app-dialog-confirm,
+  .invoice-confirm-accept,
+  .limit-alert-confirm,
+  .budget-confirm-delete
+) {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 58%),
+    var(--pf-accent, #8b5cf6) !important;
+  color: var(--pf-accent-contrast, #ffffff) !important;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.95) !important;
+  box-shadow:
+    0 8px 20px rgba(var(--pf-accent-rgb), 0.32),
+    0 0 calc(var(--pf-neon-strength, 0.15) * 46px) rgba(var(--pf-accent-rgb), calc(var(--pf-neon-strength, 0.15) + 0.1)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35) !important;
+  font-weight: 700 !important;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), box-shadow 0.25s ease, filter 0.2s ease !important;
+}
+
+:root :is(
+  .pf-confirm-accept,
+  .app-dialog-confirm,
+  .invoice-confirm-accept,
+  .limit-alert-confirm,
+  .budget-confirm-delete
+):hover:not(:disabled) {
+  filter: brightness(1.08);
+  box-shadow:
+    0 10px 26px rgba(var(--pf-accent-rgb), 0.42),
+    0 0 calc(10px + var(--pf-neon-strength, 0.15) * 60px) rgba(var(--pf-accent-rgb), calc(var(--pf-neon-strength, 0.15) + 0.2)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Botão de cancelar: vidro com contorno na cor escolhida */
+:root :is(
+  .pf-confirm-cancel,
+  .invoice-confirm-cancel,
+  .modal-footer:has(.budget-confirm-delete) .cancel-button
+) {
+  background: rgba(var(--pf-accent-rgb), 0.08) !important;
+  color: var(--pf-text, #eef0f7) !important;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.38) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+}
+
+:root[data-pf-theme='light'] :is(
+  .pf-confirm-cancel,
+  .invoice-confirm-cancel,
+  .modal-footer:has(.budget-confirm-delete) .cancel-button
+) {
+  color: #182033 !important;
+}
+
+:root :is(
+  .pf-confirm-cancel,
+  .invoice-confirm-cancel,
+  .modal-footer:has(.budget-confirm-delete) .cancel-button
+):hover:not(:disabled) {
+  background: rgba(var(--pf-accent-rgb), 0.16) !important;
+  border-color: rgba(var(--pf-accent-rgb), 0.7) !important;
+  color: var(--pf-accent-ink, var(--pf-accent)) !important;
+}
+
+/* Toque: os dois botões "afundam" */
+:root :is(
+  .pf-confirm-accept,
+  .pf-confirm-cancel,
+  .app-dialog-confirm,
+  .invoice-confirm-accept,
+  .invoice-confirm-cancel,
+  .limit-alert-confirm,
+  .budget-confirm-delete,
+  .modal-footer:has(.budget-confirm-delete) .cancel-button
+):active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* Contorno de foco (teclado) na cor escolhida */
+:root :is(.pf-confirm-actions, .invoice-confirm-actions, .app-dialog, .limit-alert-modal) button:focus-visible {
+  outline: 2px solid var(--pf-accent) !important;
+  outline-offset: 3px;
+}
+
+/* Ícone de alerta do pop-up na cor escolhida */
+:root :is(.pf-confirm-icon, .limit-alert-icon, .app-dialog-icon) {
+  color: var(--pf-accent-ink, var(--pf-accent)) !important;
+  background: rgba(var(--pf-accent-rgb), 0.15) !important;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.3);
+}
+
+/* ---------- 17. Troca de página: blocos sobem em sequência ----------
+   Antes a página inteira deslizava E os cartões subiam por cima, com
+   tempos diferentes (dois movimentos brigando). Agora a página só
+   aparece e cada bloco sobe uma única vez, em cascata curta.
+   Blocos = filhos diretos da página (ou do bloco único dela), menos
+   janelas e avisos. */
+
+:root .pf-page {
+  animation: pf-page-fade 0.22s ease-out backwards !important;
+}
+
+:root .pf-page > :not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root .pf-page > :only-child > *:not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid) {
+  animation: pf-block-rise 0.46s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+:root .pf-page > :nth-child(2):not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root .pf-page > :only-child > :nth-child(2):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid) { animation-delay: 0.04s; }
+:root .pf-page > :nth-child(3):not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root .pf-page > :only-child > :nth-child(3):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid) { animation-delay: 0.08s; }
+:root .pf-page > :nth-child(4):not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root .pf-page > :only-child > :nth-child(4):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid) { animation-delay: 0.12s; }
+:root .pf-page > :nth-child(n + 5):not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root .pf-page > :only-child > :nth-child(n + 5):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid) { animation-delay: 0.16s; }
+
+/* Cartões de resumo do Dashboard: sobem em cascata (o grupo não se move) */
+:root .pf-page .summary-grid .summary-card {
+  animation: pf-block-rise 0.46s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  translate: none;
+}
+
+/* Os outros cartões já sobem junto com o bloco deles: sem segundo movimento */
+:root:not([data-pf-device='phone']) .pf-page :is(.reports-summary-card, .backup-feature-card) {
+  animation: none;
+}
+
+:root .pf-page .summary-grid .summary-card:nth-child(1) { animation-delay: 0.06s; }
+:root .pf-page .summary-grid .summary-card:nth-child(2) { animation-delay: 0.1s; }
+:root .pf-page .summary-grid .summary-card:nth-child(3) { animation-delay: 0.14s; }
+:root .pf-page .summary-grid .summary-card:nth-child(4) { animation-delay: 0.18s; }
+
+/* Celular: distância e tempo menores (mais leve e mais "app") */
+:root[data-pf-device='phone'] .pf-page > :not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root[data-pf-device='phone'] .pf-page > :only-child > *:not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root[data-pf-device='phone'] .pf-page .summary-grid .summary-card {
+  animation-name: pf-block-rise-lite;
+  animation-duration: 0.36s;
+}
+
+@keyframes pf-page-fade {
+  from { opacity: 0; }
+}
+
+@keyframes pf-block-rise {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); }
+}
+
+@keyframes pf-block-rise-lite {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+}
+
+/* Animações reduzidas: blocos só aparecem */
+:root[data-pf-animations='reduced'] .pf-page > :not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root[data-pf-animations='reduced'] .pf-page > :only-child > *:not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root[data-pf-animations='reduced'] .pf-page .summary-card {
+  animation-name: pf-page-fade !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root .pf-page > :not(:only-child):not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+:root .pf-page > :only-child > *:not([class*='overlay']):not([class*='modal']):not([role='alert']):not(.summary-grid),
+  :root .pf-page .summary-card {
+    animation-name: pf-page-fade !important;
+  }
+}
