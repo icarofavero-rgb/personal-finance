@@ -1,0 +1,136 @@
+/* =========================================================
+   NEON LIQUID GLASS — SHOW DE LUZES
+   Focos coloridos que acendem, brilham e desvanecem, e fachos de
+   luz que varrem a tela devagar. Só transform/opacity (placa de
+   vídeo); pausa ao rolar a tela e respeita "animações reduzidas".
+   ========================================================= */
+
+.pf-lightshow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+:root[data-pf-theme='light'] .pf-lightshow {
+  mix-blend-mode: normal;
+  opacity: 0.55;
+}
+
+/* Focos (spots) */
+.pf-light {
+  position: absolute;
+  width: 46vmax;
+  height: 46vmax;
+  margin: -23vmax 0 0 -23vmax;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--light) 0%, transparent 62%);
+  opacity: 0;
+  animation-name: pf-light-show;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes pf-light-show {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale(0.6);
+  }
+  22% {
+    opacity: 0.85;
+    transform: translate3d(3vmax, -2vmax, 0) scale(1);
+  }
+  45% {
+    opacity: 0.35;
+    transform: translate3d(6vmax, 1vmax, 0) scale(1.15);
+  }
+  62% {
+    opacity: 0.75;
+    transform: translate3d(2vmax, 4vmax, 0) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-3vmax, 2vmax, 0) scale(0.7);
+  }
+}
+
+/* Fachos de luz (como luzes de palco) */
+.pf-beam {
+  position: absolute;
+  top: -12vh;
+  width: 16vmax;
+  height: 150vh;
+  margin-left: -8vmax;
+  background: linear-gradient(180deg, var(--light) 0%, transparent 78%);
+  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  transform-origin: 50% 0;
+  opacity: 0;
+  animation-name: pf-beam-sweep;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes pf-beam-sweep {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--from));
+  }
+  20% {
+    opacity: 0.32;
+  }
+  50% {
+    opacity: 0.18;
+    transform: rotate(calc((var(--from) + var(--to)) / 2));
+  }
+  80% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--to));
+  }
+}
+
+/* Celular/tablet: menos elementos e movimento mais lento */
+@media (pointer: coarse) {
+  .pf-light:nth-child(n + 5),
+  .pf-beam:nth-of-type(n + 9) {
+    display: none;
+  }
+
+  .pf-light,
+  .pf-beam {
+    animation-duration: 22s !important;
+  }
+}
+
+/* Pausa enquanto rola ou troca de página */
+:root[data-pf-busy] :is(.pf-light, .pf-beam) {
+  animation-play-state: paused;
+}
+
+/* Animações reduzidas/desligadas: luzes paradas e suaves */
+:root[data-pf-animations='reduced'] :is(.pf-light, .pf-beam),
+:root[data-pf-animations='off'] :is(.pf-light, .pf-beam) {
+  animation: none !important;
+  opacity: 0.35;
+}
+
+:root[data-pf-animations='off'] .pf-beam,
+:root[data-pf-animations='reduced'] .pf-beam {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-light {
+    animation: none !important;
+    opacity: 0.35;
+  }
+
+  .pf-beam {
+    display: none;
+  }
+}

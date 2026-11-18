@@ -794,7 +794,7 @@ return (
       <h3>Antecedência dos avisos</h3>
       <p>
         Defina quantos dias antes do vencimento deseja
-        ser avisado quando o sistema estiver disponível.
+        ser avisado.
       </p>
 
       <div className="settings-choice-grid">
@@ -827,10 +827,11 @@ return (
     <div className="settings-appearance-group">
       
 <p>
-  Os avisos de vencimento de faturas são calculados
-  automaticamente e exibidos no sino do aplicativo.
-  Notificações externas e outros tipos de lembretes
-  serão implementados futuramente.
+  Os avisos de faturas e dos lembretes do Calendário
+  aparecem no sino do aplicativo. No app Android eles
+  também chegam como notificação do celular, mesmo com
+  o app fechado (às 9h, com a antecedência escolhida e
+  no dia do vencimento).
 </p>
 
     </div>

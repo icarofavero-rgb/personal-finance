@@ -10,6 +10,7 @@ import {
 import { createPortal } from 'react-dom'
 import { Check, ChevronDown } from 'lucide-react'
 import './form-controls.css'
+import { usePresence } from '../hooks/usePresence'
 
 import {
   icons,
@@ -85,11 +86,15 @@ export default function SelectField({
 
   const [open, setOpen] = useState(false)
 
+  // Mantém o menu na tela durante a animação de saída.
+  const { rendered, closing } = usePresence(open)
+
   const [position, setPosition] = useState({
     top: 0,
     left: 0,
     width: 200,
     maxHeight: MAX_MENU_HEIGHT,
+    above: false,
   })
 
   const selected = options.find(
@@ -142,6 +147,7 @@ export default function SelectField({
       left,
       width,
       maxHeight,
+      above: openAbove,
     })
   }, [])
 
@@ -222,7 +228,9 @@ export default function SelectField({
     <div
       id={listId}
       ref={menuRef}
-      className="pf-select-options pf-select-options-portal"
+      className={`pf-select-options pf-select-options-portal pf-pop ${
+        position.above ? 'pf-pop-up' : ''
+      } ${closing ? 'is-closing' : ''}`}
       role="listbox"
       aria-label={placeholder}
       style={{
@@ -296,7 +304,7 @@ export default function SelectField({
         />
       </button>
 
-      {open && createPortal(menu, document.body)}
+      {rendered && createPortal(menu, document.body)}
     </div>
   )
 }

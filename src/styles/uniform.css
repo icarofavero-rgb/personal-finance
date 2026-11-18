@@ -163,7 +163,8 @@
   .budget-history-month-button,
   .accent-select-trigger,
   .pf-calendar-trigger,
-  .pf-select-trigger
+  .pf-select-trigger,
+  .pf-date-trigger
 ) {
   background: var(--pf-control-bg) !important;
   border: 1px solid var(--pf-control-border) !important;
@@ -173,7 +174,7 @@
   backdrop-filter: blur(12px);
 }
 
-:root[data-pf-glass] :is(.accent-select-menu, .pf-calendar-popup, .pf-select-options) {
+:root[data-pf-glass] :is(.accent-select-menu, .pf-calendar-popup, .pf-select-options, .pf-date-popup) {
   background: var(--pf-glass-bg-strong) !important;
   border: 1px solid var(--pf-glass-border) !important;
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -243,4 +244,210 @@
 
 :root[data-pf-theme='light'][data-pf-glass] .goals-empty-icon {
   color: var(--pf-accent, #8b5cf6) !important;
+}
+
+/* ---------- 4. Configurações em vidro ---------- */
+
+:root[data-pf-glass] .settings-sidebar {
+  background: var(--pf-glass-bg) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  box-shadow: var(--pf-glass-shadow) !important;
+  -webkit-backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+  backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+}
+
+/* Caixas internas: degradê do avatar, linhas de notificação */
+:root[data-pf-glass] :is(
+  .settings-avatar-gradient-panel,
+  .settings-avatar-picker-container,
+  .settings-notification-option
+) {
+  background: var(--pf-control-bg) !important;
+  border: 1px solid var(--pf-control-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Botões de escolha (estilo, tema, cor, neon, animações) e avatares */
+:root[data-pf-glass] :is(.settings-choice, .settings-avatar-option, .settings-nav-item:not(.active)) {
+  background: var(--pf-control-bg) !important;
+  border: 1px solid var(--pf-control-border) !important;
+  color: var(--pf-text, #eef0f7) !important;
+  transition: transform 0.2s var(--pf-ease-spring), background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+:root[data-pf-glass] .settings-nav-item:not(.active) {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+:root[data-pf-glass] :is(.settings-choice.selected, .settings-avatar-option.selected) {
+  background: rgba(var(--pf-accent-rgb), 0.18) !important;
+  border-color: rgba(var(--pf-accent-rgb), 0.6) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 18px rgba(var(--pf-accent-rgb), calc(0.12 + var(--pf-neon-strength, 0.15)));
+}
+
+:is(.settings-choice, .settings-avatar-option):active {
+  transform: scale(0.95);
+}
+
+/* Menus e janelas de seleção: fundo mais firme para ler bem */
+:root[data-pf-glass] :is(.dashboard-dropdown-menu, .invoice-select-menu) {
+  background: var(--pf-glass-bg-strong) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+:root[data-pf-theme='light'][data-pf-glass] :is(.pf-select-options, .pf-calendar-popup, .pf-date-popup, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+:root[data-pf-glass]:not([data-pf-theme='light']) :is(.pf-select-options, .pf-calendar-popup, .pf-date-popup, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) {
+  background: rgba(16, 18, 30, 0.9) !important;
+}
+
+/* ---------- 5. Botões "X" na cor escolhida, com neon ---------- */
+
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close
+) {
+  color: var(--pf-accent-text, #c4b5fd) !important;
+  background: rgba(var(--pf-accent-rgb), 0.1) !important;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.45) !important;
+  box-shadow:
+    0 0 calc(6px + var(--pf-neon-strength, 0.15) * 40px) rgba(var(--pf-accent-rgb), calc(0.15 + var(--pf-neon-strength, 0.15))),
+    inset 0 0 10px rgba(var(--pf-accent-rgb), 0.12) !important;
+  transition: transform 0.25s var(--pf-ease-spring), background 0.25s ease, box-shadow 0.3s ease !important;
+}
+
+:root[data-pf-theme='light'] :is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close
+) {
+  color: var(--pf-accent, #8b5cf6) !important;
+}
+
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close
+):is(:hover, :focus-visible) {
+  background: rgba(var(--pf-accent-rgb), 0.22) !important;
+  box-shadow:
+    0 0 calc(10px + var(--pf-neon-strength, 0.15) * 60px) rgba(var(--pf-accent-rgb), calc(0.3 + var(--pf-neon-strength, 0.15))),
+    inset 0 0 12px rgba(var(--pf-accent-rgb), 0.2) !important;
+}
+
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close
+) svg {
+  transition: transform 0.3s var(--pf-ease-spring);
+}
+
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close
+):hover svg {
+  transform: rotate(90deg);
+}
+
+/* Toque: o X "afunda" */
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close
+):active {
+  transform: scale(0.9);
+}
+
+/* ---------- 6. Entrada e saída de todos os menus de seleção ---------- */
+
+:is(.pf-pop, .pf-calendar-popup, .pf-date-popup, .dashboard-dropdown-menu, .invoice-select-menu, .accent-select-menu) {
+  transform-origin: 50% 0;
+  animation: pf-menu-in 0.24s var(--pf-ease-spring) both !important;
+}
+
+:is(.pf-pop, .pf-calendar-popup).pf-pop-up {
+  transform-origin: 50% 100%;
+  animation-name: pf-menu-in-up !important;
+}
+
+:is(.pf-pop, .pf-date-popup, .dashboard-dropdown-menu, .invoice-select-menu, .accent-select-menu).is-closing,
+.pf-calendar-popup.pf-calendar-popup-closing {
+  animation: pf-menu-out 0.16s var(--pf-ease-in) forwards !important;
+  pointer-events: none;
+}
+
+.pf-pop-up.is-closing,
+.pf-calendar-popup.pf-pop-up.pf-calendar-popup-closing {
+  animation-name: pf-menu-out-up !important;
+}
+
+/* As opções entram em cascata */
+:is(.pf-select-options, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) > :nth-child(-n + 8) {
+  animation: pf-menu-item 0.28s var(--pf-ease-out) backwards;
+}
+
+:is(.pf-select-options, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) > :nth-child(2) { animation-delay: 0.02s; }
+:is(.pf-select-options, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) > :nth-child(3) { animation-delay: 0.04s; }
+:is(.pf-select-options, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) > :nth-child(4) { animation-delay: 0.06s; }
+:is(.pf-select-options, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) > :nth-child(5) { animation-delay: 0.08s; }
+:is(.pf-select-options, .accent-select-menu, .dashboard-dropdown-menu, .invoice-select-menu) > :nth-child(n + 6) { animation-delay: 0.1s; }
+
+@keyframes pf-menu-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.94); }
+}
+
+@keyframes pf-menu-in-up {
+  from { opacity: 0; transform: translateY(8px) scale(0.94); }
+}
+
+@keyframes pf-menu-out {
+  to { opacity: 0; transform: translateY(-6px) scale(0.96); }
+}
+
+@keyframes pf-menu-out-up {
+  to { opacity: 0; transform: translateY(6px) scale(0.96); }
+}
+
+@keyframes pf-menu-item {
+  from { opacity: 0; transform: translateY(-4px); }
 }

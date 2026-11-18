@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import './calendar.css'
+import { usePresence } from '../hooks/usePresence'
 
 type DatePickerProps = {
   id?: string
@@ -75,6 +76,8 @@ export default function DatePicker({
   const selectedDate = parseDate(value)
 
   const [open, setOpen] = useState(false)
+  // Mantém o calendário na tela durante a animação de saída.
+  const { rendered: popupRendered, closing: popupClosing } = usePresence(open)
   const [calendarAnimation, setCalendarAnimation] = useState(0)
   const [viewDate, setViewDate] = useState(
     () => selectedDate ?? new Date()
@@ -234,7 +237,7 @@ function changeMonth(direction: number) {
     <div
       id={popupId}
       ref={popupRef}
-      className="pf-date-popup pf-date-popup-portal"
+      className={`pf-date-popup pf-date-popup-portal ${popupClosing ? 'is-closing' : ''}`}
       role="dialog"
       aria-label="Selecionar data"
       style={{
@@ -347,7 +350,7 @@ function changeMonth(direction: number) {
         <CalendarDays size={18} />
       </button>
 
-      {open && createPortal(calendar, document.body)}
+      {popupRendered && createPortal(calendar, document.body)}
 
       {required && (
         <input

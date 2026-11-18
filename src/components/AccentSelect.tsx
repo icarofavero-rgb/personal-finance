@@ -2,6 +2,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 import './AccentSelect.css'
+import { usePresence } from '../hooks/usePresence'
 
 type Option<T extends string> = {
   value: T
@@ -22,6 +23,7 @@ export default function AccentSelect<T extends string>({
   onChange,
 }: Props<T>) {
   const [open, setOpen] = useState(false)
+  const { rendered, closing } = usePresence(open)
   const containerRef = useRef<HTMLDivElement>(null)
   const labelId = useId()
 
@@ -72,8 +74,8 @@ export default function AccentSelect<T extends string>({
         <ChevronDown size={16} aria-hidden="true" />
       </button>
 
-      {open && (
-        <div className="accent-select-menu">
+      {rendered && (
+        <div className={`accent-select-menu pf-pop ${closing ? 'is-closing' : ''}`}>
           {options.map(option => (
             <button
               key={option.value}

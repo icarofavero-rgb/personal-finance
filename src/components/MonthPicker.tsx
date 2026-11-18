@@ -1,5 +1,6 @@
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CalendarDays, ChevronLeft, ChevronRight } from 'lucide-react'
 import './calendar.css'
 
@@ -48,6 +49,30 @@ function closeCalendar() {
   }, ANIMATION_DURATION)
 }
 
+// A janela "flutua" sobre a tela (portal), alinhada ao campo: assim
+// nenhum bloco a corta e ela abre logo abaixo do campo (ou acima,
+// quando não há espaço embaixo).
+const triggerRef = useRef<HTMLButtonElement>(null)
+const popupRef = useRef<HTMLDivElement>(null)
+const [placement, setPlacement] = useState<React.CSSProperties>({})
+
+const updatePlacement = useCallback(() => {
+  const trigger = triggerRef.current
+  if (!trigger) return
+
+  const rect = trigger.getBoundingClientRect()
+  const width = Math.min(300, window.innerWidth - 24)
+  const left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))
+  const spaceBelow = window.innerHeight - rect.bottom
+  const openAbove = spaceBelow < 340 && rect.top > spaceBelow
+
+  setPlacement(
+    openAbove
+      ? { position: 'fixed', left, width, bottom: window.innerHeight - rect.top + 8, top: 'auto' }
+      : { position: 'fixed', left, width, top: rect.bottom + 8, bottom: 'auto' }
+  )
+}, [])
+
 function toggleCalendar() {
   if (open) {
     closeCalendar()
@@ -59,11 +84,47 @@ function toggleCalendar() {
     closeTimer.current = null
   }
 
+  updatePlacement()
   setYear(Number(value.slice(0, 4)) || new Date().getFullYear())
   setClosing(false)
   setRenderPopup(true)
   setOpen(true)
 }
+
+// Fecha ao tocar fora, com Esc ou ao rolar a página.
+useEffect(() => {
+  if (!open) return
+
+  function onPointerDown(event: PointerEvent) {
+    const target = event.target as Node
+    if (!triggerRef.current?.contains(target) && !popupRef.current?.contains(target)) {
+      closeCalendar()
+    }
+  }
+
+  function onKey(event: KeyboardEvent) {
+    if (event.key === 'Escape') closeCalendar()
+  }
+
+  function onScroll(event: Event) {
+    if (event.target instanceof Node && popupRef.current?.contains(event.target)) return
+    closeCalendar()
+  }
+
+  document.addEventListener('pointerdown', onPointerDown)
+  document.addEventListener('keydown', onKey)
+  window.addEventListener('scroll', onScroll, true)
+  window.addEventListener('resize', updatePlacement)
+
+  return () => {
+    document.removeEventListener('pointerdown', onPointerDown)
+    document.removeEventListener('keydown', onKey)
+    window.removeEventListener('scroll', onScroll, true)
+    window.removeEventListener('resize', updatePlacement)
+  }
+  // closeCalendar só agenda estados; recriar o efeito a cada render não é necessário.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [open, updatePlacement])
 
 useEffect(() => {
   return () => {
@@ -94,6 +155,7 @@ function changeYear(direction: number) {
   return (
     <div className="pf-calendar" data-month-picker>
       <button
+        ref={triggerRef}
         id={id}
         type="button"
         className="pf-calendar-trigger"
@@ -117,11 +179,13 @@ function changeYear(direction: number) {
   </button>
 )}
 
-      {renderPopup && (
+      {renderPopup && createPortal(
   <div
-    className={`pf-calendar-popup ${
+    ref={popupRef}
+    className={`pf-calendar-popup pf-calendar-popup-floating ${
       closing ? 'pf-calendar-popup-closing' : 'pf-calendar-popup-opening'
-    }`}
+    } ${placement.bottom !== 'auto' && placement.bottom !== undefined ? 'pf-pop-up' : ''}`}
+    style={{ ...placement, zIndex: 9999 }}
   >
           <div className="pf-calendar-header">
             <button
@@ -181,7 +245,8 @@ function changeYear(direction: number) {
           >
             Este mês
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
