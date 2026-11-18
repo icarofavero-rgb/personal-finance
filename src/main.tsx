@@ -31,9 +31,14 @@ import './styles/christmas.css'
 import './styles/uniform.css'
 import './styles/neon-lightshow.css'
 import { installBusyMarker } from './hooks/busyMarker'
+import { installProfileScope } from './services/profileScope'
 
 // Pausa o fundo animado enquanto a tela rola (mais fluidez no celular).
 installBusyMarker()
+
+// Multiperfis: cada perfil lê e grava nos próprios dados.
+// Precisa vir ANTES do rastreador da sincronização.
+installProfileScope()
 
 // Registra quando cada dado foi criado/alterado/excluído (base da sincronização).
 // Não interfere nas gravações do app: só observa.
@@ -50,7 +55,18 @@ applyVisualStyle(initialAppearance.visualStyle)
 applyDeviceAttributes()
 
 function AppWithSplash() {
-  const [showSplash, setShowSplash] = useState(true)
+  // Depois de trocar de perfil a tela recarrega: sem repetir a animação de entrada.
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      if (sessionStorage.getItem('pf-skip-splash') === '1') {
+        sessionStorage.removeItem('pf-skip-splash')
+        return false
+      }
+    } catch {
+      // sem sessionStorage: mostra normalmente
+    }
+    return true
+  })
   const [showTutorial, setShowTutorial] = useState(() => !hasCompletedOnboarding())
 
   const finishSplash = useCallback(() => {

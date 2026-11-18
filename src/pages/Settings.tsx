@@ -21,11 +21,13 @@ import {
   GraduationCap,
   ImagePlus,
   PanelsTopLeft,
+  UsersRound,
 } from 'lucide-react'
 
 import AvatarColorPicker from '../components/AvatarColorPicker'
 import AvatarPhotoEditor from '../components/AvatarPhotoEditor'
 import LayoutSettings from '../components/LayoutSettings'
+import ProfilesSettings from '../components/ProfilesSettings'
 import { requestOpenTutorial } from '../services/onboardingStorage'
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
@@ -59,8 +61,9 @@ import Toast, {
   type ToastMessage,
 } from '../components/Toast'
 
-type SettingsSection =
+export type SettingsSection =
   | 'profile'
+  | 'profiles'
   | 'appearance'
   | 'layout'
   | 'notifications'
@@ -73,6 +76,12 @@ const sections = [
     label: 'Perfil e preferências',
     icon: UserRound,
     description: 'Gerencie suas informações pessoais.',
+  },
+  {
+    id: 'profiles',
+    label: 'Perfis financeiros',
+    icon: UsersRound,
+    description: 'Separe as finanças em perfis (pessoal, trabalho, casa...).',
   },
   {
     id: 'appearance',
@@ -802,6 +811,12 @@ return (
   </div>
 
 
+) : activeSection === 'profiles' ? (
+  <ProfilesSettings
+    onMessage={(message, type = 'success') =>
+      setToast({ id: crypto.randomUUID(), type, message })
+    }
+  />
 ) : activeSection === 'layout' ? (
   <LayoutSettings
     onSaved={(message, type = 'success') =>

@@ -27,6 +27,9 @@ import {
   Trash2,
   Pencil,
   Download,
+  FileJson,
+  FileSpreadsheet,
+  Database,
   Upload,
   ShieldCheck,
   CheckCircle2,
@@ -65,7 +68,13 @@ import {
   markAllNotificationsAsRead,
 } from './services/notificationReadStorage'
 
-import { exportBackup, importBackup } from './services/backup'
+import { exportBackupAs, importBackup, type BackupFormat } from './services/backup'
+
+const EXPORT_FORMATS = [
+  { id: 'json', label: 'Backup (JSON)', hint: 'Restaura no app', action: 'Exportar backup', icon: FileJson },
+  { id: 'xlsx', label: 'Planilha', hint: 'Excel / Google', action: 'Exportar planilha', icon: FileSpreadsheet },
+  { id: 'sqlite', label: 'SQLite', hint: 'Banco de dados', action: 'Exportar banco SQLite', icon: Database },
+] as const satisfies readonly { id: BackupFormat; label: string; hint: string; action: string; icon: unknown }[]
 
 import Reports from './pages/Reports'
 
@@ -103,7 +112,10 @@ import SelectField from './components/SelectField'
 import { calculateManualForecastSummary } from './services/manualForecastCalculations'
 import { TypingTitle } from './components/TypingTitle'
 import DashboardCardDetailsModal from './components/DashboardCardDetailsModal'
-import Settings from './pages/Settings'
+import Settings, { type SettingsSection } from './pages/Settings'
+import ProfileSwitcher from './components/ProfileSwitcher'
+import { OPEN_PROFILES_SETTINGS_EVENT } from './services/profileSwitch'
+import { getActiveFinancialProfile, getFinancialProfiles } from './services/financialProfilesStorage'
 import Goals from './pages/Goals'
 import './styles/goals.css'
 
@@ -917,18 +929,23 @@ function showToast(
 }
 
 async function handleExportBackup() {
+  const isBackup = backupFormat === 'json'
+
   // Tela de processamento: símbolo girando → check verde ou X vermelho.
-  setBackupProcess({ state: 'working', working: 'Gerando seu backup…' })
+  setBackupProcess({
+    state: 'working',
+    working: isBackup ? 'Gerando seu backup…' : 'Gerando seu arquivo…',
+  })
   const started = Date.now()
   const waitSpin = () => new Promise(resolve => setTimeout(resolve, Math.max(0, 900 - (Date.now() - started))))
 
   try {
-    const platform = await exportBackup()
+    const platform = await exportBackupAs(backupFormat)
     await waitSpin()
 
     setBackupProcess({
       state: 'success',
-      success: 'Backup realizado com sucesso!',
+      success: isBackup ? 'Backup realizado com sucesso!' : 'Arquivo exportado com sucesso!',
       detail:
         platform === 'android'
           ? 'Confira se o arquivo foi salvo onde você escolheu.'
@@ -1093,6 +1110,31 @@ const [cardInstallments, setCardInstallments] = useState('1')
   const [filterMonth, setFilterMonth] = useState('')
   const [filterCategory, setFilterCategory] = useState('Todas')
   const [filterType, setFilterType] = useState('Todos')
+
+  // Formato do arquivo exportado na página de Backup
+  const [backupFormat, setBackupFormat] = useState<BackupFormat>('json')
+
+  // Perfil financeiro aberto (a tela recarrega ao trocar de perfil)
+  const [activeProfileLabel] = useState(() =>
+    getFinancialProfiles().length > 1 ? getActiveFinancialProfile().name : undefined
+  )
+
+  // Seção aberta ao entrar em Configurações ("Gerenciar perfis" abre Perfis)
+  const [settingsSection, setSettingsSection] = useState<SettingsSection>('profile')
+
+  useEffect(() => {
+    const openProfiles = () => {
+      setSettingsSection('profiles')
+      navigate('Configurações')
+    }
+    window.addEventListener(OPEN_PROFILES_SETTINGS_EVENT, openProfiles)
+    return () => window.removeEventListener(OPEN_PROFILES_SETTINGS_EVENT, openProfiles)
+  }, [navigate])
+
+  // Fora de Configurações, a próxima abertura volta para "Perfil e preferências"
+  if (navPage !== 'Configurações' && settingsSection !== 'profile') {
+    setSettingsSection('profile')
+  }
 
   // Evolução das despesas na página de Transações: 6 meses até o mês
   // filtrado (ou o mês atual), respeitando a categoria escolhida.
@@ -1937,6 +1979,7 @@ function handleDashboardInvoicePayment(
         onNewTransaction={openNewTransaction}
         profileName={userName}
         profileBackground={sidebarAvatarGradient}
+        profileSubtitle={activeProfileLabel}
         profileAvatar={
           userPreferences.avatar === 'photo' && userPreferences.avatarImage ? (
             <img className="pf-sidenav-avatar-photo" src={userPreferences.avatarImage} alt="" />
@@ -1962,6 +2005,7 @@ function handleDashboardInvoicePayment(
 
 
           <div className="top-actions">
+            <ProfileSwitcher />
          
 <button
   type="button"
@@ -2153,7 +2197,8 @@ function handleDashboardInvoicePayment(
 
 {activePage === 'Configurações' && (
   <Settings
-    initialSection="profile"
+    key={settingsSection}
+    initialSection={settingsSection}
     onOpenBackup={() => {
       setActivePage('Backup e restauração')
     }}
@@ -3400,9 +3445,26 @@ background:
 
         <h3>Exportar dados</h3>
         <p>
-          Gere um arquivo de backup para guardar
-          uma cópia dos seus registros financeiros.
+          Gere um arquivo com os dados de todos os seus
+          perfis. Escolha o formato:
         </p>
+
+        <div className="pf-export-formats" role="radiogroup" aria-label="Formato do arquivo">
+          {EXPORT_FORMATS.map(option => (
+            <button
+              key={option.id}
+              type="button"
+              role="radio"
+              aria-checked={backupFormat === option.id}
+              className={`pf-export-format ${backupFormat === option.id ? 'is-selected' : ''}`}
+              onClick={() => setBackupFormat(option.id)}
+            >
+              <option.icon size={20} />
+              <strong>{option.label}</strong>
+              <small>{option.hint}</small>
+            </button>
+          ))}
+        </div>
 
         <button
           type="button"
@@ -3410,7 +3472,7 @@ background:
           onClick={handleExportBackup}
         >
           <Download size={17} />
-          Exportar backup
+          {EXPORT_FORMATS.find(option => option.id === backupFormat)?.action}
         </button>
       </div>
 

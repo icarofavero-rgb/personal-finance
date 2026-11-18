@@ -16,6 +16,8 @@ export type SyncCollection =
   | { name: string; storageKey: string; kind: 'field'; field: string }
   | { name: string; storageKey: string; kind: 'singleton' }
 
+import { DEFAULT_PROFILE_ID, getViewProfileId } from '../profileScope'
+
 export const SINGLETON_ID = 'singleton'
 
 export const SYNC_COLLECTIONS: readonly SyncCollection[] = [
@@ -36,6 +38,19 @@ export const SYNC_COLLECTIONS: readonly SyncCollection[] = [
   { name: 'notificationPreferences', storageKey: 'personal-finance-notification-preferences-v1', kind: 'singleton' },
   { name: 'layout', storageKey: 'personal-finance-layout-v1', kind: 'singleton' },
 ]
+
+/** Preferências do aparelho: iguais para todos os perfis. */
+const SHARED_COLLECTIONS = new Set(['userPreferences', 'appearance', 'notificationPreferences', 'layout'])
+
+/**
+ * Coleções do perfil que está sendo visto agora. As preferências
+ * compartilhadas só vão junto com o perfil principal (uma vez só).
+ */
+export function getSyncCollections(): readonly SyncCollection[] {
+  return getViewProfileId() === DEFAULT_PROFILE_ID
+    ? SYNC_COLLECTIONS
+    : SYNC_COLLECTIONS.filter(item => !SHARED_COLLECTIONS.has(item.name))
+}
 
 const TRACKED_KEYS = new Set(SYNC_COLLECTIONS.map(item => item.storageKey))
 

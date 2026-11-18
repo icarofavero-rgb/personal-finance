@@ -6,7 +6,7 @@ import { captureChanges, type StorageLike, type SyncMeta } from './changeTracker
 import type { SyncSnapshot } from './syncMerge'
 import {
   SINGLETON_ID,
-  SYNC_COLLECTIONS,
+  getSyncCollections,
   readCollectionRecords,
 } from './syncCollections'
 
@@ -22,7 +22,7 @@ export function buildLocalSnapshot(
 
   const collections: SyncSnapshot['collections'] = {}
 
-  for (const collection of SYNC_COLLECTIONS) {
+  for (const collection of getSyncCollections()) {
     const records = readCollectionRecords(
       collection,
       storage.getItem(collection.storageKey)
@@ -87,7 +87,7 @@ export function snapshotToStorageValues(
   const storage = options.storage ?? localStorage
   const pending = new Map<string, unknown>()
 
-  for (const collection of SYNC_COLLECTIONS) {
+  for (const collection of getSyncCollections()) {
     const data = snapshot.collections[collection.name]
     if (!data) continue
 

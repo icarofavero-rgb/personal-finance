@@ -130,6 +130,8 @@ type AppNavigationProps = {
   profileName: string
   profileAvatar: ReactNode
   profileBackground: string
+  /** Perfil financeiro aberto (só quando existe mais de um) */
+  profileSubtitle?: string
 }
 
 /** Pílula que desliza até o item ativo. */
@@ -244,6 +246,7 @@ function SideNavigation({
   profileName,
   profileAvatar,
   profileBackground,
+  profileSubtitle,
 }: AppNavigationProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const compact = device === 'tablet'
@@ -325,7 +328,7 @@ function SideNavigation({
         {!compact && (
           <span className="pf-sidenav-profile-info">
             <strong>{profileName || 'Meu perfil'}</strong>
-            <small>Ver perfil</small>
+            <small>{profileSubtitle ? `Perfil: ${profileSubtitle}` : 'Ver perfil'}</small>
           </span>
         )}
       </button>

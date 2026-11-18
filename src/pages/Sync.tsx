@@ -18,6 +18,7 @@ import QrCodeImage from '../components/QrCodeImage'
 import QrScanner from '../components/QrScanner'
 import { localDateStamp, saveTextFile } from '../services/fileExport'
 import { SIGNAL_PREFIX } from '../services/sync/signalCodec'
+import { reloadApp } from '../services/profileSwitch'
 import {
   applyRemoteSyncPackage,
   createLocalSyncPackage,
@@ -440,7 +441,7 @@ export default function Sync() {
               className="primary-button"
               onClick={() => {
                 // Recarrega para todas as telas mostrarem os dados novos.
-                if (step.changed) window.location.reload()
+                if (step.changed) reloadApp()
                 else setStep({ name: 'menu' })
               }}
             >
@@ -537,7 +538,7 @@ export default function Sync() {
               <ul>{fileResult.summary.map(line => <li key={line}>{line}</li>)}</ul>
             )}
             {fileResult.changed && (
-              <button type="button" className="primary-button" onClick={() => window.location.reload()}>
+              <button type="button" className="primary-button" onClick={() => reloadApp()}>
                 Atualizar telas
               </button>
             )}

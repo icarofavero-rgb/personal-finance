@@ -10,7 +10,7 @@
 import { createRandomUUID } from '../../polyfills'
 import { hashRecord } from './stableHash'
 import {
-  SYNC_COLLECTIONS,
+  getSyncCollections,
   isTrackedStorageKey,
   readCollectionRecords,
   type SyncCollection,
@@ -151,7 +151,7 @@ export function captureChanges(
 
   let changed = baseline
 
-  for (const collection of SYNC_COLLECTIONS) {
+  for (const collection of getSyncCollections()) {
     if (keyFilter && !keyFilter.has(collection.storageKey)) continue
 
     if (captureCollection(meta, collection, storage, now, baseline)) {

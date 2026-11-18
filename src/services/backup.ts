@@ -1,4 +1,4 @@
-import { localDateStamp, saveTextFile } from './fileExport'
+import { localDateStamp, saveBinaryFile, saveTextFile } from './fileExport'
 
 import {
   getTransactions,
@@ -49,6 +49,13 @@ import {
   restoreBackupModules,
   validateBackupModules,
 } from './backupModules'
+
+import { DEFAULT_PROFILE_ID, withProfileView } from './profileScope'
+import {
+  ensureProfilesFromBackup,
+  getFinancialProfiles,
+  getFinancialProfilesState,
+} from './financialProfilesStorage'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' &&
@@ -157,12 +164,76 @@ export function createBackupV4(): BackupV4 {
   }
 }
 
-export async function exportBackup(): Promise<'web' | 'android'> {
-  const backup = {
+/** Backup de UM perfil (o que está sendo visto). */
+function buildProfileBackup() {
+  return {
     ...createBackupV5(),
     // Metas, Orçamentos, Previsões e preferências (campo opcional).
     modules: collectBackupModules(),
   }
+}
+
+/**
+ * Backup completo: o perfil principal fica no topo (como sempre foi, então
+ * versões antigas do app continuam conseguindo ler) e os outros perfis
+ * vão em "profiles".
+ */
+export function createFullBackup() {
+  const main = withProfileView(DEFAULT_PROFILE_ID, buildProfileBackup)
+  const others = getFinancialProfiles().filter(profile => profile.id !== DEFAULT_PROFILE_ID)
+
+  if (others.length === 0) return main
+
+  return {
+    ...main,
+    profiles: {
+      list: getFinancialProfilesState().profiles.filter(profile => !profile.deleted),
+      data: Object.fromEntries(
+        others.map(profile => [profile.id, withProfileView(profile.id, buildProfileBackup)])
+      ),
+    },
+  }
+}
+
+export type BackupFormat = 'json' | 'xlsx' | 'sqlite'
+
+/**
+ * Exporta no formato escolhido:
+ *  - json:   backup completo, o único que pode ser restaurado no app;
+ *  - xlsx:   planilha (uma aba por tipo de dado, todos os perfis);
+ *  - sqlite: banco de dados .db (uma tabela por tipo de dado).
+ */
+export async function exportBackupAs(format: BackupFormat): Promise<'web' | 'android'> {
+  if (format === 'json') return exportBackup()
+
+  const { collectExportTables } = await import('./export/dataExport')
+  const share = {
+    title: 'Dados do Personal Finance',
+    text: 'Exportação dos dados do Personal Finance',
+    dialogTitle: 'Salvar ou compartilhar arquivo',
+  }
+
+  if (format === 'xlsx') {
+    const { buildXlsxWorkbook } = await import('./export/xlsxWriter')
+    return saveBinaryFile(
+      `personal-finance-planilha-${localDateStamp()}.xlsx`,
+      buildXlsxWorkbook(collectExportTables('xlsx')),
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      share
+    )
+  }
+
+  const { buildSqliteDatabase } = await import('./export/sqliteWriter')
+  return saveBinaryFile(
+    `personal-finance-${localDateStamp()}.db`,
+    buildSqliteDatabase(collectExportTables('sqlite')),
+    'application/vnd.sqlite3',
+    share
+  )
+}
+
+export async function exportBackup(): Promise<'web' | 'android'> {
+  const backup = createFullBackup()
 
   const json = JSON.stringify(backup, null, 2)
 
@@ -175,6 +246,71 @@ export async function exportBackup(): Promise<'web' | 'android'> {
   })
 }
 
+
+/** Confere um backup V5 de um perfil. Retorna os módulos já validados. */
+function validateV5(parsed: unknown, label = '') {
+  const prefix = label ? `Perfil "${label}": ` : ''
+
+  if (!isRecord(parsed) || parsed.version !== 5 || !hasValidRestoreStructure(parsed)) {
+    throw new Error(prefix + 'A estrutura do Backup V5 é inválida.')
+  }
+
+  const audit = safelyAuditBackupRestore(parsed)
+
+  if (!audit.valid) {
+    throw new Error(prefix + (audit.errors.join('\n') || 'O Backup V5 contém dados inválidos.'))
+  }
+
+  // Valida os módulos complementares ANTES de alterar qualquer dado.
+  return validateBackupModules((parsed as Record<string, unknown>).modules)
+}
+
+/**
+ * Restaura um backup com vários perfis. Tudo é conferido antes; depois
+ * cada perfil é restaurado no próprio espaço, com a proteção de sempre.
+ */
+function importMultiProfileBackup(parsed: Record<string, unknown>): Transaction[] {
+  const section = parsed.profiles as Record<string, unknown>
+  const list = Array.isArray(section.list) ? section.list : []
+  const data = isRecord(section.data) ? section.data : {}
+
+  const names = new Map<string, string>()
+  for (const item of list) {
+    if (isRecord(item) && typeof item.id === 'string' && typeof item.name === 'string') {
+      names.set(item.id, item.name)
+    }
+  }
+
+  // 1. Confere tudo antes de mudar qualquer coisa.
+  const jobs: { id: string; backup: Record<string, unknown>; modules: ReturnType<typeof validateV5> }[] = [
+    { id: DEFAULT_PROFILE_ID, backup: parsed, modules: validateV5(parsed, names.get(DEFAULT_PROFILE_ID) ?? 'Principal') },
+  ]
+
+  for (const [id, backup] of Object.entries(data)) {
+    if (id === DEFAULT_PROFILE_ID || !names.has(id) || !isRecord(backup)) continue
+    jobs.push({ id, backup, modules: validateV5(backup, names.get(id)) })
+  }
+
+  for (const job of jobs) {
+    withProfileView(job.id, () => {
+      const safety = checkBackupRestoreSafety()
+      if (!safety.safe) throw new Error(`Perfil "${names.get(job.id) ?? job.id}": ${safety.message}`)
+    })
+  }
+
+  // 2. Garante que os perfis do backup existam neste aparelho.
+  ensureProfilesFromBackup(list)
+
+  // 3. Restaura cada perfil no próprio espaço.
+  for (const job of jobs) {
+    withProfileView(job.id, () => {
+      executeBackupRestore(job.backup as Parameters<typeof executeBackupRestore>[0])
+      if (job.modules !== null) restoreBackupModules(job.modules)
+    })
+  }
+
+  return getTransactions()
+}
 
 export async function importBackup(
   file: File
@@ -202,35 +338,23 @@ export async function importBackup(
 
 
 if (parsed.version === 5) {
-  if (!hasValidRestoreStructure(parsed)) {
-    throw new Error(
-      'A estrutura do Backup V5 é inválida.'
-    )
+  // Backup com vários perfis: principal no topo + "profiles".
+  if (isRecord(parsed.profiles)) {
+    return importMultiProfileBackup(parsed)
   }
 
-  const audit = safelyAuditBackupRestore(parsed)
-
-  if (!audit.valid) {
-    throw new Error(
-      audit.errors.join('\n') ||
-      'O Backup V5 contém dados inválidos.'
-    )
-  }
-
-  // Valida os módulos complementares ANTES de alterar qualquer dado.
-  const modules = validateBackupModules(
-    (parsed as Record<string, unknown>).modules
-  )
+  // Backup de um perfil só: vai para o perfil aberto agora.
+  const modules = validateV5(parsed)
 
   // O executor realiza novamente as verificações
   // de segurança e cria o snapshot antes da gravação.
-  executeBackupRestore(parsed)
+  executeBackupRestore(parsed as Parameters<typeof executeBackupRestore>[0])
 
   if (modules !== null) {
     restoreBackupModules(modules)
   }
 
-  return parsed.transactions
+  return (parsed as { transactions: Transaction[] }).transactions
 }
 
 if (
