@@ -134,7 +134,7 @@ import CalendarPage, { REMINDERS_CHANGED_EVENT } from './pages/CalendarPage'
 import { getReminders } from './services/remindersStorage'
 import { generateReminderNotifications } from './services/calendarEvents'
 import { syncSystemNotifications } from './services/systemNotifications'
-import AppNavigation, { PAGE_ORDER } from './components/AppNavigation'
+import AppNavigation, { getPageOrder } from './components/AppNavigation'
 import { useDeviceClass } from './hooks/useDeviceClass'
 import { markBusy } from './hooks/busyMarker'
 import DatePicker from './components/DatePicker'
@@ -557,7 +557,7 @@ const [pageDirection, setPageDirection] = useState<'forward' | 'back'>('forward'
 if (previousPage !== activePage) {
   setPreviousPage(activePage)
   setPageDirection(
-    PAGE_ORDER.indexOf(activePage) >= PAGE_ORDER.indexOf(previousPage)
+    getPageOrder().indexOf(activePage) >= getPageOrder().indexOf(previousPage)
       ? 'forward'
       : 'back'
   )

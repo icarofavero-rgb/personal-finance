@@ -99,6 +99,11 @@ export const BACKUP_MODULES: readonly ModuleDefinition[] = [
     label: 'Notificações',
     validate: requireObject('preferências de notificação'),
   },
+  {
+    key: 'personal-finance-layout-v1',
+    label: 'Layout do menu',
+    validate: requireObject('preferências de layout'),
+  },
 ]
 
 /** Dados dos módulos no arquivo: chave → valor (JSON já interpretado). */

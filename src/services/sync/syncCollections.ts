@@ -34,6 +34,7 @@ export const SYNC_COLLECTIONS: readonly SyncCollection[] = [
   { name: 'userPreferences', storageKey: 'personal-finance-user-preferences', kind: 'singleton' },
   { name: 'appearance', storageKey: 'personal-finance-appearance', kind: 'singleton' },
   { name: 'notificationPreferences', storageKey: 'personal-finance-notification-preferences-v1', kind: 'singleton' },
+  { name: 'layout', storageKey: 'personal-finance-layout-v1', kind: 'singleton' },
 ]
 
 const TRACKED_KEYS = new Set(SYNC_COLLECTIONS.map(item => item.storageKey))

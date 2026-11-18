@@ -30,10 +30,16 @@ import {
 import type { DeviceClass } from '../hooks/useDeviceClass'
 import { Capacitor } from '@capacitor/core'
 import { exitApp } from '../services/appExit'
+import {
+  getLayoutPreferences,
+  LAYOUT_CHANGED_EVENT,
+  LAYOUT_STORAGE_KEY,
+  type LayoutPreferences,
+} from '../services/layoutPreferencesStorage'
 
 type IconType = ComponentType<{ size?: number; strokeWidth?: number }>
 
-type NavItem = {
+export type NavItem = {
   page: string
   label: string
   shortLabel?: string
@@ -76,11 +82,45 @@ function useLandscape(): boolean {
   return landscape
 }
 
-/** Ordem de todas as páginas — usada para saber a direção da transição. */
-export const PAGE_ORDER = [...MAIN_NAV, ...SECONDARY_NAV].map(item => item.page)
+/** Todas as páginas do menu, para achar nome e ícone de cada uma. */
+export const ALL_NAV: NavItem[] = [...MAIN_NAV, ...SECONDARY_NAV]
 
-/** No celular, estas ficam na barra; o resto vai para "Mais". */
-const PHONE_TABS = ['Dashboard', 'Transações', 'Cartões']
+export function findNavItem(page: string): NavItem | undefined {
+  return ALL_NAV.find(item => item.page === page)
+}
+
+/** Menu principal na ordem escolhida pelo usuário (seção "Layout"). */
+function orderedMainNav(layout: LayoutPreferences): NavItem[] {
+  return layout.mainOrder
+    .map(page => MAIN_NAV.find(item => item.page === page))
+    .filter((item): item is NavItem => item !== undefined)
+}
+
+/** Ordem de todas as páginas — usada para saber a direção da transição. */
+export function getPageOrder(): string[] {
+  return [...orderedMainNav(getLayoutPreferences()), ...SECONDARY_NAV].map(item => item.page)
+}
+
+/** Acompanha as mudanças feitas em Configurações → Layout (e pela sincronização). */
+function useLayout(): LayoutPreferences {
+  const [layout, setLayout] = useState(getLayoutPreferences)
+
+  useEffect(() => {
+    const refresh = () => setLayout(getLayoutPreferences())
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === null || event.key === LAYOUT_STORAGE_KEY) refresh()
+    }
+
+    window.addEventListener(LAYOUT_CHANGED_EVENT, refresh)
+    window.addEventListener('storage', onStorage)
+    return () => {
+      window.removeEventListener(LAYOUT_CHANGED_EVENT, refresh)
+      window.removeEventListener('storage', onStorage)
+    }
+  }, [])
+
+  return layout
+}
 
 type AppNavigationProps = {
   device: DeviceClass
@@ -207,6 +247,7 @@ function SideNavigation({
 }: AppNavigationProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const compact = device === 'tablet'
+  const mainNav = orderedMainNav(useLayout())
   const landscape = useLandscape()
 
   // Computador (e tablet deitado): Configurações sai do menu lateral e
@@ -248,7 +289,7 @@ function SideNavigation({
         <span className="pf-nav-indicator" style={indicator} aria-hidden="true" />
 
         {!compact && <span className="pf-sidenav-section">Menu principal</span>}
-        {MAIN_NAV.map(item => (
+        {mainNav.map(item => (
           <NavButton
             key={item.page}
             item={item}
@@ -297,8 +338,10 @@ function PhoneNavigation({ activePage, onNavigate, onNewTransaction }: AppNaviga
   const [moreOpen, setMoreOpen] = useState(false)
   const [closing, setClosing] = useState(false)
   const barRef = useRef<HTMLDivElement>(null)
+  const layout = useLayout()
+  const phoneTabs = layout.phoneTabs
 
-  const inMore = !PHONE_TABS.includes(activePage)
+  const inMore = !phoneTabs.includes(activePage)
   const activeKey = moreOpen ? 'more' : inMore ? 'more' : activePage
   const indicator = useIndicator(barRef, activeKey, 'x')
 
@@ -321,8 +364,12 @@ function PhoneNavigation({ activePage, onNavigate, onNewTransaction }: AppNaviga
     return () => window.removeEventListener('keydown', onKey)
   }, [moreOpen, closeMore])
 
-  const tabs = MAIN_NAV.filter(item => PHONE_TABS.includes(item.page))
-  const moreItems = [...MAIN_NAV.filter(item => !PHONE_TABS.includes(item.page)), ...SECONDARY_NAV]
+  const tabs = phoneTabs
+    .map(page => findNavItem(page))
+    .filter((item): item is NavItem => item !== undefined)
+  const moreItems = [...orderedMainNav(layout), ...SECONDARY_NAV].filter(
+    item => !phoneTabs.includes(item.page)
+  )
   const isNative = Capacitor.isNativePlatform()
 
   function go(page: string) {

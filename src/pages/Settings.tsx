@@ -20,10 +20,12 @@ import {
   RefreshCw,
   GraduationCap,
   ImagePlus,
+  PanelsTopLeft,
 } from 'lucide-react'
 
 import AvatarColorPicker from '../components/AvatarColorPicker'
 import AvatarPhotoEditor from '../components/AvatarPhotoEditor'
+import LayoutSettings from '../components/LayoutSettings'
 import { requestOpenTutorial } from '../services/onboardingStorage'
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
@@ -60,6 +62,7 @@ import Toast, {
 type SettingsSection =
   | 'profile'
   | 'appearance'
+  | 'layout'
   | 'notifications'
   | 'security'
   | 'storage'
@@ -76,6 +79,12 @@ const sections = [
     label: 'Aparência',
     icon: Palette,
     description: 'Personalize o visual do aplicativo.',
+  },
+  {
+    id: 'layout',
+    label: 'Layout',
+    icon: PanelsTopLeft,
+    description: 'Reorganize o menu principal e a barra do celular.',
   },
   {
     id: 'notifications',
@@ -793,6 +802,12 @@ return (
   </div>
 
 
+) : activeSection === 'layout' ? (
+  <LayoutSettings
+    onSaved={(message, type = 'success') =>
+      setToast({ id: crypto.randomUUID(), type, message })
+    }
+  />
 ) : activeSection === 'notifications' ? (
   <div className="settings-appearance">
     <div className="settings-appearance-group">
