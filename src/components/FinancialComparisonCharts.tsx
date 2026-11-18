@@ -523,6 +523,7 @@ const { categoryData, categories } = useMemo(() => {
             <div
               className="category-line-legend-item"
               key={category}
+              style={{ '--legend-color': group.color } as React.CSSProperties}
             >
               <CategoryIcon category={category} />
 

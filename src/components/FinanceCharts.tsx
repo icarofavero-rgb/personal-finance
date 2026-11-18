@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { chartAnimation } from './chartMotion'
-import GlassDonut from './GlassDonut'
+import GlassDonut, { formatPercent } from './GlassDonut'
+import CategoryIcon from './CategoryIcon'
 import {
   ResponsiveContainer,
   BarChart,
@@ -14,18 +15,6 @@ import {
 import {
   getMainCategory,
 } from '../services/categories'
-
-import {
-  Utensils,
-  House,
-  CarFront,
-  HeartPulse,
-  Gamepad2,
-  ShoppingBag,
-  GraduationCap,
-  Wallet,
-  Ellipsis,
-} from 'lucide-react'
 
 import type { Transaction } from '../services/storage'
 
@@ -44,24 +33,35 @@ const money = (value: number) =>
     currency: 'BRL',
   }).format(value)
 
-const CATEGORY_ICONS = {
-  utensils: Utensils,
-  house: House,
-  'car-front': CarFront,
-  'heart-pulse': HeartPulse,
-  'gamepad-2': Gamepad2,
-  'shopping-bag': ShoppingBag,
-  'graduation-cap': GraduationCap,
-  wallet: Wallet,
-  ellipsis: Ellipsis,
-}
-
 /** Cores das barras: [topo, base] */
 const BAR_GRADIENTS: Record<string, [string, string]> = {
   income: ['#67e8f9', '#38bdf8'],
   expense: ['#c4b5fd', '#8b5cf6'],
   paid: ['#6ee7b7', '#36c995'],
   pending: ['#fcd34d', '#f0b85d'],
+}
+
+/** Descobre a cor da barra a partir do degradê usado nela (url(#...-income)). */
+function legendColor(fill: unknown): string {
+  const key = String(fill ?? '').match(/-(income|expense|paid|pending)\)$/)?.[1]
+  return key ? BAR_GRADIENTS[key][1] : String(fill ?? '#8b5cf6')
+}
+
+/** Legenda das barras: pastilhas de vidro no Liquid Glass, bolinhas lisas no Clássico. */
+function BarLegend({ payload }: { payload?: ReadonlyArray<{ value?: unknown; color?: string }> }) {
+  return (
+    <ul className="pf-chart-legend">
+      {(payload ?? []).map(entry => (
+        <li
+          key={String(entry.value)}
+          style={{ '--legend-color': legendColor(entry.color) } as React.CSSProperties}
+        >
+          <span className="pf-chart-legend-swatch" aria-hidden="true" />
+          {String(entry.value ?? '')}
+        </li>
+      ))}
+    </ul>
+  )
 }
 
 function FinanceCharts({
@@ -303,7 +303,7 @@ return (
 />
 
 
-<Legend />
+<Legend content={props => <BarLegend payload={props.payload} />} />
 
 {projection ? (
   <>
@@ -396,33 +396,27 @@ return (
             </div>
 
          
-<div className="category-legend">
+<ul className="pf-donut-legend pf-chart-category-legend">
   {categoryData.map(item => {
     const group = getMainCategory(item.name)
-    const Icon = CATEGORY_ICONS[
-      group.icon as keyof typeof CATEGORY_ICONS
-    ] ?? Ellipsis
 
     return (
-      <div className="category-row" key={item.name}>
-        <span
-          className="category-color"
-          style={{ background: group.color }}
-        />
-
-        <Icon
-          size={15}
-          color={group.color}
-          aria-hidden="true"
-        />
-
-        <span>{item.name}</span>
-
-        <strong>{money(item.value)}</strong>
-      </div>
+      <li
+        key={item.name}
+        style={{ '--legend-color': group.color } as React.CSSProperties}
+      >
+        <span className="pf-donut-legend-icon">
+          <CategoryIcon icon={group.icon} size={15} />
+        </span>
+        <span className="pf-donut-legend-name">{item.name}</span>
+        <span className="pf-donut-legend-percent">
+          {formatPercent(totalCategoryExpenses > 0 ? (item.value / totalCategoryExpenses) * 100 : 0)}
+        </span>
+        <span className="pf-donut-legend-value">{money(item.value)}</span>
+      </li>
     )
   })}
-</div>
+</ul>
 
           </>
         )}

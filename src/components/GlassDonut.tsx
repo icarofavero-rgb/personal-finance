@@ -135,6 +135,8 @@ export default function GlassDonut({
                     ? `${CIRCUMFERENCE} 0`
                     : `${arc.dash} ${CIRCUMFERENCE}`,
                   strokeDashoffset: arc.offset,
+                  // Cor lisa usada no modo Clássico (sem degradê de vidro)
+                  '--arc-color': arc.segment.color,
                   '--i': arc.index,
                   '--circ': CIRCUMFERENCE,
                 } as React.CSSProperties

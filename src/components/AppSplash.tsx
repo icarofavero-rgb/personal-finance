@@ -15,7 +15,7 @@ type AppSplashProps = {
 const SECTION_ICONS = 7
 
 /** Tempos da animação normal (ms). Ícones: 1 a cada STEP. */
-const STEP = 260
+const STEP = 370
 const FIRST_ICON = 400
 const FINAL_AT = FIRST_ICON + SECTION_ICONS * STEP
 const CLOSE_AT = FINAL_AT + 1700
