@@ -76,6 +76,8 @@ import BackupReminderBanner from './components/BackupReminderBanner'
 import MonthInsights from './components/MonthInsights'
 import RecurringManager from './components/RecurringManager'
 import StatementImport from './components/StatementImport'
+import ReceiptButton from './components/ReceiptButton'
+import { pruneAttachments } from './services/attachments'
 import {
   createRuleFromTransaction,
   getRecurringRules,
@@ -865,6 +867,15 @@ return {
   notificationReadRevision,
   remindersRevision,
 ])
+
+// Fotos de comprovantes de transações apagadas são removidas
+useEffect(() => {
+  if (activePage !== 'Transações') return
+  const timer = window.setTimeout(() => {
+    void pruneAttachments(new Set(transactions.map(item => item.id))).catch(() => {})
+  }, 2000)
+  return () => window.clearTimeout(timer)
+}, [activePage, transactions])
 
 // Transações recorrentes: lança sozinho os meses que já chegaram
 const [recurringRevision, setRecurringRevision] = useState(0)
@@ -3538,6 +3549,8 @@ background:
 
 
 <div className="transaction-actions">
+  <ReceiptButton transactionId={item.id} description={item.description} onMessage={showToast} />
+
   <button
     type="button"
     className="edit-button"

@@ -50,7 +50,8 @@ import {
   validateBackupModules,
 } from './backupModules'
 
-import { DEFAULT_PROFILE_ID, withProfileView } from './profileScope'
+import { DEFAULT_PROFILE_ID, getViewProfileId, withProfileView } from './profileScope'
+import { exportAttachments, importAttachments } from './attachments'
 import { markBackupDone } from './backupReminder'
 import {
   ensureProfilesFromBackup,
@@ -234,7 +235,15 @@ export async function exportBackupAs(format: BackupFormat): Promise<'web' | 'and
 }
 
 export async function exportBackup(): Promise<'web' | 'android'> {
-  const backup = createFullBackup()
+  const backup: Record<string, unknown> = createFullBackup()
+
+  // Fotos dos comprovantes (de todos os perfis)
+  try {
+    const attachments = await exportAttachments(getFinancialProfiles().map(profile => profile.id))
+    if (Object.keys(attachments).length > 0) backup.attachments = attachments
+  } catch {
+    // sem IndexedDB: o backup sai sem as fotos
+  }
 
   const json = JSON.stringify(backup, null, 2)
 
@@ -345,7 +354,9 @@ export async function importBackup(
 if (parsed.version === 5) {
   // Backup com vários perfis: principal no topo + "profiles".
   if (isRecord(parsed.profiles)) {
-    return importMultiProfileBackup(parsed)
+    const restored = importMultiProfileBackup(parsed)
+    if (isRecord(parsed.attachments)) await importAttachments(parsed.attachments).catch(() => 0)
+    return restored
   }
 
   // Backup de um perfil só: vai para o perfil aberto agora.
@@ -358,6 +369,10 @@ if (parsed.version === 5) {
   if (modules !== null) {
     restoreBackupModules(modules)
   }
+
+  // Fotos do backup de um perfil só vão para o perfil aberto
+  const files = isRecord(parsed.attachments) ? parsed.attachments[DEFAULT_PROFILE_ID] : null
+  if (isRecord(files)) await importAttachments({ [getViewProfileId()]: files }).catch(() => 0)
 
   return (parsed as { transactions: Transaction[] }).transactions
 }
