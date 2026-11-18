@@ -1,8 +1,10 @@
 /* =========================================================
    NEON LIQUID GLASS — SHOW DE LUZES
-   Focos coloridos que acendem, brilham e desvanecem, e fachos de
-   luz que varrem a tela devagar. Só transform/opacity (placa de
-   vídeo); pausa ao rolar a tela e respeita "animações reduzidas".
+   - Pulsos: luzes que acendem e se apagam no meio da tela.
+   - Viajantes: luzes que atravessam a tela de um lado para o outro,
+     surgindo e desvanecendo no caminho.
+   Só transform/opacity (placa de vídeo); pausa ao rolar a tela e
+   respeita "animações reduzidas/desligadas".
    ========================================================= */
 
 .pf-lightshow {
@@ -18,119 +20,130 @@
   opacity: 0.55;
 }
 
-/* Focos (spots) */
 .pf-light {
   position: absolute;
-  width: 46vmax;
-  height: 46vmax;
-  margin: -23vmax 0 0 -23vmax;
+  width: var(--size, 30vmax);
+  height: var(--size, 30vmax);
+  margin: calc(var(--size, 30vmax) / -2) 0 0 calc(var(--size, 30vmax) / -2);
   border-radius: 50%;
-  background: radial-gradient(circle, var(--light) 0%, transparent 62%);
+  background: radial-gradient(circle, var(--light) 0%, color-mix(in srgb, var(--light) 35%, transparent) 30%, transparent 65%);
   opacity: 0;
-  animation-name: pf-light-show;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
   will-change: transform, opacity;
 }
 
-@keyframes pf-light-show {
+/* ---------- Pulsos: acendem e apagam no meio da tela ---------- */
+
+.pf-light-pulse {
+  animation-name: pf-light-pulse;
+}
+
+@keyframes pf-light-pulse {
   0% {
     opacity: 0;
-    transform: translate3d(0, 0, 0) scale(0.6);
+    transform: scale(0.55);
   }
-  22% {
-    opacity: 0.85;
-    transform: translate3d(3vmax, -2vmax, 0) scale(1);
+  35% {
+    opacity: 0.9;
+    transform: scale(1);
   }
-  45% {
-    opacity: 0.35;
-    transform: translate3d(6vmax, 1vmax, 0) scale(1.15);
-  }
-  62% {
+  55% {
     opacity: 0.75;
-    transform: translate3d(2vmax, 4vmax, 0) scale(0.95);
+    transform: scale(1.06);
   }
   100% {
     opacity: 0;
-    transform: translate3d(-3vmax, 2vmax, 0) scale(0.7);
+    transform: scale(1.25);
   }
 }
 
-/* Fachos de luz (como luzes de palco) */
-.pf-beam {
-  position: absolute;
-  top: -12vh;
-  width: 16vmax;
-  height: 150vh;
-  margin-left: -8vmax;
-  background: linear-gradient(180deg, var(--light) 0%, transparent 78%);
-  clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
-  transform-origin: 50% 0;
-  opacity: 0;
-  animation-name: pf-beam-sweep;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  will-change: transform, opacity;
+/* ---------- Viajantes: de um lado para o outro ---------- */
+
+.pf-light-travel {
+  left: 0;
+  animation-timing-function: linear;
 }
 
-@keyframes pf-beam-sweep {
+.pf-light-travel.to-right {
+  animation-name: pf-light-travel-right;
+}
+
+.pf-light-travel.to-left {
+  animation-name: pf-light-travel-left;
+}
+
+/* Surge devagar, atravessa com brilho e desvanece antes da borda */
+@keyframes pf-light-travel-right {
   0% {
     opacity: 0;
-    transform: rotate(var(--from));
+    transform: translate3d(-10vw, 0, 0) scale(0.8);
   }
-  20% {
-    opacity: 0.32;
+  18% {
+    opacity: 0.85;
   }
   50% {
-    opacity: 0.18;
-    transform: rotate(calc((var(--from) + var(--to)) / 2));
+    transform: translate3d(50vw, -3vh, 0) scale(1.05);
   }
-  80% {
-    opacity: 0.3;
+  82% {
+    opacity: 0.85;
   }
   100% {
     opacity: 0;
-    transform: rotate(var(--to));
+    transform: translate3d(110vw, 0, 0) scale(0.8);
   }
 }
 
-/* Celular/tablet: menos elementos e movimento mais lento */
-@media (pointer: coarse) {
-  .pf-light:nth-child(n + 5),
-  .pf-beam:nth-of-type(n + 9) {
-    display: none;
+@keyframes pf-light-travel-left {
+  0% {
+    opacity: 0;
+    transform: translate3d(110vw, 0, 0) scale(0.8);
   }
+  18% {
+    opacity: 0.85;
+  }
+  50% {
+    transform: translate3d(50vw, 3vh, 0) scale(1.05);
+  }
+  82% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(-10vw, 0, 0) scale(0.8);
+  }
+}
 
-  .pf-light,
-  .pf-beam {
-    animation-duration: 22s !important;
+/* Celular/tablet: menos luzes ao mesmo tempo */
+@media (pointer: coarse) {
+  .pf-light-pulse:nth-child(4),
+  .pf-light-travel:last-child {
+    display: none;
   }
 }
 
 /* Pausa enquanto rola ou troca de página */
-:root[data-pf-busy] :is(.pf-light, .pf-beam) {
+:root[data-pf-busy] .pf-light {
   animation-play-state: paused;
 }
 
 /* Animações reduzidas/desligadas: luzes paradas e suaves */
-:root[data-pf-animations='reduced'] :is(.pf-light, .pf-beam),
-:root[data-pf-animations='off'] :is(.pf-light, .pf-beam) {
+:root[data-pf-animations='reduced'] .pf-light,
+:root[data-pf-animations='off'] .pf-light {
   animation: none !important;
-  opacity: 0.35;
 }
 
-:root[data-pf-animations='off'] .pf-beam,
-:root[data-pf-animations='reduced'] .pf-beam {
-  display: none;
+:root[data-pf-animations='reduced'] .pf-light-pulse,
+:root[data-pf-animations='off'] .pf-light-pulse {
+  opacity: 0.35;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pf-light {
     animation: none !important;
-    opacity: 0.35;
   }
 
-  .pf-beam {
-    display: none;
+  .pf-light-pulse {
+    opacity: 0.35;
   }
 }

@@ -35,7 +35,7 @@
 }
 
 .goals-summary-card svg {
-  color: #a78bfa;
+  color: var(--pf-accent-ink, #a78bfa);
 }
 
 .goals-summary-card span {
@@ -65,8 +65,8 @@
   height: 64px;
   border-radius: 18px;
   background: #29213c;
-  color: #a78bfa;
-  box-shadow: 0 0 22px #a78bfa20;
+  color: var(--pf-accent-ink, #a78bfa);
+  box-shadow: 0 0 22px rgba(var(--pf-accent-rgb), 0.13);
 }
 
 .goals-empty h2 {
@@ -101,7 +101,7 @@
 }
 
 .goals-item-heading span {
-  color: #a78bfa;
+  color: var(--pf-accent-ink, #a78bfa);
   font-weight: 700;
 }
 
@@ -301,7 +301,7 @@
 }
 
 .goals-history-toggle:hover {
-  color: #a78bfa;
+  color: var(--pf-accent-ink, #a78bfa);
 }
 
 .goals-history-toggle > span {
@@ -381,7 +381,7 @@
 
 .goals-history-icon.withdrawal {
   background: #302344;
-  color: #a78bfa;
+  color: var(--pf-accent-ink, #a78bfa);
 }
 
 .goals-history-amount {
@@ -515,9 +515,9 @@
 }
 
 .goals-edit-button:hover {
-  color: #a78bfa;
-  border-color: #a78bfa;
-  box-shadow: 0 0 16px #a78bfa25;
+  color: var(--pf-accent-ink, #a78bfa);
+  border-color: var(--pf-accent-ink, #a78bfa);
+  box-shadow: 0 0 16px rgba(var(--pf-accent-rgb), 0.15);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -598,9 +598,9 @@
 }
 
 .goals-edit-note-button:hover {
-  color: #a78bfa;
-  border-color: #a78bfa;
-  box-shadow: 0 0 16px #a78bfa25;
+  color: var(--pf-accent-ink, #a78bfa);
+  border-color: var(--pf-accent-ink, #a78bfa);
+  box-shadow: 0 0 16px rgba(var(--pf-accent-rgb), 0.15);
 }
 
 .goals-note-counter {
@@ -646,9 +646,9 @@
 }
 
 .goals-export-button:hover {
-  color: #a78bfa;
-  border-color: #a78bfa;
-  box-shadow: 0 0 16px #a78bfa25;
+  color: var(--pf-accent-ink, #a78bfa);
+  border-color: var(--pf-accent-ink, #a78bfa);
+  box-shadow: 0 0 16px rgba(var(--pf-accent-rgb), 0.15);
 }
 
 
@@ -821,7 +821,7 @@
 
 .goals-restore-checkbox input {
   margin-top: 3px;
-  accent-color: #a78bfa;
+  accent-color: var(--pf-accent-ink, #a78bfa);
 }
 
 .goals-form-actions .primary-button:disabled {

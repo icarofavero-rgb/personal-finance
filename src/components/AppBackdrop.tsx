@@ -31,24 +31,24 @@ const SNOWFLAKES = Array.from({ length: 26 }, (_, index) => ({
 
 const LIGHT_COLORS = ['#ef4444', '#facc15', '#22c55e', '#38bdf8', '#f472b6']
 
-// Show de luzes do Neon: focos que acendem e desvanecem em lugares e
-// tempos diferentes (a cor de destaque escolhida participa do show).
-const ACCENT = 'rgba(var(--pf-accent-rgb), 0.9)'
+// Show de luzes do Neon (a cor de destaque escolhida participa do show).
+const ACCENT = 'rgba(var(--pf-accent-rgb), 0.95)'
 
-const LIGHTS = [
-  { x: 12, y: 18, color: ACCENT, duration: 11, delay: 0 },
-  { x: 78, y: 12, color: 'rgba(236, 72, 153, 0.85)', duration: 13, delay: -4 },
-  { x: 55, y: 62, color: 'rgba(34, 211, 238, 0.8)', duration: 12, delay: -8 },
-  { x: 22, y: 78, color: 'rgba(168, 85, 247, 0.85)', duration: 15, delay: -2 },
-  { x: 88, y: 70, color: ACCENT, duration: 14, delay: -10 },
-  { x: 40, y: 30, color: 'rgba(59, 130, 246, 0.8)', duration: 16, delay: -6 },
+// Luzes que acendem e se apagam no meio da tela, cada uma no seu tempo.
+const PULSES = [
+  { x: 50, y: 45, color: ACCENT, size: 38, duration: 9, delay: 0 },
+  { x: 35, y: 55, color: 'rgba(236, 72, 153, 0.9)', size: 30, duration: 11, delay: -3.5 },
+  { x: 65, y: 38, color: 'rgba(34, 211, 238, 0.85)', size: 32, duration: 10, delay: -6.5 },
+  { x: 55, y: 62, color: 'rgba(168, 85, 247, 0.9)', size: 28, duration: 12, delay: -8.5 },
 ]
 
-// Fachos de luz, como em um palco, varrendo devagar.
-const BEAMS = [
-  { x: 18, color: ACCENT, from: -28, to: 18, duration: 14, delay: 0 },
-  { x: 62, color: 'rgba(236, 72, 153, 0.8)', from: 24, to: -16, duration: 17, delay: -6 },
-  { x: 86, color: 'rgba(34, 211, 238, 0.75)', from: -12, to: 26, duration: 19, delay: -11 },
+// Luzes que atravessam a tela de um lado para o outro, surgindo e
+// desvanecendo no caminho (umas da esquerda, outras da direita).
+const TRAVELERS = [
+  { y: 30, color: ACCENT, size: 30, duration: 16, delay: 0, direction: 'right' },
+  { y: 58, color: 'rgba(236, 72, 153, 0.85)', size: 26, duration: 19, delay: -7, direction: 'left' },
+  { y: 44, color: 'rgba(34, 211, 238, 0.8)', size: 24, duration: 22, delay: -13, direction: 'right' },
+  { y: 72, color: 'rgba(59, 130, 246, 0.85)', size: 28, duration: 18, delay: -4, direction: 'left' },
 ]
 
 /**
@@ -77,33 +77,33 @@ export default function AppBackdrop() {
         {/* Neon: show de luzes que acendem, brilham e desvanecem */}
         {style === 'neon-glass' && (
           <div className="pf-lightshow">
-            {LIGHTS.map((light, index) => (
+            {PULSES.map((light, index) => (
               <span
-                key={`light-${index}`}
-                className="pf-light"
+                key={`pulse-${index}`}
+                className="pf-light pf-light-pulse"
                 style={
                   {
                     left: `${light.x}%`,
                     top: `${light.y}%`,
                     '--light': light.color,
+                    '--size': `${light.size}vmax`,
                     animationDuration: `${light.duration}s`,
                     animationDelay: `${light.delay}s`,
                   } as React.CSSProperties
                 }
               />
             ))}
-            {BEAMS.map((beam, index) => (
+            {TRAVELERS.map((light, index) => (
               <span
-                key={`beam-${index}`}
-                className="pf-beam"
+                key={`travel-${index}`}
+                className={`pf-light pf-light-travel to-${light.direction}`}
                 style={
                   {
-                    left: `${beam.x}%`,
-                    '--light': beam.color,
-                    '--from': `${beam.from}deg`,
-                    '--to': `${beam.to}deg`,
-                    animationDuration: `${beam.duration}s`,
-                    animationDelay: `${beam.delay}s`,
+                    top: `${light.y}%`,
+                    '--light': light.color,
+                    '--size': `${light.size}vmax`,
+                    animationDuration: `${light.duration}s`,
+                    animationDelay: `${light.delay}s`,
                   } as React.CSSProperties
                 }
               />

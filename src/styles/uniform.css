@@ -451,3 +451,108 @@
 @keyframes pf-menu-item {
   from { opacity: 0; transform: translateY(-4px); }
 }
+
+/* ---------- 7. Cor de destaque para textos e ícones ---------- */
+
+/* "Tinta" da cor de destaque: tom claro no escuro, tom forte no claro
+   (para ícones e textos ficarem legíveis nos dois temas). */
+:root {
+  --pf-accent-ink: var(--pf-accent-text, #c4b5fd);
+}
+
+:root[data-pf-theme='light'] {
+  --pf-accent-ink: var(--pf-accent, #8b5cf6);
+}
+
+/* Ícones dos cartões de resumo das Metas: plaquinha na cor do tema */
+.goals-summary-card > svg {
+  box-sizing: content-box;
+  padding: 9px;
+  border-radius: 12px;
+  color: var(--pf-accent-ink) !important;
+  background: rgba(var(--pf-accent-rgb), 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 calc(4px + var(--pf-neon-strength, 0.15) * 30px) rgba(var(--pf-accent-rgb), var(--pf-neon-strength, 0.15));
+}
+
+.goals-empty-icon {
+  color: var(--pf-accent-ink) !important;
+  background: rgba(var(--pf-accent-rgb), 0.14) !important;
+}
+
+/* ---------- 8. Botão "X" padronizado em todos os blocos ---------- */
+
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close,
+  .pf-toast-close
+) {
+  /* Quadrado perfeito, cantos arredondados, X centralizado */
+  box-sizing: border-box !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
+  padding: 0 !important;
+  margin: 0;
+  display: inline-grid !important;
+  place-items: center !important;
+  flex: 0 0 36px !important;
+  border-radius: 11px !important;
+  line-height: 0 !important;
+  aspect-ratio: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close,
+  .pf-toast-close
+) svg {
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  stroke-width: 2.4;
+  transition: transform 0.35s var(--pf-ease-spring) !important;
+}
+
+/* O mesmo giro em todos (mouse no computador, toque no celular) */
+:is(
+  .modal-close,
+  .app-dialog-close,
+  .dashboard-card-modal-close,
+  .dashboard-invoice-close,
+  .invoice-confirm-close,
+  .notification-panel-close,
+  .pf-confirm-close,
+  .settings-avatar-picker-close,
+  .pf-toast-close
+):is(:hover, :focus-visible, :active) svg {
+  transform: rotate(90deg);
+}
+
+/* O X do aviso (toast) segue a mesma cor de destaque e neon */
+.pf-toast-close {
+  color: var(--pf-accent-ink) !important;
+  background: rgba(var(--pf-accent-rgb), 0.1) !important;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.45) !important;
+  box-shadow: 0 0 calc(6px + var(--pf-neon-strength, 0.15) * 40px) rgba(var(--pf-accent-rgb), calc(0.15 + var(--pf-neon-strength, 0.15))) !important;
+  transition: transform 0.25s var(--pf-ease-spring), background 0.25s ease !important;
+}
