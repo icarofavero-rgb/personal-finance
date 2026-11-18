@@ -78,6 +78,8 @@ import RecurringManager from './components/RecurringManager'
 import StatementImport from './components/StatementImport'
 import ReceiptButton from './components/ReceiptButton'
 import { pruneAttachments } from './services/attachments'
+import { updateHomeWidget } from './services/widgetBridge'
+import { LOCK_CHANGED_EVENT } from './components/AppLockScreen'
 import {
   createRuleFromTransaction,
   getRecurringRules,
@@ -1201,6 +1203,17 @@ const [cardInstallments, setCardInstallments] = useState('1')
   const [activeProfileLabel] = useState(() =>
     getFinancialProfiles().length > 1 ? getActiveFinancialProfile().name : undefined
   )
+
+  // Widget da tela inicial (Android): saldo do mês do perfil aberto
+  useEffect(() => {
+    const push = () => void updateHomeWidget(transactions, activeProfileLabel).catch(() => {})
+    const timer = window.setTimeout(push, 1200)
+    window.addEventListener(LOCK_CHANGED_EVENT, push)
+    return () => {
+      window.clearTimeout(timer)
+      window.removeEventListener(LOCK_CHANGED_EVENT, push)
+    }
+  }, [transactions, activeProfileLabel])
 
   // Seção aberta ao entrar em Configurações ("Gerenciar perfis" abre Perfis)
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('profile')

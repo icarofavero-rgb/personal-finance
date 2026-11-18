@@ -4,4 +4,5 @@
     <string name="title_activity_main">Personal Finance</string>
     <string name="package_name">com.personalfinance.app</string>
     <string name="custom_url_scheme">com.personalfinance.app</string>
+    <string name="widget_description">Saldo, entradas e saídas do mês</string>
 </resources>
