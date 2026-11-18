@@ -259,7 +259,6 @@
 /* Caixas internas: degradê do avatar, linhas de notificação */
 :root[data-pf-glass] :is(
   .settings-avatar-gradient-panel,
-  .settings-avatar-picker-container,
   .settings-notification-option
 ) {
   background: var(--pf-control-bg) !important;
@@ -317,8 +316,7 @@
   .dashboard-invoice-close,
   .invoice-confirm-close,
   .notification-panel-close,
-  .pf-confirm-close,
-  .settings-avatar-picker-close
+  .pf-confirm-close
 ) {
   color: var(--pf-accent-text, #c4b5fd) !important;
   background: rgba(var(--pf-accent-rgb), 0.1) !important;
@@ -336,8 +334,7 @@
   .dashboard-invoice-close,
   .invoice-confirm-close,
   .notification-panel-close,
-  .pf-confirm-close,
-  .settings-avatar-picker-close
+  .pf-confirm-close
 ) {
   color: var(--pf-accent, #8b5cf6) !important;
 }
@@ -349,8 +346,7 @@
   .dashboard-invoice-close,
   .invoice-confirm-close,
   .notification-panel-close,
-  .pf-confirm-close,
-  .settings-avatar-picker-close
+  .pf-confirm-close
 ):is(:hover, :focus-visible) {
   background: rgba(var(--pf-accent-rgb), 0.22) !important;
   box-shadow:
@@ -365,8 +361,7 @@
   .dashboard-invoice-close,
   .invoice-confirm-close,
   .notification-panel-close,
-  .pf-confirm-close,
-  .settings-avatar-picker-close
+  .pf-confirm-close
 ) svg {
   transition: transform 0.3s var(--pf-ease-spring);
 }
@@ -378,8 +373,7 @@
   .dashboard-invoice-close,
   .invoice-confirm-close,
   .notification-panel-close,
-  .pf-confirm-close,
-  .settings-avatar-picker-close
+  .pf-confirm-close
 ):hover svg {
   transform: rotate(90deg);
 }
@@ -392,8 +386,7 @@
   .dashboard-invoice-close,
   .invoice-confirm-close,
   .notification-panel-close,
-  .pf-confirm-close,
-  .settings-avatar-picker-close
+  .pf-confirm-close
 ):active {
   transform: scale(0.9);
 }
@@ -491,7 +484,6 @@
   .invoice-confirm-close,
   .notification-panel-close,
   .pf-confirm-close,
-  .settings-avatar-picker-close,
   .pf-toast-close
 ) {
   /* Quadrado perfeito, cantos arredondados, X centralizado */
@@ -522,7 +514,6 @@
   .invoice-confirm-close,
   .notification-panel-close,
   .pf-confirm-close,
-  .settings-avatar-picker-close,
   .pf-toast-close
 ) svg {
   display: block !important;
@@ -542,7 +533,6 @@
   .invoice-confirm-close,
   .notification-panel-close,
   .pf-confirm-close,
-  .settings-avatar-picker-close,
   .pf-toast-close
 ):is(:hover, :focus-visible, :active) svg {
   transform: rotate(90deg);
@@ -555,4 +545,426 @@
   border: 1px solid rgba(var(--pf-accent-rgb), 0.45) !important;
   box-shadow: 0 0 calc(6px + var(--pf-neon-strength, 0.15) * 40px) rgba(var(--pf-accent-rgb), calc(0.15 + var(--pf-neon-strength, 0.15))) !important;
   transition: transform 0.25s var(--pf-ease-spring), background 0.25s ease !important;
+}
+
+/* ---------- 9. Pop-ups de confirmação em vidro ---------- */
+
+:root[data-pf-glass] :is(.pf-confirm-dialog, .app-dialog, .invoice-confirm-panel, .limit-alert-modal, .dashboard-card-modal) {
+  background: var(--pf-glass-bg-strong) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  box-shadow:
+    0 30px 70px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 40px rgba(var(--pf-accent-rgb), calc(0.06 + var(--pf-neon-strength, 0.15) * 0.4)) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  backdrop-filter: blur(28px) saturate(170%);
+  color: var(--pf-text, #eef0f7);
+}
+
+:root[data-pf-theme='light'][data-pf-glass] :is(.pf-confirm-dialog, .app-dialog, .invoice-confirm-panel, .limit-alert-modal, .dashboard-card-modal) {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+/* Borda brilhante de vidro nos pop-ups */
+:root[data-pf-glass] :is(.pf-confirm-dialog, .app-dialog, .invoice-confirm-panel, .limit-alert-modal) {
+  position: relative;
+}
+
+:root[data-pf-glass] :is(.pf-confirm-dialog, .app-dialog, .invoice-confirm-panel, .limit-alert-modal)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--pf-glass-rim);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* Fundo escurecido com desfoque, mais leve no tema claro */
+:root[data-pf-glass] :is(.pf-confirm-overlay, .app-dialog-overlay, .invoice-confirm-overlay, .limit-alert-overlay) {
+  background: rgba(6, 8, 16, 0.5) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
+}
+
+:root[data-pf-theme='light'][data-pf-glass] :is(.pf-confirm-overlay, .app-dialog-overlay, .invoice-confirm-overlay, .limit-alert-overlay) {
+  background: rgba(30, 36, 60, 0.3) !important;
+}
+
+/* Botão "cancelar" em vidro; ícone na cor do tema */
+:root[data-pf-glass] :is(.pf-confirm-cancel, .invoice-confirm-cancel) {
+  background: var(--pf-control-bg) !important;
+  border: 1px solid var(--pf-control-border) !important;
+  color: var(--pf-text, #eef0f7) !important;
+}
+
+:root[data-pf-glass] .app-dialog-icon {
+  color: var(--pf-accent-ink) !important;
+  background: rgba(var(--pf-accent-rgb), 0.14) !important;
+}
+
+:root[data-pf-glass] .app-dialog-confirm {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%),
+    var(--pf-accent, #8b5cf6) !important;
+  color: var(--pf-accent-contrast, #ffffff) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Textos dos pop-ups legíveis no tema claro */
+:root[data-pf-theme='light'][data-pf-glass] :is(.pf-confirm-dialog, .app-dialog, .invoice-confirm-panel, .limit-alert-modal) :is(h2, h3, strong) {
+  color: var(--pf-text, #182033);
+}
+
+/* ---------- 10. Período (Dashboard) e Planejamento manual ---------- */
+
+/* Bloco "Período" com os seletores de mês e ano */
+:root[data-pf-glass] .dashboard-month-selector {
+  background: var(--pf-glass-bg) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  box-shadow: var(--pf-glass-shadow) !important;
+  -webkit-backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+  backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+}
+
+:root[data-pf-glass] .dashboard-dropdown-trigger {
+  background: var(--pf-control-bg) !important;
+  border: 1px solid var(--pf-control-border) !important;
+  color: var(--pf-text, #eef0f7) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Planejamento manual: caixas internas e itens da lista */
+:root[data-pf-glass] :is(
+  .manual-forecast-summary,
+  .manual-forecast-summary-item,
+  .manual-forecast-summary-result,
+  .manual-forecast-item,
+  .monthly-forecast-footer
+) {
+  background: var(--pf-control-bg) !important;
+  border: 1px solid var(--pf-control-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14) !important;
+}
+
+:root[data-pf-glass] .manual-forecast-summary {
+  background: var(--pf-glass-bg) !important;
+}
+
+/* Perfil destacado quando Configurações está aberta (no computador ela
+   não aparece mais no menu lateral) */
+.pf-sidenav-profile.is-active {
+  border-color: rgba(var(--pf-accent-rgb), 0.55) !important;
+  background: rgba(var(--pf-accent-rgb), 0.16) !important;
+  box-shadow: 0 0 18px rgba(var(--pf-accent-rgb), calc(0.1 + var(--pf-neon-strength, 0.15)));
+}
+
+:root[data-pf-glass] .manual-forecast-summary-result {
+  padding: 12px 14px !important;
+  border-radius: 14px !important;
+  margin-top: 10px;
+}
+
+/* ---------- 11. Sem marcas de toque/clique ---------- */
+
+/* Sem o "flash" azul do Android ao tocar em botões, links e gráficos */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Sem contorno ao clicar com o mouse ou tocar com o dedo.
+   (Quem navega pelo teclado continua vendo o contorno: :focus-visible.) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Gráficos: nunca mostram a borda de foco ao clicar */
+:is(
+  .recharts-wrapper,
+  .recharts-surface,
+  .recharts-sector,
+  .recharts-rectangle,
+  .recharts-layer,
+  .recharts-curve,
+  .recharts-dot,
+  .pf-donut,
+  .pf-donut svg,
+  .pf-donut-arc,
+  .pf-bars,
+  .pf-bar
+),
+:is(
+  .recharts-wrapper,
+  .recharts-surface,
+  .recharts-sector,
+  .recharts-rectangle,
+  .recharts-layer,
+  .recharts-curve,
+  .recharts-dot,
+  .pf-donut,
+  .pf-donut svg,
+  .pf-donut-arc
+):is(:focus, :focus-visible, :active) {
+  outline: none !important;
+  box-shadow: none;
+}
+
+/* Evita a seleção azul de texto ao tocar rápido em gráficos e botões */
+:is(.recharts-wrapper, .pf-donut, button, .pf-nav-item, .pf-sheet-item, .pf-cal-day) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ---------- 12. Perfil: nome junto do cartão, foto e seletor de cor ---------- */
+
+.settings-profile-card {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+}
+
+.settings-profile-identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.settings-profile-name {
+  margin: 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--pf-control-border, rgba(255, 255, 255, 0.1));
+}
+
+.settings-profile-avatar,
+.pf-sidenav-avatar {
+  overflow: hidden;
+}
+
+.settings-avatar-photo,
+.pf-sidenav-avatar-photo,
+.settings-avatar-option-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.settings-avatar-option-photo {
+  padding: 2px !important;
+  overflow: hidden;
+}
+
+/* Botão "usar uma foto": contorno tracejado na cor de destaque */
+.settings-avatar-upload {
+  border-style: dashed !important;
+  border-color: rgba(var(--pf-accent-rgb), 0.6) !important;
+  color: var(--pf-accent-ink, var(--pf-accent)) !important;
+}
+
+.settings-avatar-upload:hover {
+  background: rgba(var(--pf-accent-rgb), 0.14) !important;
+}
+
+/* Seletor de cor do degradê */
+.settings-avatar-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 380px;
+  margin-top: 4px;
+  padding: 0;
+  background: none;
+  border: none;
+  animation: pf-menu-in 0.28s var(--pf-ease-spring, ease) both;
+}
+
+:root[data-pf-glass] .avatar-color-picker {
+  background: var(--pf-glass-bg) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  box-shadow: var(--pf-glass-shadow, 0 10px 30px rgba(0, 0, 0, 0.2)), inset 0 1px 0 rgba(255, 255, 255, 0.16) !important;
+  -webkit-backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+  backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+}
+
+:root[data-pf-glass] .avatar-color-picker-hex input {
+  background: var(--pf-control-bg) !important;
+  border-color: var(--pf-control-border) !important;
+}
+
+.settings-avatar-picker-close {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  min-height: 38px;
+  padding: 9px 22px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.5);
+  background: rgba(var(--pf-accent-rgb), 0.16);
+  color: var(--pf-accent-ink, var(--pf-accent));
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), background 0.2s ease;
+}
+
+.settings-avatar-picker-close:hover {
+  background: rgba(var(--pf-accent-rgb), 0.26);
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+.settings-avatar-picker-close:active {
+  transform: scale(0.95);
+}
+
+/* ---------- 13. Janela de ajuste da foto ---------- */
+
+.pf-photo-editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding-top: 6px;
+}
+
+.pf-photo-stage {
+  position: relative;
+  max-width: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  background:
+    repeating-conic-gradient(rgba(127, 127, 127, 0.16) 0 25%, transparent 0 50%) 0 0 / 20px 20px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pf-photo-stage:active {
+  cursor: grabbing;
+}
+
+.pf-photo-stage:focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: 4px;
+}
+
+.pf-photo-stage img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.pf-photo-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.2),
+    0 0 18px rgba(var(--pf-accent-rgb), 0.45);
+  pointer-events: none;
+}
+
+.pf-photo-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+  color: var(--pf-text-secondary);
+  font-size: 13px;
+}
+
+.pf-photo-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.pf-photo-zoom input[type='range'] {
+  flex: 1;
+  accent-color: var(--pf-accent);
+  cursor: pointer;
+}
+
+.pf-photo-zoom-button,
+.pf-photo-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 11px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, var(--pf-surface-secondary));
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), border-color 0.2s ease;
+}
+
+.pf-photo-zoom-button {
+  width: 36px;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.pf-photo-zoom-button:hover:not(:disabled),
+.pf-photo-button:hover:not(:disabled) {
+  border-color: rgba(var(--pf-accent-rgb), 0.6);
+}
+
+.pf-photo-zoom-button:active:not(:disabled),
+.pf-photo-button:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.pf-photo-zoom-button:disabled,
+.pf-photo-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.pf-photo-tools,
+.pf-photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.pf-photo-actions {
+  justify-content: flex-end;
+  padding-top: 14px;
+  border-top: 1px solid var(--pf-control-border, var(--pf-border));
+}
+
+.pf-photo-actions .primary-button:disabled {
+  opacity: 0.5;
+}
+
+@media (max-width: 480px) {
+  .pf-photo-actions > * {
+    flex: 1;
+    justify-content: center;
+  }
 }

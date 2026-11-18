@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   UserRound,
   Palette,
@@ -19,9 +19,11 @@ import {
   DatabaseBackup,
   RefreshCw,
   GraduationCap,
+  ImagePlus,
 } from 'lucide-react'
 
 import AvatarColorPicker from '../components/AvatarColorPicker'
+import AvatarPhotoEditor from '../components/AvatarPhotoEditor'
 import { requestOpenTutorial } from '../services/onboardingStorage'
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
@@ -129,15 +131,58 @@ export default function Settings({
 
 
 const [selectedAvatar, setSelectedAvatar] =
-  useState<ProfileAvatarId>(() => {
-    const saved = getUserPreferences().avatar
+  useState<ProfileAvatarId | 'photo'>(() => {
+    const saved = getUserPreferences()
+
+    if (saved.avatar === 'photo' && saved.avatarImage) return 'photo'
 
     return profileAvatars.some(
-      avatar => avatar.id === saved
+      avatar => avatar.id === saved.avatar
     )
-      ? (saved as ProfileAvatarId)
+      ? (saved.avatar as ProfileAvatarId)
       : 'initial'
   })
+
+// Foto de perfil já recortada (data URL) e a foto aberta no editor
+const [avatarImage, setAvatarImage] = useState<string | undefined>(
+  () => getUserPreferences().avatarImage
+)
+const [photoSource, setPhotoSource] = useState<string | null>(null)
+const photoInput = useRef<HTMLInputElement>(null)
+
+function openPhotoPicker() {
+  photoInput.current?.click()
+}
+
+function handlePhotoChosen(event: React.ChangeEvent<HTMLInputElement>) {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+
+  if (!file.type.startsWith('image/')) {
+    setToast({ id: crypto.randomUUID(), type: 'error', message: 'Escolha um arquivo de imagem.' })
+    return
+  }
+
+  if (photoSource) URL.revokeObjectURL(photoSource)
+  setPhotoSource(URL.createObjectURL(file))
+}
+
+function closePhotoEditor() {
+  if (photoSource) URL.revokeObjectURL(photoSource)
+  setPhotoSource(null)
+}
+
+function handlePhotoConfirmed(dataUrl: string) {
+  setAvatarImage(dataUrl)
+  setSelectedAvatar('photo')
+  closePhotoEditor()
+  setToast({
+    id: crypto.randomUUID(),
+    type: 'success',
+    message: 'Foto ajustada! Toque em “Salvar alterações” para usar.',
+  })
+}
 
 const [userName, setUserName] = useState(
   () => getUserPreferences().name
@@ -183,6 +228,18 @@ const [notificationPreferences, setNotificationPreferences] =
   )
 
 
+function renderAvatarContent(size: number) {
+  if (selectedAvatar === 'photo' && avatarImage) {
+    return <img className="settings-avatar-photo" src={avatarImage} alt="" />
+  }
+
+  const AvatarIcon = profileAvatars.find(item => item.id === selectedAvatar)?.icon
+
+  return AvatarIcon
+    ? <AvatarIcon size={size} strokeWidth={1.8} />
+    : userName.trim().charAt(0).toLocaleUpperCase('pt-BR') || 'U'
+}
+
 function handleSaveNotifications() {
   try {
     saveNotificationPreferences(notificationPreferences)
@@ -224,6 +281,7 @@ saveUserPreferences({
   avatar: selectedAvatar,
   avatarColor1,
   avatarColor2,
+  ...(avatarImage ? { avatarImage } : {}),
 })
 window.dispatchEvent(
   new Event('personal-finance-profile-updated')
@@ -343,34 +401,43 @@ return (
 
 
 <div className="settings-profile-card">
-<div
-  className="settings-profile-avatar"
-  style={{
-    background: avatarGradient,
-    color: '#ffffff',
-  }}
->
-    {selectedAvatar === 'initial' ? (
-      userName.trim().charAt(0).toLocaleUpperCase('pt-BR') || 'U'
-    ) : (
-      (() => {
-        const avatar = profileAvatars.find(
-          item => item.id === selectedAvatar
-        )
+  <div className="settings-profile-identity">
+    <div
+      className="settings-profile-avatar"
+      style={{
+        background: avatarGradient,
+        color: '#ffffff',
+      }}
+    >
+      {renderAvatarContent(28)}
+    </div>
 
-        const AvatarIcon = avatar?.icon
-
-        return AvatarIcon
-          ? <AvatarIcon size={28} strokeWidth={1.8} />
-          : null
-      })()
-    )}
+    <div className="settings-profile-info">
+      <strong>{userName.trim() || 'Meu perfil'}</strong>
+      <span>Perfil pessoal</span>
+      <small>Informações armazenadas neste dispositivo</small>
+    </div>
   </div>
 
-  <div className="settings-profile-info">
-    <strong>{userName.trim() || 'Meu perfil'}</strong>
-    <span>Perfil pessoal</span>
-    <small>Informações armazenadas neste dispositivo</small>
+  <div className="settings-form-field settings-profile-name">
+    <label htmlFor="settings-user-name">
+      Nome de exibição
+    </label>
+
+    <input
+      id="settings-user-name"
+      type="text"
+      value={userName}
+      onChange={event => setUserName(event.target.value)}
+      placeholder="Como deseja ser chamado?"
+      maxLength={60}
+      autoComplete="nickname"
+    />
+
+    <p>
+      Esse nome será utilizado na saudação do Dashboard
+      e no perfil do aplicativo.
+    </p>
   </div>
 </div>
 
@@ -407,10 +474,52 @@ return (
         </button>
       )
     })}
+
+    {avatarImage && (
+      <button
+        type="button"
+        className={`settings-avatar-option settings-avatar-option-photo ${
+          selectedAvatar === 'photo' ? 'selected' : ''
+        }`}
+        aria-label="Avatar Minha foto"
+        aria-pressed={selectedAvatar === 'photo'}
+        onClick={() => setSelectedAvatar('photo')}
+      >
+        <img src={avatarImage} alt="" />
+        <small>Minha foto</small>
+      </button>
+    )}
+
+    <button
+      type="button"
+      className="settings-avatar-option settings-avatar-upload"
+      aria-label={avatarImage ? 'Trocar foto do perfil' : 'Usar uma foto minha'}
+      title={avatarImage ? 'Trocar foto' : 'Usar uma foto'}
+      onClick={openPhotoPicker}
+    >
+      <ImagePlus size={21} strokeWidth={1.8} />
+      <small>Foto</small>
+    </button>
+
+    <input
+      ref={photoInput}
+      type="file"
+      accept="image/*"
+      hidden
+      onChange={handlePhotoChosen}
+    />
   </div>
 </div>
 
+<AvatarPhotoEditor
+  source={photoSource}
+  onCancel={closePhotoEditor}
+  onConfirm={handlePhotoConfirmed}
+  onPickAnother={openPhotoPicker}
+/>
 
+
+{selectedAvatar !== 'photo' && (
 <div className="settings-avatar-gradient">
   <div className="settings-avatar-gradient-heading">
     <strong>Personalizar degradê</strong>
@@ -487,29 +596,7 @@ return (
 
   </div>
 </div>
-
-
-
-    <div className="settings-form-field">
-      <label htmlFor="settings-user-name">
-        Nome de exibição
-      </label>
-
-      <input
-        id="settings-user-name"
-        type="text"
-        value={userName}
-        onChange={event => setUserName(event.target.value)}
-        placeholder="Como deseja ser chamado?"
-        maxLength={60}
-        autoComplete="nickname"
-      />
-
-      <p>
-        Esse nome será utilizado na saudação do Dashboard
-        e no perfil do aplicativo.
-      </p>
-    </div>
+)}
 
     <div className="settings-form-actions">
       <button type="submit" className="primary-button">

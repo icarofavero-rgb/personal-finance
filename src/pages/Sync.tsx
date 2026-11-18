@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import ProcessOverlay, { type ProcessState } from '../components/ProcessOverlay'
 import {
+  AlertTriangle,
   ArrowLeftRight,
   CheckCircle2,
   Copy,
@@ -53,6 +55,25 @@ const STAGE_LABELS: Record<SyncStage, string> = {
   receiving: 'Recebendo dados do outro aparelho…',
   applying: 'Juntando e salvando os dados com segurança…',
   'waiting-peer': 'Aguardando o outro aparelho terminar…',
+}
+
+/** Aviso mostrado embaixo dos QR codes. */
+function WifiWarning() {
+  return (
+    <p className="pf-wifi-warning" role="note">
+      <AlertTriangle size={18} />
+      <span>
+        <strong>Atenção:</strong> o backup somente funcionará quando ambos os dispositivos
+        estiverem conectados à mesma rede Wi-Fi.
+      </span>
+    </p>
+  )
+}
+
+/** Deixa o símbolo girar ao menos um instante (operações muito rápidas). */
+function minimumSpin(started: number, minimum = 900): Promise<void> {
+  const remaining = minimum - (Date.now() - started)
+  return remaining > 0 ? new Promise(resolve => setTimeout(resolve, remaining)) : Promise.resolve()
 }
 
 function errorMessage(error: unknown, fallback: string): string {
@@ -128,9 +149,15 @@ export default function Sync() {
   // Fecha a conexão ao sair da tela.
   useEffect(() => closeConnections, [closeConnections])
 
+  // Tela de processamento (símbolo girando → check verde ou X vermelho)
+  const [process, setProcess] = useState<{ state: ProcessState; detail?: string }>({ state: 'idle' })
+  const closeProcess = useCallback(() => setProcess({ state: 'idle' }), [])
+
   const startSession = useCallback(
     async (channel: TextChannel) => {
       setStep({ name: 'syncing', stage: 'connected' })
+      setProcess({ state: 'working' })
+      const started = Date.now()
 
       try {
         const result = await runSyncSession(channel, {
@@ -139,14 +166,19 @@ export default function Sync() {
           onStage: stage => setStep({ name: 'syncing', stage }),
         })
 
+        await minimumSpin(started)
         setStep({
           name: 'done',
           local: result.local.summary,
           peer: result.peerSummary,
           changed: result.local.changed,
         })
+        setProcess({ state: 'success' })
       } catch (error) {
-        setStep({ name: 'error', message: errorMessage(error, 'A sincronização falhou.') })
+        await minimumSpin(started)
+        const message = errorMessage(error, 'A sincronização falhou.')
+        setStep({ name: 'error', message })
+        setProcess({ state: 'error', detail: message })
       } finally {
         // Dá tempo da última mensagem chegar ao outro lado antes de fechar.
         setTimeout(closeConnections, 1500)
@@ -176,11 +208,14 @@ export default function Sync() {
     if (!host) return
 
     setStep({ name: 'preparing', message: 'Conectando ao outro aparelho…' })
+    setProcess({ state: 'working' })
 
     try {
       await startSession(await host.acceptAnswer(code))
     } catch (error) {
-      setStep({ name: 'error', message: errorMessage(error, 'Não foi possível conectar.') })
+      const message = errorMessage(error, 'Não foi possível conectar.')
+      setStep({ name: 'error', message })
+      setProcess({ state: 'error', detail: message })
     }
   }
 
@@ -197,7 +232,9 @@ export default function Sync() {
 
       await startSession(await guest.connected)
     } catch (error) {
-      setStep({ name: 'error', message: errorMessage(error, 'Não foi possível conectar.') })
+      const message = errorMessage(error, 'Não foi possível conectar.')
+      setStep({ name: 'error', message })
+      setProcess({ state: 'error', detail: message })
     }
   }
 
@@ -228,6 +265,8 @@ export default function Sync() {
 
     setFileError(null)
     setFileResult(null)
+    setProcess({ state: 'working' })
+    const started = Date.now()
 
     try {
       let parsed: unknown
@@ -238,9 +277,15 @@ export default function Sync() {
         throw new Error('O arquivo escolhido não é um arquivo de sincronização.')
       }
 
-      setFileResult(applyRemoteSyncPackage(parsed))
+      const result = applyRemoteSyncPackage(parsed)
+      await minimumSpin(started)
+      setFileResult(result)
+      setProcess({ state: 'success' })
     } catch (error) {
-      setFileError(errorMessage(error, 'Não foi possível sincronizar com o arquivo.'))
+      await minimumSpin(started)
+      const message = errorMessage(error, 'Não foi possível sincronizar com o arquivo.')
+      setFileError(message)
+      setProcess({ state: 'error', detail: message })
     }
   }
 
@@ -299,6 +344,7 @@ export default function Sync() {
             <span className="sync-step-number">Passo 1 de 2</span>
             <h3>No outro aparelho, toque em “Ler QR code” e aponte para este código</h3>
             <QrCodeImage value={step.offerCode} label="QR code de convite" />
+            <WifiWarning />
             <CopyCode code={step.offerCode} />
             <button
               type="button"
@@ -344,6 +390,7 @@ export default function Sync() {
             <span className="sync-step-number">Passo 2 de 2</span>
             <h3>Mostre este QR code para o primeiro aparelho ler</h3>
             <QrCodeImage value={step.answerCode} label="QR code de resposta" />
+            <WifiWarning />
             <CopyCode code={step.answerCode} />
             <div className="sync-status">
               <RefreshCw size={18} className="sync-spin" />
@@ -514,6 +561,13 @@ export default function Sync() {
           <li>Sincronize apenas aparelhos <strong>seus</strong>: os dados dos dois ficam iguais.</li>
         </ul>
       </div>
+
+      <ProcessOverlay
+        state={process.state}
+        detail={process.detail}
+        workingText="Sincronizando seus dados…"
+        onClose={closeProcess}
+      />
     </section>
   )
 }

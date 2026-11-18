@@ -16,6 +16,8 @@ import {
   DatabaseBackup,
   LayoutDashboard,
   LayoutGrid,
+  LifeBuoy,
+  LogOut,
   Plus,
   RefreshCw,
   Settings as SettingsIcon,
@@ -26,6 +28,8 @@ import {
 } from 'lucide-react'
 
 import type { DeviceClass } from '../hooks/useDeviceClass'
+import { Capacitor } from '@capacitor/core'
+import { exitApp } from '../services/appExit'
 
 type IconType = ComponentType<{ size?: number; strokeWidth?: number }>
 
@@ -51,8 +55,26 @@ export const MAIN_NAV: NavItem[] = [
 export const SECONDARY_NAV: NavItem[] = [
   { page: 'Sincronização', label: 'Sincronização', shortLabel: 'Sincronizar', icon: RefreshCw },
   { page: 'Backup e restauração', label: 'Backup', icon: DatabaseBackup },
+  { page: 'Central de ajuda', label: 'Central de ajuda', shortLabel: 'Ajuda', icon: LifeBuoy },
   { page: 'Configurações', label: 'Configurações', shortLabel: 'Ajustes', icon: SettingsIcon },
 ]
+
+/** Tablet deitado (paisagem): mais largo que alto. */
+function useLandscape(): boolean {
+  const [landscape, setLandscape] = useState(() => window.innerWidth > window.innerHeight)
+
+  useEffect(() => {
+    const update = () => setLandscape(window.innerWidth > window.innerHeight)
+    window.addEventListener('resize', update)
+    window.addEventListener('orientationchange', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('orientationchange', update)
+    }
+  }, [])
+
+  return landscape
+}
 
 /** Ordem de todas as páginas — usada para saber a direção da transição. */
 export const PAGE_ORDER = [...MAIN_NAV, ...SECONDARY_NAV].map(item => item.page)
@@ -185,7 +207,19 @@ function SideNavigation({
 }: AppNavigationProps) {
   const listRef = useRef<HTMLDivElement>(null)
   const compact = device === 'tablet'
-  const indicator = useIndicator(listRef, activePage, 'y')
+  const landscape = useLandscape()
+
+  // Computador (e tablet deitado): Configurações sai do menu lateral e
+  // fica só no botão do perfil, lá embaixo. Celular e tablet em pé mantêm.
+  const showSettings = device === 'tablet' && !landscape
+  const secondaryItems = SECONDARY_NAV.filter(item => item.page !== 'Configurações' || showSettings)
+
+  // Com Configurações aberta pelo perfil, a pílula some do menu.
+  const indicator = useIndicator(
+    listRef,
+    activePage === 'Configurações' && !showSettings ? null : activePage,
+    'y'
+  )
 
   return (
     <aside className={`pf-sidenav ${compact ? 'is-rail' : ''}`} aria-label="Navegação principal">
@@ -226,7 +260,7 @@ function SideNavigation({
 
         {!compact && <span className="pf-sidenav-section">Seus dados</span>}
         {compact && <span className="pf-sidenav-divider" aria-hidden="true" />}
-        {SECONDARY_NAV.map(item => (
+        {secondaryItems.map(item => (
           <NavButton
             key={item.page}
             item={item}
@@ -239,7 +273,7 @@ function SideNavigation({
 
       <button
         type="button"
-        className="pf-sidenav-profile"
+        className={`pf-sidenav-profile ${activePage === 'Configurações' ? 'is-active' : ''}`}
         onClick={() => onNavigate('Configurações')}
         aria-label="Abrir meu perfil"
         title="Abrir meu perfil"
@@ -289,6 +323,7 @@ function PhoneNavigation({ activePage, onNavigate, onNewTransaction }: AppNaviga
 
   const tabs = MAIN_NAV.filter(item => PHONE_TABS.includes(item.page))
   const moreItems = [...MAIN_NAV.filter(item => !PHONE_TABS.includes(item.page)), ...SECONDARY_NAV]
+  const isNative = Capacitor.isNativePlatform()
 
   function go(page: string) {
     onNavigate(page)
@@ -385,6 +420,21 @@ function PhoneNavigation({ activePage, onNavigate, onNewTransaction }: AppNaviga
                   </button>
                 )
               })}
+
+              {/* Sair do app (só no Android; no navegador basta fechar a aba) */}
+              {isNative && (
+                <button
+                  type="button"
+                  className="pf-sheet-item pf-sheet-exit"
+                  style={{ '--pf-stagger': moreItems.length } as React.CSSProperties}
+                  onClick={() => void exitApp()}
+                >
+                  <span className="pf-sheet-icon">
+                    <LogOut size={22} />
+                  </span>
+                  <span>Sair</span>
+                </button>
+              )}
             </div>
           </div>
         </div>

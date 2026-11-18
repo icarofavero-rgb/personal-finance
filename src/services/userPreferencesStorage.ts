@@ -1,9 +1,10 @@
-
 export type UserPreferences = {
   name: string
   avatar: string
   avatarColor1: string
   avatarColor2: string
+  /** Foto escolhida pelo usuário (já recortada pelo app), em data URL. */
+  avatarImage?: string
 }
 
 const STORAGE_KEY = 'personal-finance-user-preferences'
@@ -25,12 +26,22 @@ const VALID_AVATARS = [
   'gamer',
   'rocket',
   'star',
+  'photo',
 ]
 
 function isValidColor(value: unknown): value is string {
   return (
     typeof value === 'string' &&
     /^#[0-9a-fA-F]{6}$/.test(value)
+  )
+}
+
+/** Aceita só imagens pequenas, já recortadas pelo app (até ~300 KB). */
+export function isValidAvatarImage(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    value.length < 400_000 &&
+    /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(value)
   )
 }
 
@@ -53,10 +64,17 @@ export function getUserPreferences(): UserPreferences {
       return { ...DEFAULT_PREFERENCES }
     }
 
+    const avatarImage =
+      'avatarImage' in parsed && isValidAvatarImage(parsed.avatarImage)
+        ? parsed.avatarImage
+        : undefined
+
     const avatar =
       'avatar' in parsed &&
       typeof parsed.avatar === 'string' &&
-      VALID_AVATARS.includes(parsed.avatar)
+      VALID_AVATARS.includes(parsed.avatar) &&
+      // "Foto" sem uma imagem válida volta para a inicial do nome
+      (parsed.avatar !== 'photo' || avatarImage !== undefined)
         ? parsed.avatar
         : DEFAULT_PREFERENCES.avatar
 
@@ -77,6 +95,7 @@ export function getUserPreferences(): UserPreferences {
       avatar,
       avatarColor1,
       avatarColor2,
+      ...(avatarImage ? { avatarImage } : {}),
     }
   } catch {
     return { ...DEFAULT_PREFERENCES }

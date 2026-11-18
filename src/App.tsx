@@ -11,6 +11,9 @@ import TransactionsCategoryChart from './components/TransactionsCategoryChart'
 import { createPortal } from 'react-dom'
 import { useState, useMemo, useEffect, useRef, useCallback, useTransition } from 'react'
 import Deferred from './components/Deferred'
+import ProcessOverlay, { type ProcessState } from './components/ProcessOverlay'
+import { installBackButton } from './services/appExit'
+import HelpCenter from './pages/HelpCenter'
 import {
   ArrowLeftRight,
   ChartNoAxesCombined,
@@ -560,6 +563,19 @@ if (previousPage !== activePage) {
   )
 }
 
+// Botão "voltar" do Android: fecha janelas, volta ao Dashboard e só sai
+// do app com dois toques seguidos (ou pelo botão "Sair").
+const activePageRef = useRef(activePage)
+activePageRef.current = activePage
+
+useEffect(() => {
+  return installBackButton({
+    isHome: () => activePageRef.current === 'Dashboard',
+    goHome: () => navigate('Dashboard'),
+    notify: message => setToast({ id: crypto.randomUUID(), type: 'success', message }),
+  })
+}, [navigate])
+
 // Cada página nova começa do topo; o fundo animado pausa durante a troca.
 useEffect(() => {
   markBusy(450)
@@ -875,6 +891,15 @@ const [toast, setToast] = useState<ToastMessage | null>(null)
 // Referência estável: evita reiniciar o temporizador do aviso a cada renderização.
 const closeToast = useCallback(() => setToast(null), [])
 
+// Tela de processamento do backup (exportar/restaurar).
+const [backupProcess, setBackupProcess] = useState<{
+  state: ProcessState
+  working?: string
+  success?: string
+  detail?: string
+}>({ state: 'idle' })
+const closeBackupProcess = useCallback(() => setBackupProcess({ state: 'idle' }), [])
+
 const [pendingBackupFile, setPendingBackupFile] =
   useState<File | null>(null)
 
@@ -892,30 +917,31 @@ function showToast(
 }
 
 async function handleExportBackup() {
-  console.log('[BACKUP] Função executada')
-  // Notifica imediatamente ao clicar.
-  showToast(
-    'success',
-    'Preparando seu backup financeiro...'
-  )
+  // Tela de processamento: símbolo girando → check verde ou X vermelho.
+  setBackupProcess({ state: 'working', working: 'Gerando seu backup…' })
+  const started = Date.now()
+  const waitSpin = () => new Promise(resolve => setTimeout(resolve, Math.max(0, 900 - (Date.now() - started))))
 
   try {
     const platform = await exportBackup()
+    await waitSpin()
 
-if (platform === 'android') {
-  showToast('success', 'Backup gerado! Confira se o arquivo foi salvo.')
-} else {
-  showToast('success', 'Backup realizado com sucesso! Verifique a pasta de downloads.')
-}
+    setBackupProcess({
+      state: 'success',
+      success: 'Backup realizado com sucesso!',
+      detail:
+        platform === 'android'
+          ? 'Confira se o arquivo foi salvo onde você escolheu.'
+          : 'O arquivo foi salvo na pasta de downloads.',
+    })
   } catch (error) {
     console.error('Erro ao exportar backup:', error)
+    await waitSpin()
 
-    showToast(
-      'error',
-      error instanceof Error
-        ? error.message
-        : 'Não foi possível preparar o backup.'
-    )
+    setBackupProcess({
+      state: 'error',
+      detail: error instanceof Error ? error.message : 'Não foi possível preparar o backup.',
+    })
   }
 }
 
@@ -1792,6 +1818,9 @@ async function handleConfirmImportBackup() {
   if (!file || backupImportRunning.current) return
 
   backupImportRunning.current = true
+  setBackupProcess({ state: 'working', working: 'Restaurando seu backup…' })
+  const started = Date.now()
+  const waitSpin = () => new Promise(resolve => setTimeout(resolve, Math.max(0, 900 - (Date.now() - started))))
 
   try {
     // Revalida a segurança antes de executar.
@@ -1823,19 +1852,16 @@ async function handleConfirmImportBackup() {
     applyVisualStyle(appearance.visualStyle)
     applyAnimationPreference(appearance.animations)
 
-    showToast(
-      'success',
-      'Backup restaurado com sucesso!'
-    )
+    await waitSpin()
+    setBackupProcess({ state: 'success', success: 'Backup restaurado com sucesso!' })
   } catch (error) {
     console.error('Erro ao restaurar backup:', error)
+    await waitSpin()
 
-    showToast(
-      'error',
-      error instanceof Error
-        ? error.message
-        : 'Não foi possível restaurar o backup.'
-    )
+    setBackupProcess({
+      state: 'error',
+      detail: error instanceof Error ? error.message : 'Não foi possível restaurar o backup.',
+    })
   } finally {
     backupImportRunning.current = false
     setPendingBackupFile(null)
@@ -1891,7 +1917,9 @@ function handleDashboardInvoicePayment(
         profileName={userName}
         profileBackground={sidebarAvatarGradient}
         profileAvatar={
-          SidebarAvatarIcon ? (
+          userPreferences.avatar === 'photo' && userPreferences.avatarImage ? (
+            <img className="pf-sidenav-avatar-photo" src={userPreferences.avatarImage} alt="" />
+          ) : SidebarAvatarIcon ? (
             <SidebarAvatarIcon size={22} strokeWidth={1.8} />
           ) : (
             userName.trim().charAt(0).toLocaleUpperCase('pt-BR') || 'U'
@@ -3458,6 +3486,8 @@ background:
 
 {activePage === 'Calendário' && <CalendarPage />}
 
+{activePage === 'Central de ajuda' && <HelpCenter />}
+
 {activePage === 'Sincronização' && <Sync />}
 
           {activePage === 'Relatórios' && (
@@ -4119,6 +4149,14 @@ options={[
   message={appAlert?.message ?? ''}
   onClose={() => setAppAlert(null)}
 />
+
+    <ProcessOverlay
+      state={backupProcess.state}
+      workingText={backupProcess.working}
+      successText={backupProcess.success}
+      detail={backupProcess.detail}
+      onClose={closeBackupProcess}
+    />
 
     {/* Aviso global: precisa ficar fora das páginas para aparecer em todas. */}
     <Toast
