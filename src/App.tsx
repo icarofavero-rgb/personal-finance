@@ -75,6 +75,7 @@ import { matchesSearch, summarize } from './services/transactionSearch'
 import BackupReminderBanner from './components/BackupReminderBanner'
 import MonthInsights from './components/MonthInsights'
 import RecurringManager from './components/RecurringManager'
+import StatementImport from './components/StatementImport'
 import {
   createRuleFromTransaction,
   getRecurringRules,
@@ -3364,7 +3365,17 @@ background:
                     <p>Suas movimentações financeiras</p>
                   </div>
 
-                  {activePage === 'Transações' && <RecurringManager />}
+                  {activePage === 'Transações' && (
+                    <div className="pf-tx-tools">
+                      <StatementImport
+                        onImported={count => {
+                          setTransactions(getTransactions())
+                          showToast('success', count === 1 ? '1 transação importada!' : `${count} transações importadas!`)
+                        }}
+                      />
+                      <RecurringManager />
+                    </div>
+                  )}
 
                   {activePage === 'Dashboard' && (
                     <button

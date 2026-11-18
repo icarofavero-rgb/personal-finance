@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 type PfModalProps = {
@@ -7,6 +8,8 @@ type PfModalProps = {
   subtitle?: string
   onClose: () => void
   children: ReactNode
+  /** classe extra (ex.: "is-wide" para janelas mais largas) */
+  className?: string
 }
 
 const CLOSE_DURATION = 240
@@ -16,7 +19,7 @@ const CLOSE_DURATION = 240
  * do app: no celular sobe de baixo; no computador aparece com "mola".
  * Fecha com Esc, tocando fora ou no X.
  */
-export default function PfModal({ open, title, subtitle, onClose, children }: PfModalProps) {
+export default function PfModal({ open, title, subtitle, onClose, children, className = '' }: PfModalProps) {
   const [rendered, setRendered] = useState(open)
   const [closing, setClosing] = useState(false)
   const timer = useRef<number | null>(null)
@@ -57,10 +60,12 @@ export default function PfModal({ open, title, subtitle, onClose, children }: Pf
 
   if (!rendered) return null
 
-  return (
+  // Portal: abre por cima da tela inteira, mesmo quando o botão está
+  // dentro de um bloco de vidro (que "prenderia" a janela dentro dele)
+  return createPortal(
     <div className={`modal-overlay ${closing ? 'is-closing' : ''}`} onClick={onClose}>
       <div
-        className="modal pf-modal"
+        className={`modal pf-modal ${className}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}
@@ -79,6 +84,7 @@ export default function PfModal({ open, title, subtitle, onClose, children }: Pf
 
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
