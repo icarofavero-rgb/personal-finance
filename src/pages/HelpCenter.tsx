@@ -26,6 +26,19 @@ import '../styles/help-center.css'
 /** Repositório público do projeto (onde as mensagens podem ser abertas). */
 const ISSUES_URL = 'https://github.com/icarofavero-rgb/personal-finance/issues/new'
 const DEVELOPER = 'Ícaro'
+const INSTAGRAM_USER = 'zi_crinho'
+const INSTAGRAM_URL = `https://www.instagram.com/${INSTAGRAM_USER}/`
+
+/** Ícone simples de câmera (estilo do Instagram) — o lucide não tem marcas. */
+function InstagramGlyph({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" />
+    </svg>
+  )
+}
 
 type Topic = {
   icon: typeof LifeBuoy
@@ -334,9 +347,25 @@ export default function HelpCenter() {
               </button>
             </div>
 
+            <a
+              className="pf-help-instagram"
+              href={INSTAGRAM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className="pf-help-instagram-icon">
+                <InstagramGlyph size={20} />
+              </span>
+              <span className="pf-help-instagram-text">
+                <strong>@{INSTAGRAM_USER}</strong>
+                <small>Mande uma mensagem direta no Instagram</small>
+              </span>
+              <ExternalLink size={16} />
+            </a>
+
             <p className="pf-help-note">
               “Enviar pelo GitHub” abre a página do projeto com a mensagem pronta (é preciso ter uma conta
-              gratuita no GitHub). Se preferir, copie a mensagem e envie diretamente ao {DEVELOPER}. Junto vão só
+              gratuita no GitHub). Se preferir, copie a mensagem e mande no Instagram @{INSTAGRAM_USER}. Junto vão só
               informações do aparelho (tipo e tamanho de tela) para ajudar a entender o problema — nenhum dado
               financeiro.
             </p>
