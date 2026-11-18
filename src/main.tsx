@@ -28,6 +28,7 @@ import {
 import './styles/experience.css'
 import './styles/liquid-ios.css'
 import './styles/christmas.css'
+import './styles/uniform.css'
 import { installBusyMarker } from './hooks/busyMarker'
 
 // Pausa o fundo animado enquanto a tela rola (mais fluidez no celular).

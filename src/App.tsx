@@ -1,9 +1,13 @@
 
 import {
   CATEGORY_GROUPS,
+  SUBCATEGORY_ICONS,
   getCategorySelection,
+  getTransactionVisual,
   buildCategoryValue,
 } from './services/categories'
+import CategoryIcon from './components/CategoryIcon'
+import TransactionsCategoryChart from './components/TransactionsCategoryChart'
 import { createPortal } from 'react-dom'
 import { useState, useMemo, useEffect, useRef, useCallback, useTransition } from 'react'
 import Deferred from './components/Deferred'
@@ -3134,6 +3138,15 @@ background:
 )}
 
 
+              {activePage === 'Transações' && (
+                <TransactionsCategoryChart
+                  transactions={transactions}
+                  month={filterMonth}
+                  category={filterCategory}
+                  type={filterType}
+                />
+              )}
+
               <section
   className={`panel transactions-panel ${
     activePage === 'Dashboard'
@@ -3246,9 +3259,20 @@ background:
                       )
                       .map(item => (
                         <div className="transaction" key={item.id}>
-                          <div className="transaction-icon">
-                            {item.type === 'income' ? '💰' : '💸'}
-                          </div>
+                          {(() => {
+                            // Ícone da subcategoria (ou da categoria) no lugar do emoji.
+                            const visual = getTransactionVisual(item.category, item.type)
+
+                            return (
+                              <div
+                                className="transaction-icon pf-tx-icon"
+                                style={{ '--tx-color': visual.color } as React.CSSProperties}
+                                title={visual.label}
+                              >
+                                <CategoryIcon icon={visual.icon} size={19} />
+                              </div>
+                            )
+                          })()}
 
                           <div className="transaction-info">
                             <strong>{item.description}</strong>
@@ -3662,6 +3686,8 @@ options={[
           ...selectedGroup.subcategories.map(item => ({
             value: item,
             label: item,
+            icon: SUBCATEGORY_ICONS[item] ?? selectedGroup.icon,
+            color: selectedGroup.color,
           })),
           ...(selectedSubcategory &&
           !selectedGroup.subcategories.includes(

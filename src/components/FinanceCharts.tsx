@@ -1,5 +1,6 @@
 import { useEffect, useId, useState } from 'react'
 import { chartAnimation } from './chartMotion'
+import GlassDonut from './GlassDonut'
 import {
   ResponsiveContainer,
   BarChart,
@@ -9,11 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts'
-
 import {
   getMainCategory,
 } from '../services/categories'
@@ -374,147 +371,28 @@ return (
           </div>
         ) : (
           <>
-            <div className="chart-container">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie {...chartAnimation}
-                    data={categoryData}
-                    dataKey="value"
-                    nameKey="name"
-innerRadius="52%"
-outerRadius="74%"
-paddingAngle={3}
-cornerRadius={8}
-stroke="rgba(255, 255, 255, 0.35)"
-strokeWidth={1.5}
-                  >
-                    {categoryData.map(item => (
-                      <Cell
-                        key={item.name}
-                        fill={getMainCategory(item.name).color}
-                      />
-                    ))}
-                  </Pie>
-                  
-
-<Tooltip
-  content={({ active, payload }) => {
-    if (!active || !payload?.length) return null
-
-    const entry = payload[0]
-    const category = String(entry.name ?? 'Outros')
-    const value = Number(entry.value ?? 0)
-
-    const group = getMainCategory(category)
-
-    const Icon =
-      CATEGORY_ICONS[
-        group.icon as keyof typeof CATEGORY_ICONS
-      ] ?? Ellipsis
-
-    const percentage =
-      totalCategoryExpenses > 0
-        ? (value / totalCategoryExpenses) * 100
-        : 0
-
-    return (
-      <div
-        style={{
-          background: tooltipBackground,
-          border: `1px solid ${group.color}88`,
-          borderRadius: 14,
-          padding: '14px 16px',
-          color: tooltipText,
-          minWidth: 190,
-          boxShadow: isLightTheme
-            ? '0 8px 30px rgba(23,32,51,0.14)'
-            : `0 8px 30px rgba(0,0,0,0.35),
-               0 0 16px ${group.color}22`,
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 9,
-            marginBottom: 12,
-          }}
-        >
-          <Icon
-            size={19}
-            color={group.color}
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-
-          <strong
-            style={{
-              fontSize: 13,
-              color: group.color,
-            }}
-          >
-            {category}
-          </strong>
-        </div>
-
-        <div
-          style={{
-            fontSize: 18,
-            fontWeight: 700,
-            marginBottom: 8,
-          }}
-        >
-          {money(value)}
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-            fontSize: 12,
-            opacity: 0.85,
-          }}
-        >
-          <span>Participação nas despesas</span>
-
-          <strong>
-            {percentage.toLocaleString('pt-BR', {
-              minimumFractionDigits: 1,
-              maximumFractionDigits: 1,
-            })}%
-          </strong>
-        </div>
-
-        <div
-          style={{
-            height: 5,
-            marginTop: 9,
-            background: isLightTheme
-              ? '#e2e8f0'
-              : '#343c4b',
-            borderRadius: 999,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              width: `${Math.min(100, percentage)}%`,
-              height: '100%',
-              background: group.color,
-              borderRadius: 999,
-            }}
-          />
-        </div>
-      </div>
-    )
-  }}
-/>
-
-
-                </PieChart>
-              </ResponsiveContainer>
+            <div className="pf-chart-donut-wrap">
+              <GlassDonut
+                segments={categoryData.map(item => {
+                  const group = getMainCategory(item.name)
+                  return {
+                    key: item.name,
+                    label: item.name,
+                    value: item.value,
+                    color: group.color,
+                    icon: group.icon,
+                  }
+                })}
+                formatValue={money}
+                ariaLabel="Despesas por categoria"
+                center={
+                  <>
+                    <small>Total de saídas</small>
+                    <strong>{money(totalCategoryExpenses)}</strong>
+                    <span>Toque numa fatia</span>
+                  </>
+                }
+              />
             </div>
 
          

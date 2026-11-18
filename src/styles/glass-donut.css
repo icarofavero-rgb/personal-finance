@@ -1,0 +1,264 @@
+/* =========================================================
+   GRÁFICO DE ROSCA EM VIDRO (GlassDonut)
+   ========================================================= */
+
+.pf-donut {
+  --donut-track: rgba(255, 255, 255, 0.07);
+  --donut-rim: rgba(255, 255, 255, 0.32);
+  --donut-text: var(--pf-text, #eef0f7);
+  --donut-muted: var(--pf-text-secondary, #8995aa);
+
+  position: relative;
+  width: min(100%, 260px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+:root[data-pf-theme='light'] .pf-donut {
+  --donut-track: rgba(24, 32, 51, 0.07);
+  --donut-rim: rgba(255, 255, 255, 0.9);
+}
+
+.pf-donut svg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Brilho colorido atrás do anel (gradiente, sem filtro: leve) */
+.pf-donut-glow {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--donut-glow) 38%, transparent) 0%, transparent 70%);
+  transition: background 0.4s ease;
+  pointer-events: none;
+}
+
+.pf-donut-track {
+  stroke: var(--donut-track);
+}
+
+.pf-donut-disc {
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1;
+}
+
+.pf-donut-arc {
+  cursor: pointer;
+  transition:
+    stroke-width 0.3s cubic-bezier(0.3, 1.35, 0.5, 1),
+    opacity 0.3s ease,
+    stroke-dasharray 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pf-donut-draw 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation-delay: calc(var(--i) * 70ms);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pf-donut.has-active .pf-donut-arc:not(.is-active) {
+  opacity: 0.4;
+}
+
+.pf-donut-arc.is-active {
+  stroke-width: 30px;
+}
+
+.pf-donut-sheen {
+  opacity: 0.55;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+:root[data-pf-theme='light'] .pf-donut-sheen {
+  opacity: 0.7;
+  mix-blend-mode: normal;
+}
+
+.pf-donut-rim {
+  stroke: var(--donut-rim);
+  stroke-width: 1;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.pf-donut-rim.is-inner {
+  opacity: 0.35;
+}
+
+@keyframes pf-donut-draw {
+  from {
+    stroke-dasharray: 0 var(--circ);
+  }
+}
+
+/* Centro (texto em HTML por cima do disco de vidro) */
+.pf-donut-center {
+  position: absolute;
+  inset: 26%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.pf-donut-center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  animation: pf-donut-center-in 0.35s cubic-bezier(0.3, 1.35, 0.5, 1) backwards;
+}
+
+.pf-donut-center-content strong {
+  font-size: clamp(20px, 6vw, 28px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--donut-text);
+}
+
+.pf-donut-center-content span {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--donut-text);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-donut-center-content small {
+  font-size: 11px;
+  color: var(--donut-muted);
+}
+
+.pf-donut-center-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 2px;
+  border-radius: 10px;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+
+@keyframes pf-donut-center-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+:root[data-pf-animations='off'] .pf-donut *,
+:root[data-pf-animations='reduced'] .pf-donut-arc {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-donut-arc {
+    animation: none;
+  }
+}
+
+/* Legenda com porcentagem (usada pelos gráficos de categoria) */
+.pf-donut-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.pf-donut-legend li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--pf-text, #eef0f7);
+  background: color-mix(in srgb, var(--legend-color) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--legend-color) 22%, transparent);
+  animation: pf-rise 0.4s var(--pf-ease-out, ease) backwards;
+}
+
+.pf-donut-legend li:nth-child(2) { animation-delay: 0.04s; }
+.pf-donut-legend li:nth-child(3) { animation-delay: 0.08s; }
+.pf-donut-legend li:nth-child(n + 4) { animation-delay: 0.12s; }
+
+.pf-donut-legend-icon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  color: var(--legend-color);
+  background: color-mix(in srgb, var(--legend-color) 16%, transparent);
+}
+
+.pf-donut-legend-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-donut-legend-percent {
+  font-weight: 700;
+  color: var(--legend-color);
+}
+
+.pf-donut-legend-value {
+  font-weight: 600;
+  color: var(--pf-text-secondary, #8995aa);
+  font-size: 12px;
+}
+
+/* Bloco do gráfico na página de Transações */
+.pf-category-chart {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+  padding: 22px;
+  margin-bottom: 22px;
+  border-radius: 22px;
+}
+
+.pf-category-chart-info {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.pf-category-chart-info h3 {
+  margin: 0;
+  font-size: 17px;
+  color: var(--pf-text, #eef0f7);
+}
+
+.pf-category-chart-info p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--pf-text-secondary, #8995aa);
+}
+
+.pf-category-chart-empty {
+  padding: 30px 10px;
+  text-align: center;
+  color: var(--pf-text-secondary, #8995aa);
+  font-size: 14px;
+}
+
+@media (max-width: 760px) {
+  .pf-category-chart {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 18px;
+  }
+}

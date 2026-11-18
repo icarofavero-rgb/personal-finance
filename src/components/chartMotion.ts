@@ -11,6 +11,9 @@
 const isTouch =
   typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches
 
+/** Celular/tablet: efeitos de filtro (brilho) ficam desligados. */
+export const isTouchDevice = Boolean(isTouch)
+
 const reduceMotion =
   typeof document !== 'undefined' &&
   (document.documentElement.getAttribute('data-pf-animations') !== 'normal' ||

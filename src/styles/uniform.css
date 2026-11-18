@@ -1,0 +1,246 @@
+/* =========================================================
+   PADRONIZAÇÃO DAS PÁGINAS
+   Todas as páginas com o mesmo cabeçalho, espaçamentos e,
+   nos estilos de vidro, todos os blocos e controles em vidro.
+   ========================================================= */
+
+/* ---------- 1. Cabeçalho igual em todas as páginas ---------- */
+
+:is(
+  .welcome,
+  .cards-page-heading,
+  .debtors-page-heading,
+  .budgets-heading,
+  .goals-header,
+  .reports-header,
+  .settings-page-heading,
+  .pf-section-heading,
+  .backup-page-heading
+) {
+  margin-bottom: 26px !important;
+}
+
+:is(
+  .welcome,
+  .cards-page-heading,
+  .debtors-page-heading,
+  .budgets-heading,
+  .goals-header,
+  .reports-header,
+  .settings-page-heading,
+  .pf-section-heading,
+  .backup-page-heading
+) h1 {
+  margin: 6px 0 8px !important;
+  font-size: clamp(28px, 3.4vw, 38px) !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.02em;
+  color: var(--pf-text, #eef0f7);
+}
+
+:is(
+  .welcome,
+  .cards-page-heading,
+  .debtors-page-heading,
+  .budgets-heading,
+  .goals-header,
+  .reports-header,
+  .settings-page-heading,
+  .pf-section-heading,
+  .backup-page-heading
+) :is(.eyebrow, .reports-eyebrow) {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+  color: var(--pf-text-secondary, #8995aa) !important;
+}
+
+:is(
+  .welcome,
+  .cards-page-heading,
+  .debtors-page-heading,
+  .budgets-heading,
+  .goals-header,
+  .reports-header,
+  .settings-page-heading,
+  .pf-section-heading,
+  .backup-page-heading
+) h1 + p,
+:is(
+  .cards-page-heading,
+  .debtors-heading-content,
+  .budgets-heading-content,
+  .goals-header,
+  .reports-heading-content,
+  .settings-page-heading,
+  .backup-page-heading
+) > p {
+  font-size: 14px !important;
+  color: var(--pf-text-secondary, #8995aa) !important;
+}
+
+@media (max-width: 650px) {
+  :is(
+    .welcome,
+    .cards-page-heading,
+    .debtors-page-heading,
+    .budgets-heading,
+    .goals-header,
+    .reports-header,
+    .settings-page-heading,
+    .pf-section-heading,
+    .backup-page-heading
+  ) h1 {
+    font-size: 28px !important;
+  }
+}
+
+/* ---------- 2. Ícone da subcategoria nas transações ---------- */
+
+.pf-tx-icon {
+  display: grid !important;
+  place-items: center;
+  color: var(--tx-color);
+  background: color-mix(in srgb, var(--tx-color) 15%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--tx-color) 30%, transparent) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  font-size: 0;
+}
+
+.pf-chart-donut-wrap {
+  padding: 6px 0 16px;
+}
+
+/* ---------- 3. Vidro em todos os blocos e controles ---------- */
+
+/* Blocos que não eram "panel" (ex.: Cartões cadastrados) */
+:root[data-pf-glass] :is(.cards-owned-section, .goals-item, .goals-empty, .goals-summary-card, .budget-card, .debtor-debt-card) {
+  background: var(--pf-glass-bg) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  box-shadow: var(--pf-glass-shadow) !important;
+  -webkit-backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+  backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+}
+
+:root[data-pf-glass] .cards-owned-section {
+  position: relative;
+  border-radius: 16px;
+}
+
+/* Caixas internas (dentro de um bloco de vidro) */
+:root[data-pf-glass] :is(
+  .filters,
+  .card-carousel-details,
+  .new-card-color-section,
+  .invoice-payment-summary,
+  .invoice-payment-form,
+  .monthly-group-content > *,
+  .budget-comparison-grid > *,
+  .settings-storage-card,
+  .settings-profile-card
+) {
+  background: var(--pf-control-bg, rgba(255, 255, 255, 0.06)) !important;
+  border-color: var(--pf-control-border, rgba(255, 255, 255, 0.16)) !important;
+}
+
+/* Botões secundários e seletores (antes ficavam azul-escuro sólido) */
+:root[data-pf-glass] :is(
+  .goals-import-button,
+  .goals-export-button,
+  .goals-cancel-button,
+  .goals-edit-button,
+  .goals-edit-note-button,
+  .goals-withdraw-button,
+  .cancel-button,
+  .debtor-expand-button,
+  .card-personalize-button,
+  .card-image-upload-button,
+  .card-carousel-arrow,
+  .card-carousel-actions button:not(.primary-button),
+  .budget-edit-button,
+  .budget-delete-button,
+  .budget-history-month-button,
+  .accent-select-trigger,
+  .pf-calendar-trigger,
+  .pf-select-trigger
+) {
+  background: var(--pf-control-bg) !important;
+  border: 1px solid var(--pf-control-border) !important;
+  color: var(--pf-text, #eef0f7) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 14px rgba(0, 0, 0, 0.12) !important;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+:root[data-pf-glass] :is(.accent-select-menu, .pf-calendar-popup, .pf-select-options) {
+  background: var(--pf-glass-bg-strong) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* Campos de texto e número em todas as páginas */
+:root[data-pf-glass] .app :is(
+  input:not([type='checkbox']):not([type='radio']):not([type='color']):not([type='range']):not([type='file']),
+  textarea
+) {
+  background: var(--pf-control-bg) !important;
+  border-color: var(--pf-control-border) !important;
+  color: var(--pf-text, #eef0f7) !important;
+}
+
+:root[data-pf-glass] .app :is(input, textarea)::placeholder {
+  color: var(--pf-text-secondary, #8995aa);
+  opacity: 0.85;
+}
+
+/* Celular/tablet: botões e campos sem desfoque (são muitos e pequenos;
+   o fundo translúcido já dá o efeito, sem custo de desempenho). */
+@media (pointer: coarse) {
+  :root[data-pf-glass] :is(
+    .goals-import-button,
+    .goals-export-button,
+    .goals-cancel-button,
+    .goals-edit-button,
+    .goals-edit-note-button,
+    .goals-withdraw-button,
+    .cancel-button,
+    .debtor-expand-button,
+    .card-personalize-button,
+    .card-image-upload-button,
+    .card-carousel-arrow,
+    .card-carousel-actions button,
+    .budget-edit-button,
+    .budget-delete-button,
+    .budget-history-month-button,
+    .accent-select-trigger,
+    .pf-calendar-trigger,
+    .pf-select-trigger,
+    .pf-calendar-today
+  ) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  :root[data-pf-glass] :is(.goals-item, .goals-summary-card, .budget-card, .debtor-debt-card) {
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+  }
+}
+
+/* Ícone do estado vazio das Metas segue a cor de destaque */
+:root[data-pf-glass] .goals-empty-icon {
+  background: rgba(var(--pf-accent-rgb), 0.16) !important;
+  color: var(--pf-accent-text, #c4b5fd) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+:root[data-pf-glass] .goals-empty-icon svg {
+  color: inherit;
+  stroke: currentColor;
+}
+
+:root[data-pf-theme='light'][data-pf-glass] .goals-empty-icon {
+  color: var(--pf-accent, #8b5cf6) !important;
+}

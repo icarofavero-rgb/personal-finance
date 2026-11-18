@@ -120,6 +120,99 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   },
 ]
 
+/**
+ * Ícone de cada subcategoria (nomes dos ícones da biblioteca lucide).
+ * Subcategorias sem ícone próprio usam o ícone da categoria principal.
+ */
+export const SUBCATEGORY_ICONS: Record<string, string> = {
+  // Alimentação
+  Supermercado: 'shopping-cart',
+  Delivery: 'bike',
+  Restaurante: 'utensils-crossed',
+  Cafeteria: 'coffee',
+  Lanches: 'sandwich',
+  'Outros alimentos': 'apple',
+  // Moradia
+  Aluguel: 'key-round',
+  Condomínio: 'building',
+  Água: 'droplets',
+  Energia: 'zap',
+  Internet: 'wifi',
+  Manutenção: 'wrench',
+  // Transporte
+  Combustível: 'fuel',
+  'Aplicativos de transporte': 'car-taxi-front',
+  'Transporte público': 'bus',
+  Estacionamento: 'parking-meter',
+  'Manutenção do veículo': 'cog',
+  // Saúde
+  Farmácia: 'pill',
+  Consultas: 'stethoscope',
+  Exames: 'microscope',
+  'Plano de saúde': 'shield-plus',
+  // Lazer
+  Jogos: 'gamepad-2',
+  Cinema: 'clapperboard',
+  Passeios: 'trees',
+  Assinaturas: 'tv',
+  Viagens: 'plane',
+  // Compras
+  Roupas: 'shirt',
+  Eletrônicos: 'smartphone',
+  Casa: 'sofa',
+  Presentes: 'gift',
+  'Outras compras': 'package',
+  // Educação
+  Cursos: 'presentation',
+  Livros: 'book-open',
+  Mensalidades: 'school',
+  Materiais: 'pencil-ruler',
+  // Finanças
+  Tarifas: 'receipt',
+  Juros: 'percent',
+  Impostos: 'landmark',
+  'Outras despesas financeiras': 'banknote',
+  // Outros
+  Geral: 'circle-ellipsis',
+}
+
+/** Ícone e cor das categorias de entrada (receitas). */
+export const INCOME_CATEGORY_META: Record<string, { icon: string; color: string }> = {
+  Salário: { icon: 'briefcase-business', color: '#64E6A5' },
+  Freelance: { icon: 'laptop', color: '#35D9FF' },
+  Vendas: { icon: 'shopping-bag', color: '#9B75FF' },
+  Reembolsos: { icon: 'rotate-ccw', color: '#7C91FF' },
+  Rendimentos: { icon: 'trending-up', color: '#FFB86B' },
+  'Presentes recebidos': { icon: 'gift', color: '#FF789A' },
+  'Outros recebimentos': { icon: 'wallet', color: '#C4A5FF' },
+}
+
+/**
+ * Ícone e cor de uma transação: usa a subcategoria quando houver,
+ * senão a categoria principal (ou a categoria de entrada).
+ */
+export function getTransactionVisual(
+  category: string,
+  type: 'income' | 'expense'
+): { icon: string; color: string; label: string } {
+  if (type === 'income') {
+    const meta = INCOME_CATEGORY_META[category.trim()]
+    return {
+      icon: meta?.icon ?? 'wallet',
+      color: meta?.color ?? LEGACY_CATEGORY_COLORS.income,
+      label: category,
+    }
+  }
+
+  const { group, subcategory } = getCategorySelection(category)
+
+  return {
+    icon: (subcategory && SUBCATEGORY_ICONS[subcategory]) || group.icon,
+    color: group.color,
+    label: subcategory || group.name,
+  }
+}
+
 const LEGACY_CATEGORY_ALIASES: Record<string, string> = {
   assinaturas: 'Lazer',
 }

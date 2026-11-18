@@ -1,5 +1,32 @@
 
-import { chartAnimation } from './chartMotion'
+import { chartAnimation, isTouchDevice } from './chartMotion'
+import { resolveIcon } from './CategoryIcon'
+
+/** Bolinha de vidro com o ícone da categoria no fim de cada linha. */
+function LineEndBadge({
+  cx,
+  cy,
+  color,
+  icon,
+  dark,
+}: {
+  cx: number
+  cy: number
+  color: string
+  icon: string
+  dark: boolean
+}) {
+  const Icon = resolveIcon(icon)
+
+  return (
+    <g className="pf-line-end" transform={`translate(${cx}, ${cy})`}>
+      <circle r={14} fill={color} fillOpacity={0.22} />
+      <circle r={11} fill={dark ? '#151a26' : '#ffffff'} stroke={color} strokeWidth={2} />
+      <circle r={11} fill="none" stroke="#ffffff" strokeOpacity={0.35} strokeWidth={0.8} />
+      <Icon x={-6.5} y={-6.5} width={13} height={13} color={color} strokeWidth={2.4} />
+    </g>
+  )
+}
 import { useEffect, useMemo, useState } from 'react'
 import {
   ResponsiveContainer,
@@ -359,8 +386,9 @@ const { categoryData, categories } = useMemo(() => {
               <ComposedChart
   data={categoryData}
   margin={{
-    top: 15,
-    right: 6,
+    top: 20,
+    // Espaço para a bolinha com o ícone no fim de cada linha
+    right: 20,
     bottom: 8,
     left: -10,
   }}
@@ -533,7 +561,26 @@ const { categoryData, categories } = useMemo(() => {
   stroke={getMainCategory(category).color}
   strokeWidth={3}
   strokeLinecap="round"
-  dot={false}
+  dot={props => {
+    const { cx, cy, index } = props as { cx?: number; cy?: number; index: number }
+    const key = `end-${category}-${index}`
+
+    // Só o último ponto da linha ganha a bolinha com o ícone da categoria.
+    if (index !== categoryData.length - 1 || cx == null || cy == null) {
+      return <g key={key} />
+    }
+
+    return (
+      <LineEndBadge
+        key={key}
+        cx={cx}
+        cy={cy}
+        color={getMainCategory(category).color}
+        icon={getMainCategory(category).icon}
+        dark={!isLightTheme}
+      />
+    )
+  }}
   activeDot={{
     r: 6,
     strokeWidth: 2,
@@ -544,11 +591,12 @@ const { categoryData, categories } = useMemo(() => {
   {...chartAnimation}
   animationDuration={850}
 
-style={{
-  filter: `drop-shadow(0 0 4px ${
-    getMainCategory(category).color
-  }55)`,
-}}
+style={
+  // Brilho da linha só no computador (no celular o filtro pesava)
+  isTouchDevice
+    ? undefined
+    : { filter: `drop-shadow(0 0 4px ${getMainCategory(category).color}55)` }
+}
 
 />
 
