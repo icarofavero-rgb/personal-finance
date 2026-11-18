@@ -111,35 +111,32 @@ let lastSignature = ''
  * não faz nada se nada mudou ou se não estiver no app Android.
  */
 export async function syncSystemNotifications(
-  sources: CalendarSources,
-  preferences: NotificationPreferences
+  batches: { label: string; sources: CalendarSources }[],
+  preferences: NotificationPreferences,
+  options: { mayAskPermission: boolean }
 ): Promise<void> {
   if (!Capacitor.isNativePlatform()) return
 
-  const notices = planSystemNotices(sources, preferences, new Date())
+  const notices = planProfilesNotices(batches, preferences, new Date())
   const signature = JSON.stringify(notices.map(item => [item.id, item.at.getTime(), item.body]))
 
   if (signature === lastSignature) return
 
   let permission = await LocalNotifications.checkPermissions()
 
-  if (permission.display === 'prompt' || permission.display === 'prompt-with-rationale') {
-    if (notices.length === 0) return
+  // Pede a permissão uma vez, logo que o app estiver pronto (depois do
+  // tutorial) — antes só pedia se já houvesse algum aviso para agendar.
+  if (
+    preferences.enabled &&
+    options.mayAskPermission &&
+    (permission.display === 'prompt' || permission.display === 'prompt-with-rationale')
+  ) {
     permission = await LocalNotifications.requestPermissions()
   }
 
   if (permission.display !== 'granted') return
 
-  if (!channelReady) {
-    await LocalNotifications.createChannel({
-      id: CHANNEL_ID,
-      name: 'Avisos financeiros',
-      description: 'Faturas e lembretes de pagamento',
-      importance: 4,
-      visibility: 1,
-    })
-    channelReady = true
-  }
+  await ensureChannel()
 
   const pending = await LocalNotifications.getPending()
 
@@ -162,4 +159,83 @@ export async function syncSystemNotifications(
   }
 
   lastSignature = signature
+}
+
+// =========================================================
+// PERMISSÃO, TESTE E VÁRIOS PERFIS
+// =========================================================
+
+export type NotificationPermissionState = 'granted' | 'denied' | 'prompt' | 'unsupported'
+
+/** Situação da permissão de notificações do Android. */
+export async function getNotificationPermission(): Promise<NotificationPermissionState> {
+  if (!Capacitor.isNativePlatform()) return 'unsupported'
+
+  const permission = await LocalNotifications.checkPermissions()
+  if (permission.display === 'granted') return 'granted'
+  if (permission.display === 'denied') return 'denied'
+  return 'prompt'
+}
+
+/** Mostra o pedido do Android ("Permitir notificações?"). */
+export async function requestNotificationPermission(): Promise<NotificationPermissionState> {
+  if (!Capacitor.isNativePlatform()) return 'unsupported'
+
+  const permission = await LocalNotifications.requestPermissions()
+  // Permissão nova: os avisos são agendados de novo na próxima verificação
+  lastSignature = ''
+  return permission.display === 'granted' ? 'granted' : permission.display === 'denied' ? 'denied' : 'prompt'
+}
+
+async function ensureChannel(): Promise<void> {
+  if (channelReady) return
+
+  await LocalNotifications.createChannel({
+    id: CHANNEL_ID,
+    name: 'Avisos financeiros',
+    description: 'Faturas e lembretes de pagamento',
+    importance: 4,
+    visibility: 1,
+  })
+  channelReady = true
+}
+
+/** Envia uma notificação de teste daqui a 3 segundos. */
+export async function sendTestNotification(): Promise<NotificationPermissionState> {
+  if (!Capacitor.isNativePlatform()) return 'unsupported'
+
+  let state = await getNotificationPermission()
+  if (state === 'prompt') state = await requestNotificationPermission()
+  if (state !== 'granted') return state
+
+  await ensureChannel()
+  await LocalNotifications.schedule({
+    notifications: [
+      {
+        id: 7,
+        title: 'Personal Finance',
+        body: 'Tudo certo! As notificações estão funcionando. 🎉',
+        channelId: CHANNEL_ID,
+        schedule: { at: new Date(Date.now() + 3000), allowWhileIdle: true },
+      },
+    ],
+  })
+
+  return 'granted'
+}
+
+/** Avisos de vários perfis juntos (o nome do perfil vai no texto). */
+export function planProfilesNotices(
+  batches: { label: string; sources: CalendarSources }[],
+  preferences: NotificationPreferences,
+  now: Date
+): ScheduledNotice[] {
+  return batches
+    .flatMap(batch =>
+      planSystemNotices(batch.sources, preferences, now).map(notice =>
+        batch.label ? { ...notice, id: stableNotificationId(`${batch.label}:${notice.id}`), body: `${batch.label} · ${notice.body}` } : notice
+      )
+    )
+    .sort((a, b) => a.at.getTime() - b.at.getTime())
+    .slice(0, MAX_SCHEDULED)
 }

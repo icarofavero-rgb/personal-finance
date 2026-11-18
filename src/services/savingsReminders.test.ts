@@ -17,7 +17,7 @@ import {
   type Reminder,
 } from './remindersStorage'
 import { buildCalendarEvents, generateReminderNotifications } from './calendarEvents'
-import { planSystemNotices, stableNotificationId } from './systemNotifications'
+import { planProfilesNotices, planSystemNotices, stableNotificationId } from './systemNotifications'
 import type { Transaction } from './storage'
 import { DEFAULT_NOTIFICATION_PREFERENCES } from './notificationPreferencesStorage'
 
@@ -261,5 +261,45 @@ describe('Notificações do sistema (Android)', () => {
     )
 
     expect(notices).toEqual([])
+  })
+})
+
+describe('avisos do celular com vários perfis', () => {
+  const reminder = (id: string, title: string): Reminder => ({
+    id,
+    title,
+    kind: 'conta',
+    date: '2026-11-20',
+    recurrence: 'none',
+    doneDates: [],
+    createdAt: '2026-11-01T00:00:00Z',
+  })
+  const empty = { cards: [], purchases: [], payments: [], forecasts: [], debts: [] }
+
+  it('junta os avisos de todos os perfis, com o nome do perfil no texto', () => {
+    const notices = planProfilesNotices(
+      [
+        { label: 'Principal', sources: { ...empty, reminders: [reminder('a', 'Luz')] } },
+        { label: 'Trabalho', sources: { ...empty, reminders: [reminder('a', 'Aluguel da sala')] } },
+      ],
+      { ...DEFAULT_NOTIFICATION_PREFERENCES, daysBeforeDue: 1 },
+      new Date(2026, 10, 18, 10, 0)
+    )
+
+    expect(notices.map(item => item.body)).toEqual(
+      expect.arrayContaining(['Principal · Luz vence hoje.', 'Trabalho · Aluguel da sala vence hoje.'])
+    )
+    // Mesmo id de lembrete em perfis diferentes não pode virar o mesmo aviso
+    expect(new Set(notices.map(item => item.id)).size).toBe(notices.length)
+  })
+
+  it('com um perfil só, o texto fica como antes', () => {
+    const notices = planProfilesNotices(
+      [{ label: '', sources: { ...empty, reminders: [reminder('a', 'Luz')] } }],
+      { ...DEFAULT_NOTIFICATION_PREFERENCES, daysBeforeDue: 1 },
+      new Date(2026, 10, 18, 10, 0)
+    )
+
+    expect(notices.map(item => item.body)).toContain('Luz vence hoje.')
   })
 })

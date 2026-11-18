@@ -28,6 +28,7 @@ import AvatarColorPicker from '../components/AvatarColorPicker'
 import AvatarPhotoEditor from '../components/AvatarPhotoEditor'
 import LayoutSettings from '../components/LayoutSettings'
 import ProfilesSettings from '../components/ProfilesSettings'
+import NotificationPermissionCard from '../components/NotificationPermissionCard'
 import { requestOpenTutorial } from '../services/onboardingStorage'
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
@@ -825,6 +826,12 @@ return (
   />
 ) : activeSection === 'notifications' ? (
   <div className="settings-appearance">
+    <NotificationPermissionCard
+      onMessage={(message, type = 'success') =>
+        setToast({ id: crypto.randomUUID(), type, message })
+      }
+    />
+
     <div className="settings-appearance-group">
       <h3>Preferências de notificações</h3>
       

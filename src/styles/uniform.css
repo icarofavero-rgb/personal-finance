@@ -2075,3 +2075,89 @@
     text-align: left;
   }
 }
+
+/* ---------- 21. Permissão de notificações ---------- */
+
+.pf-permission-card {
+  --perm-color: var(--pf-accent);
+  --perm-rgb: var(--pf-accent-rgb);
+
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  max-width: 620px;
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(var(--perm-rgb), 0.4);
+  background: rgba(var(--perm-rgb), 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.pf-permission-card.is-ok {
+  --perm-color: #22c55e;
+  --perm-rgb: 34, 197, 94;
+}
+
+.pf-permission-card.is-blocked {
+  --perm-color: #f59e0b;
+  --perm-rgb: 245, 158, 11;
+}
+
+.pf-permission-card > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--perm-color);
+}
+
+.pf-permission-card strong {
+  display: block;
+  font-size: 14.5px;
+  color: var(--pf-text);
+}
+
+.pf-permission-card p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pf-text-secondary);
+}
+
+.pf-permission-card p b {
+  color: var(--pf-text);
+}
+
+.pf-permission-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  margin-top: 12px;
+  padding: 0 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--perm-rgb), 0.55);
+  background: rgba(var(--perm-rgb), 0.14);
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), background 0.2s ease;
+}
+
+.pf-permission-button.is-primary {
+  border-color: rgba(var(--pf-accent-rgb), 0.95);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 58%),
+    var(--pf-accent);
+  color: var(--pf-accent-contrast, #ffffff);
+  box-shadow: 0 8px 20px rgba(var(--pf-accent-rgb), 0.32);
+}
+
+.pf-permission-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.pf-permission-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

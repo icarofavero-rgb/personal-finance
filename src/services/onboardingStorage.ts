@@ -16,6 +16,9 @@ export function hasCompletedOnboarding(): boolean {
   }
 }
 
+/** Avisado quando o tutorial termina (o app pede a permissão de notificações). */
+export const ONBOARDING_FINISHED_EVENT = 'personal-finance-onboarding-finished'
+
 export function markOnboardingCompleted(): void {
   try {
     localStorage.setItem(
@@ -25,6 +28,8 @@ export function markOnboardingCompleted(): void {
   } catch {
     // Sem problema: apenas mostrará o tutorial de novo na próxima vez.
   }
+
+  window.dispatchEvent(new Event(ONBOARDING_FINISHED_EVENT))
 }
 
 export function requestOpenTutorial(): void {

@@ -116,6 +116,8 @@ import Settings, { type SettingsSection } from './pages/Settings'
 import ProfileSwitcher from './components/ProfileSwitcher'
 import { OPEN_PROFILES_SETTINGS_EVENT } from './services/profileSwitch'
 import { getActiveFinancialProfile, getFinancialProfiles } from './services/financialProfilesStorage'
+import { withProfileView } from './services/profileScope'
+import { hasCompletedOnboarding, ONBOARDING_FINISHED_EVENT } from './services/onboardingStorage'
 import Goals from './pages/Goals'
 import './styles/goals.css'
 
@@ -849,28 +851,44 @@ return {
   remindersRevision,
 ])
 
+// Muda quando o tutorial termina (para pedir a permissão de notificações)
+const [onboardingDoneRevision, setOnboardingDoneRevision] = useState(0)
+
 // Notificações fora do app (Android): reagenda quando algo muda.
 useEffect(() => {
   const timer = window.setTimeout(() => {
     try {
-      void syncSystemNotifications(
-        {
+      // Avisos de TODOS os perfis (o nome do perfil vai no texto)
+      const profiles = getFinancialProfiles()
+      const batches = profiles.map(profile => ({
+        label: profiles.length > 1 ? profile.name : '',
+        sources: withProfileView(profile.id, () => ({
           cards: getCards(),
           purchases: getCardPurchases(),
           payments: getCardPayments(),
           reminders: getReminders(),
           forecasts: [],
           debts: [],
-        },
-        getNotificationPreferences()
-      ).catch(error => console.error('Erro ao agendar notificações:', error))
+        })),
+      }))
+
+      void syncSystemNotifications(batches, getNotificationPreferences(), {
+        mayAskPermission: hasCompletedOnboarding(),
+      }).catch(error => console.error('Erro ao agendar notificações:', error))
     } catch (error) {
       console.error('Erro ao preparar notificações:', error)
     }
   }, 1500)
 
   return () => window.clearTimeout(timer)
-}, [cardsRevision, remindersRevision, notificationPreferencesRevision, notificationToday])
+}, [cardsRevision, remindersRevision, notificationPreferencesRevision, notificationToday, onboardingDoneRevision])
+
+// Ao terminar o tutorial, já pede a permissão de notificações
+useEffect(() => {
+  const done = () => setOnboardingDoneRevision(value => value + 1)
+  window.addEventListener(ONBOARDING_FINISHED_EVENT, done)
+  return () => window.removeEventListener(ONBOARDING_FINISHED_EVENT, done)
+}, [])
 
 
 const [manualForecasts, setManualForecasts] =
