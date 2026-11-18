@@ -1093,6 +1093,27 @@ const [cardInstallments, setCardInstallments] = useState('1')
   const [filterMonth, setFilterMonth] = useState('')
   const [filterCategory, setFilterCategory] = useState('Todas')
   const [filterType, setFilterType] = useState('Todos')
+
+  // Evolução das despesas na página de Transações: 6 meses até o mês
+  // filtrado (ou o mês atual), respeitando a categoria escolhida.
+  const transactionsEvolutionEnd =
+    filterMonth || new Date().toLocaleDateString('en-CA').slice(0, 7)
+
+  const transactionsEvolution = useMemo(() => {
+    const [year, month] = transactionsEvolutionEnd.split('-').map(Number)
+    const start = new Date(year, month - 6, 1)
+    const startMonth = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`
+
+    return transactions.filter(transaction => {
+      const transactionMonth = transaction.date.slice(0, 7)
+
+      return (
+        transactionMonth >= startMonth &&
+        transactionMonth <= transactionsEvolutionEnd &&
+        (filterCategory === 'Todas' || transaction.category === filterCategory)
+      )
+    })
+  }, [transactions, transactionsEvolutionEnd, filterCategory])
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
@@ -3167,12 +3188,23 @@ background:
 
 
               {activePage === 'Transações' && (
-                <TransactionsCategoryChart
-                  transactions={transactions}
-                  month={filterMonth}
-                  category={filterCategory}
-                  type={filterType}
-                />
+                <div className="pf-transactions-charts">
+                  <TransactionsCategoryChart
+                    transactions={transactions}
+                    month={filterMonth}
+                    category={filterCategory}
+                    type={filterType}
+                  />
+
+                  <Deferred minHeight={420} delay={300}>
+                    <FinancialComparisonCharts
+                      only="categories"
+                      transactions={[]}
+                      categoryTransactions={transactionsEvolution}
+                      categoryEndMonth={transactionsEvolutionEnd}
+                    />
+                  </Deferred>
+                </div>
               )}
 
               <section

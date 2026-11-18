@@ -65,6 +65,8 @@ type Props = {
   transactions: Transaction[]
   categoryTransactions?: Transaction[]
   categoryEndMonth?: string
+  /** "categories" mostra só a evolução das despesas (página de Transações). */
+  only?: 'categories'
 }
 
 type MonthlyCategory = {
@@ -135,6 +137,7 @@ export default function FinancialComparisonCharts({
   transactions,
   categoryTransactions,
   categoryEndMonth,
+  only,
 }: Props) {
   const [isLightTheme, setIsLightTheme] = useState(
     () =>
@@ -260,7 +263,8 @@ const { categoryData, categories } = useMemo(() => {
   )
 
   return (
-    <div className="financial-comparison-charts">
+    <div className={`financial-comparison-charts ${only ? 'is-single' : ''}`}>
+      {only !== 'categories' && (
       <section className="finance-chart-card">
         <h3>Comparação de entradas e saídas</h3>
         <p>Distribuição dos valores no período selecionado</p>
@@ -371,6 +375,7 @@ const { categoryData, categories } = useMemo(() => {
           </div>
         )}
       </section>
+      )}
 
       <section className="finance-chart-card">
         <h3>Evolução das despesas por categoria</h3>

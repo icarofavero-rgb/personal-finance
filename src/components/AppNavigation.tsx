@@ -16,7 +16,7 @@ import {
   DatabaseBackup,
   LayoutDashboard,
   LayoutGrid,
-  LifeBuoy,
+  CircleQuestionMark,
   LogOut,
   Plus,
   RefreshCw,
@@ -55,7 +55,7 @@ export const MAIN_NAV: NavItem[] = [
 export const SECONDARY_NAV: NavItem[] = [
   { page: 'Sincronização', label: 'Sincronização', shortLabel: 'Sincronizar', icon: RefreshCw },
   { page: 'Backup e restauração', label: 'Backup', icon: DatabaseBackup },
-  { page: 'Central de ajuda', label: 'Central de ajuda', shortLabel: 'Ajuda', icon: LifeBuoy },
+  { page: 'Central de ajuda', label: 'Central de ajuda', shortLabel: 'Ajuda', icon: CircleQuestionMark },
   { page: 'Configurações', label: 'Configurações', shortLabel: 'Ajustes', icon: SettingsIcon },
 ]
 
