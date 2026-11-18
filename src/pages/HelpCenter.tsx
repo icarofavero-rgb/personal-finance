@@ -205,7 +205,27 @@ const TOPICS: Topic[] = [
       {
         question: 'Como deixo o celular e o computador com os mesmos dados?',
         answer:
-          'Abra Sincronização nos dois aparelhos, conectados à MESMA rede Wi-Fi. Em um, toque em “Mostrar QR code”; no outro, em “Ler QR code”. Sem câmera ou sem Wi-Fi em comum, use a sincronização por arquivo. Todos os perfis vão juntos.',
+          'Use a Conexão contínua: no computador, abra Sincronização e toque em “Mostrar QR code”. No celular, abra Sincronização, toque em “Ler QR code do outro aparelho” e aponte a câmera. Pronto: os dois sincronizam e ficam conectados. Todos os perfis vão juntos.',
+      },
+      {
+        question: 'Preciso ler o QR code toda vez?',
+        answer:
+          'Não. Depois da primeira vez, os aparelhos ficam pareados e se reconectam sozinhos sempre que os dois estiverem com o app aberto e com internet. No topo da tela aparece o aparelho conectado em verde.',
+      },
+      {
+        question: 'Para que serve o botão “Sincronizar” no topo da tela?',
+        answer:
+          'Ele aparece quando algo mudou em um dos aparelhos conectados. Ao tocar, os dois trocam e juntam as alterações, e as telas se atualizam na hora. Se o ícone do aparelho estiver cinza, a conexão caiu: abra o app no outro aparelho para ele se reconectar.',
+      },
+      {
+        question: 'Como desconecto um aparelho?',
+        answer:
+          'Em Sincronização, no quadro “Conexão contínua”, toque em “Desconectar”. Os dados continuam nos dois aparelhos; para conectar de novo, basta ler um QR code novo.',
+      },
+      {
+        question: 'E se eu estiver sem internet?',
+        answer:
+          'Use “Sem internet: com dois QR codes” na mesma página (os dois aparelhos no mesmo Wi-Fi, cada um lê o QR do outro) ou a sincronização por arquivo.',
       },
       {
         question: 'Por que fazer backup?',
@@ -307,7 +327,7 @@ const TOPICS: Topic[] = [
       {
         question: 'Meus dados vão para a internet?',
         answer:
-          'Não. O Personal Finance não usa servidor: tudo fica guardado só no aparelho em que você usa o app. A sincronização acontece diretamente entre os seus aparelhos, pela rede Wi-Fi.',
+          'Não. Seus dados ficam guardados só no aparelho em que você usa o app, nunca em um servidor. Na conexão contínua, a internet é usada só para os aparelhos se encontrarem (por um serviço gratuito, sempre cifrado com a chave do QR code); os dados vão direto de um aparelho para o outro.',
       },
       {
         question: 'Onde exatamente ficam os dados?',

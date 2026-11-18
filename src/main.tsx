@@ -33,6 +33,7 @@ import './styles/uniform.css'
 import './styles/neon-lightshow.css'
 import { installBusyMarker } from './hooks/busyMarker'
 import { installProfileScope } from './services/profileScope'
+import { liveLink } from './services/sync/liveLink'
 
 // Pausa o fundo animado enquanto a tela rola (mais fluidez no celular).
 installBusyMarker()
@@ -44,6 +45,9 @@ installProfileScope()
 // Registra quando cada dado foi criado/alterado/excluído (base da sincronização).
 // Não interfere nas gravações do app: só observa.
 installChangeTracking()
+
+// Conexão contínua com o aparelho pareado (se houver)
+liveLink.start()
 
 // Aplica a aparência antes do primeiro desenho da tela (evita "piscar").
 const initialAppearance = getAppearancePreferences()

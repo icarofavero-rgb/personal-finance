@@ -30,7 +30,7 @@ function createPeer(): RTCPeerConnection {
   return new RTCPeerConnection({ iceServers: [] })
 }
 
-function waitForIceGathering(peer: RTCPeerConnection): Promise<void> {
+export function waitForIceGathering(peer: RTCPeerConnection): Promise<void> {
   if (peer.iceGatheringState === 'complete') return Promise.resolve()
 
   return new Promise(resolve => {
@@ -50,7 +50,7 @@ function waitForIceGathering(peer: RTCPeerConnection): Promise<void> {
   })
 }
 
-function localDescriptionSdp(peer: RTCPeerConnection): string {
+export function localDescriptionSdp(peer: RTCPeerConnection): string {
   const sdp = peer.localDescription?.sdp
 
   if (!sdp || !sdp.includes('a=candidate:')) {
@@ -64,7 +64,7 @@ function localDescriptionSdp(peer: RTCPeerConnection): string {
 }
 
 /** Adapta o canal WebRTC para o formato usado pelo protocolo. */
-function toTextChannel(peer: RTCPeerConnection, channel: RTCDataChannel): TextChannel {
+export function toTextChannel(peer: RTCPeerConnection, channel: RTCDataChannel): TextChannel {
   channel.bufferedAmountLowThreshold = BUFFER_LOW
 
   let onMessage: (text: string) => void = () => {}

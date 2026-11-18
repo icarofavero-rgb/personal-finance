@@ -80,6 +80,8 @@ import ReceiptButton from './components/ReceiptButton'
 import { pruneAttachments } from './services/attachments'
 import { updateHomeWidget } from './services/widgetBridge'
 import { LOCK_CHANGED_EVENT } from './components/AppLockScreen'
+import LiveSyncIndicator from './components/LiveSyncIndicator'
+import { DATA_SYNCED_EVENT } from './services/sync/liveLink'
 import {
   createRuleFromTransaction,
   getRecurringRules,
@@ -869,6 +871,38 @@ return {
   notificationReadRevision,
   remindersRevision,
 ])
+
+// Conexão contínua: depois de sincronizar, todas as telas leem os dados de novo
+const [dataRevision, setDataRevision] = useState(0)
+
+useEffect(() => {
+  const refresh = () => {
+    setTransactions(getTransactions())
+    setCardsRevision(value => value + 1)
+    try {
+      setManualForecasts(getManualForecasts())
+    } catch {
+      setManualForecasts([])
+    }
+    setUserPreferences(getUserPreferences())
+    setNotificationPreferencesRevision(value => value + 1)
+    setRemindersRevision(value => value + 1)
+    setRecurringRevision(value => value + 1)
+
+    const appearance = getAppearancePreferences()
+    applyAccentColor(appearance.accentColor)
+    applyNeonIntensity(appearance.neonIntensity)
+    applyAppTheme(appearance.theme)
+    applyVisualStyle(appearance.visualStyle)
+    applyAnimationPreference(appearance.animations)
+
+    // Remonta a página aberta (Metas, Guardado, Calendário... leem de novo)
+    setDataRevision(value => value + 1)
+  }
+
+  window.addEventListener(DATA_SYNCED_EVENT, refresh)
+  return () => window.removeEventListener(DATA_SYNCED_EVENT, refresh)
+}, [])
 
 // Fotos de comprovantes de transações apagadas são removidas
 useEffect(() => {
@@ -2118,6 +2152,7 @@ function handleDashboardInvoicePayment(
 
 
           <div className="top-actions">
+            <LiveSyncIndicator onOpenSync={() => navigate('Sincronização')} onMessage={showToast} />
             <ProfileSwitcher />
          
 <button
@@ -2198,7 +2233,7 @@ function handleDashboardInvoicePayment(
 
         <section className="content">
         {/* A chave troca a cada página: a página "entra" com a animação do aparelho. */}
-        <div key={activePage} className="pf-page" data-direction={pageDirection}>
+        <div key={`${activePage}-${dataRevision}`} className="pf-page" data-direction={pageDirection}>
 
         {localStorage.getItem(
   'personal-finance-pending-backup-snapshot'

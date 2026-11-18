@@ -107,7 +107,7 @@ const STEPS: Step[] = [
     color: '#38bdf8',
     eyebrow: 'Seus aparelhos',
     title: 'Sincronize e faça backup',
-    text: 'Junte os dados do celular, tablet e computador pelo Wi-Fi com QR code, sem internet. E guarde backups.',
+    text: 'Leia um QR code uma única vez e o celular fica conectado ao computador: os dados vão direto de um para o outro. E guarde backups.',
     tips: ['Configurações → Dados e armazenamento', 'Sincronize apenas aparelhos seus'],
   },
 ]
@@ -161,7 +161,7 @@ function AttentionCard() {
 
       <h2>Onde ficam os seus dados</h2>
       <p className="pf-onb-attention-intro">
-        O Personal Finance <strong>não usa internet nem servidor</strong>. Tudo fica guardado
+        O Personal Finance <strong>não guarda seus dados em nenhum servidor</strong>. Tudo fica guardado
         somente no aparelho em que você usa o app.
       </p>
 

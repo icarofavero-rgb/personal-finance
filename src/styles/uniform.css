@@ -3467,3 +3467,289 @@
 .pf-profile-menu-item > span.pf-side-profile-icon {
   flex: 0 0 26px;
 }
+
+/* ---------- 31. Conexão contínua ---------- */
+
+.pf-live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-live-device {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 12px 0 10px;
+  border-radius: 13px;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), background 0.2s ease;
+}
+
+.pf-live-device.is-on {
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.12);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.18);
+}
+
+.pf-live-device.is-off {
+  color: var(--pf-text-secondary);
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, transparent);
+}
+
+.pf-live-device:active,
+.pf-live-sync:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.pf-live-dot {
+  position: absolute;
+  top: 7px;
+  left: 22px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 2px solid var(--pf-bg, #0d0f16);
+}
+
+.is-on > .pf-live-dot,
+.pf-live-card-status.is-on .pf-live-dot {
+  background: #22c55e;
+  animation: pf-live-pulse 2.2s ease-in-out infinite;
+}
+
+.is-off > .pf-live-dot,
+.pf-live-card-status:not(.is-on) .pf-live-dot {
+  background: #f59e0b;
+}
+
+.pf-live-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 13px;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.9);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 58%),
+    var(--pf-accent);
+  color: var(--pf-accent-contrast, #ffffff);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(var(--pf-accent-rgb), 0.35);
+  animation: pf-menu-in 0.3s var(--pf-ease-spring, ease) both;
+}
+
+.pf-live-sync.is-busy svg {
+  animation: sync-spin 1s linear infinite;
+}
+
+@keyframes pf-live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
+  50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
+}
+
+@keyframes sync-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Celular: só os ícones (o título precisa de espaço) */
+@media (max-width: 650px) {
+  .pf-live-label,
+  .pf-live-sync span {
+    display: none;
+  }
+
+  .pf-live-device,
+  .pf-live-sync {
+    width: 40px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .pf-live-dot {
+    top: 6px;
+    left: auto;
+    right: 6px;
+  }
+}
+
+/* Cartão na página de Sincronização */
+.pf-live-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 22px;
+  border-radius: 22px;
+}
+
+.pf-live-card-heading {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.pf-live-card-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--pf-text);
+}
+
+.pf-live-card-heading p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--pf-text-secondary);
+}
+
+.pf-live-card-icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 15px;
+  color: var(--pf-accent-ink, var(--pf-accent));
+  background: rgba(var(--pf-accent-rgb), 0.15);
+}
+
+.pf-live-card-actions,
+.pf-live-card-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pf-live-card-scan,
+.pf-live-card-invite {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.pf-live-card-invite ol {
+  margin: 0;
+  padding-left: 20px;
+  max-width: 420px;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--pf-text-secondary);
+}
+
+.pf-live-card-invite b {
+  color: var(--pf-text);
+}
+
+.pf-live-card-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(245, 158, 11, 0.07);
+}
+
+.pf-live-card-status.is-on {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.pf-live-card-peer {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.pf-live-card-status.is-on .pf-live-card-peer {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.pf-live-card-peer .pf-live-dot {
+  top: 6px;
+  left: auto;
+  right: 6px;
+}
+
+.pf-live-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.pf-live-card-text strong {
+  font-size: 15px;
+  color: var(--pf-text);
+}
+
+.pf-live-card-text small {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--pf-text-secondary);
+}
+
+.pf-live-card-error {
+  color: #f87171 !important;
+}
+
+.pf-live-card-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--pf-text-secondary);
+}
+
+.pf-live-card-notes li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.pf-live-card-notes svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+/* Celular com a conexão contínua: abre espaço para o título */
+@media (max-width: 650px) {
+  .topbar:has(.pf-live) .breadcrumb {
+    display: none;
+  }
+
+  .topbar:has(.pf-live) .top-actions {
+    gap: 6px;
+  }
+
+  .topbar .pf-header-title {
+    min-width: 0;
+    overflow: hidden;
+  }
+}

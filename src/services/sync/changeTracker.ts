@@ -187,6 +187,13 @@ export function installChangeTracking(): () => void {
   function schedule(storage: Storage, key: string) {
     if (storage !== localStorage || !isTrackedStorageKey(key)) return
 
+    // Avisa a conexão contínua: há algo novo para sincronizar
+    try {
+      window.dispatchEvent(new Event('personal-finance-local-change'))
+    } catch {
+      // sem window (testes): ignora
+    }
+
     pendingKeys.add(key)
 
     if (scheduled) return

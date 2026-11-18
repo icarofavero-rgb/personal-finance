@@ -37,6 +37,8 @@ import {
   type SyncStage,
   type TextChannel,
 } from '../services/sync/syncProtocol'
+import LiveSyncCard from '../components/LiveSyncCard'
+import Toast, { type ToastMessage } from '../components/Toast'
 import '../styles/sync.css'
 
 type Step =
@@ -135,6 +137,8 @@ function CopyCode({ code }: { code: string }) {
 }
 
 export default function Sync() {
+  const [toast, setToast] = useState<ToastMessage | null>(null)
+  const closeToast = useCallback(() => setToast(null), [])
   const [step, setStep] = useState<Step>({ name: 'menu' })
   const hostRef = useRef<HostConnection | null>(null)
   const guestRef = useRef<GuestConnection | null>(null)
@@ -477,15 +481,19 @@ export default function Sync() {
         <h1>
           Sincronização<span className="neon-dot">.</span>
         </h1>
-        <p>Junte os dados do celular, tablet e computador. Nada passa pela internet.</p>
+        <p>Junte os dados do celular, tablet e computador. Seus dados vão direto de um aparelho para o outro.</p>
       </div>
+
+      <LiveSyncCard
+        onMessage={(type, message) => setToast({ id: crypto.randomUUID(), type, message })}
+      />
 
       <div className="backup-security-panel sync-howto">
         <div className="backup-security-heading">
           <Wifi size={22} />
           <div>
-            <h3>Pelo Wi-Fi, com QR code</h3>
-            <p>Os dois aparelhos precisam estar com o app aberto e no mesmo Wi-Fi.</p>
+            <h3>Sem internet: com dois QR codes</h3>
+            <p>Uma sincronização de cada vez, sem usar internet. Os dois aparelhos precisam estar abertos e no mesmo Wi-Fi.</p>
           </div>
         </div>
 
@@ -556,7 +564,7 @@ export default function Sync() {
         </div>
 
         <ul className="sync-file-steps">
-          <li>Os aparelhos conversam diretamente pelo Wi-Fi, sem internet e sem servidor.</li>
+          <li>Os aparelhos conversam diretamente; seus dados nunca ficam guardados em servidor.</li>
           <li>Se o mesmo item foi alterado nos dois aparelhos, vale a alteração mais recente.</li>
           <li>Antes de gravar, o app guarda uma cópia dos dados atuais. Se algo der errado, tudo volta como estava.</li>
           <li>Sincronize apenas aparelhos <strong>seus</strong>: os dados dos dois ficam iguais.</li>
@@ -569,6 +577,7 @@ export default function Sync() {
         workingText="Sincronizando seus dados…"
         onClose={closeProcess}
       />
+      <Toast key={toast?.id ?? 'empty'} toast={toast} onClose={closeToast} />
     </section>
   )
 }

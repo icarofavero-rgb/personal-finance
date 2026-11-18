@@ -1096,7 +1096,7 @@ return (
 
   <p>
     Junte os dados do celular, tablet e computador
-    pelo Wi-Fi, com QR code, sem usar a internet.
+    lendo um QR code uma única vez: os aparelhos ficam conectados.
   </p>
 
   <button
