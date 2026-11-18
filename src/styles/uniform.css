@@ -2161,3 +2161,265 @@
   opacity: 0.6;
   cursor: default;
 }
+
+/* ---------- 22. Busca nas transações ---------- */
+
+.pf-tx-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0 12px;
+  padding: 0 8px 0 14px;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, var(--pf-surface-secondary));
+  color: var(--pf-text-secondary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pf-tx-search:focus-within {
+  border-color: rgba(var(--pf-accent-rgb), 0.7);
+  box-shadow: 0 0 0 3px rgba(var(--pf-accent-rgb), 0.14);
+}
+
+.pf-tx-search input {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.pf-tx-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.pf-tx-search button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(var(--pf-accent-rgb), 0.12);
+  color: var(--pf-accent-ink, var(--pf-accent));
+  cursor: pointer;
+}
+
+.pf-tx-results {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: -2px 0 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  background: rgba(var(--pf-accent-rgb), 0.08);
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.22);
+  color: var(--pf-text);
+}
+
+.pf-tx-results .income {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.pf-tx-results .expense {
+  color: #f87171;
+  font-weight: 700;
+}
+
+/* ---------- 23. Lembrete de backup ---------- */
+
+.pf-backup-reminder {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: linear-gradient(120deg, rgba(245, 158, 11, 0.14), rgba(245, 158, 11, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  animation: pf-menu-in 0.35s var(--pf-ease-spring, ease) both;
+}
+
+:root .pf-page > .pf-backup-reminder.is-closing,
+.pf-backup-reminder.is-closing {
+  animation: pf-menu-out 0.25s ease forwards !important;
+}
+
+.pf-backup-reminder-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.16);
+}
+
+.pf-backup-reminder-text {
+  flex: 1;
+  min-width: 200px;
+}
+
+.pf-backup-reminder-text strong {
+  font-size: 14.5px;
+  color: var(--pf-text);
+}
+
+.pf-backup-reminder-text p {
+  margin: 3px 0 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--pf-text-secondary);
+}
+
+.pf-backup-reminder-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.pf-backup-reminder-later {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: transparent;
+  color: var(--pf-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 650px) {
+  .pf-backup-reminder-actions {
+    width: 100%;
+  }
+
+  .pf-backup-reminder-actions > * {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ---------- 24. Destaques do mês ---------- */
+
+.pf-insights {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 22px;
+}
+
+.pf-insights-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pf-insights-heading h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--pf-text);
+}
+
+.pf-insights-heading p {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-insights-badge {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: var(--pf-accent-ink, var(--pf-accent));
+  background: rgba(var(--pf-accent-rgb), 0.15);
+}
+
+.pf-insights-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-insight {
+  --insight: 139, 92, 246;
+
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--insight), 0.3);
+  background: rgba(var(--insight), 0.08);
+  animation: pf-rise 0.45s var(--pf-ease-out, ease) backwards;
+  animation-delay: calc(var(--i) * 60ms + 0.1s);
+}
+
+.pf-insight.is-good { --insight: 34, 197, 94; }
+.pf-insight.is-bad { --insight: 248, 113, 113; }
+.pf-insight.is-neutral { --insight: var(--pf-accent-rgb); }
+
+.pf-insight-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  color: rgb(var(--insight));
+  background: rgba(var(--insight), 0.16);
+}
+
+.pf-insight-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pf-insight-text strong {
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--pf-text);
+}
+
+.pf-insight-text small {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--pf-text-secondary);
+}
+
+:root[data-pf-glass] .pf-insight {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+/* O campo de busca já está dentro da "pílula": sem caixa própria */
+.pf-tx-search input,
+:root[data-pf-glass] .pf-tx-search input {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  padding: 0 !important;
+}

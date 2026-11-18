@@ -24,6 +24,7 @@ import {
   Wallet,
   CalendarDays,
   X,
+  Search,
   Trash2,
   Pencil,
   Download,
@@ -68,6 +69,9 @@ import {
   markAllNotificationsAsRead,
 } from './services/notificationReadStorage'
 
+import { matchesSearch, summarize } from './services/transactionSearch'
+import BackupReminderBanner from './components/BackupReminderBanner'
+import MonthInsights from './components/MonthInsights'
 import { exportBackupAs, importBackup, type BackupFormat } from './services/backup'
 
 const EXPORT_FORMATS = [
@@ -1128,6 +1132,7 @@ const [cardInstallments, setCardInstallments] = useState('1')
   const [filterMonth, setFilterMonth] = useState('')
   const [filterCategory, setFilterCategory] = useState('Todas')
   const [filterType, setFilterType] = useState('Todos')
+  const [searchText, setSearchText] = useState('')
 
   // Formato do arquivo exportado na página de Backup
   const [backupFormat, setBackupFormat] = useState<BackupFormat>('json')
@@ -1634,8 +1639,16 @@ const availableInvoiceMonths = selectedCardInvoices
     filterType === 'Todos' ||
     item.type === filterType
 
-  return matchesMonth && matchesCategory && matchesType
+  // Busca por texto/valor (só na página Transações)
+  const matchesText =
+    activePage !== 'Transações' || matchesSearch(item, searchText)
+
+  return matchesMonth && matchesCategory && matchesType && matchesText
 })
+
+const hasActiveFilters =
+  searchText.trim() !== '' || filterMonth !== '' || filterCategory !== 'Todas' || filterType !== 'Todos'
+const filteredSummary = summarize(filteredTransactions)
 
 // Abre o formulário sempre limpo (evita herdar dados de uma edição cancelada).
 function openNewTransaction() {
@@ -2116,6 +2129,12 @@ function handleDashboardInvoicePayment(
   </button>
 
 )}
+{activePage === 'Dashboard' && (
+  <BackupReminderBanner
+    hasData={transactions.length > 0}
+    onBackup={() => navigate('Backup e restauração')}
+  />
+)}
 {paymentWarning.needsAttention && (
   <div
     role="alert"
@@ -2384,6 +2403,9 @@ function handleDashboardInvoicePayment(
 
   </div>
 </div>
+
+{/* Destaques: comparação automática com o mês anterior */}
+<MonthInsights transactions={transactions} month={dashboardMonth} />
 
 {/* SEÇÃO DE PLANEJAMENTO FINANCEIRO */}
 <div className="dashboard-section-heading dashboard-planning-heading">
@@ -3298,6 +3320,32 @@ background:
                 </div>
 
 {activePage === 'Transações' && (
+  <div className="pf-tx-search">
+    <Search size={18} aria-hidden="true" />
+    <input
+      type="search"
+      value={searchText}
+      onChange={event => setSearchText(event.target.value)}
+      placeholder="Buscar por nome, categoria ou valor (ex.: uber, farmácia, 45,90)"
+      aria-label="Buscar transações"
+    />
+    {searchText && (
+      <button type="button" onClick={() => setSearchText('')} aria-label="Limpar busca">
+        <X size={16} />
+      </button>
+    )}
+  </div>
+)}
+
+{activePage === 'Transações' && hasActiveFilters && (
+  <div className="pf-tx-results" aria-live="polite">
+    <strong>{filteredSummary.count} {filteredSummary.count === 1 ? 'resultado' : 'resultados'}</strong>
+    {filteredSummary.income > 0 && <span className="income">+ {formatMoney(filteredSummary.income)}</span>}
+    {filteredSummary.expense > 0 && <span className="expense">- {formatMoney(filteredSummary.expense)}</span>}
+  </div>
+)}
+
+{activePage === 'Transações' && (
   <div className="filters">
     <div className="filter-field">
   <label htmlFor="filter-month">Mês</label>
@@ -3358,6 +3406,7 @@ background:
         setFilterMonth('')
         setFilterCategory('Todas')
         setFilterType('Todos')
+        setSearchText('')
       }}
     >
       Limpar filtros
@@ -3369,10 +3418,19 @@ background:
                   {filteredTransactions.length === 0 ? (
                     <div className="empty-state">
                       <Wallet size={32} />
-                      <strong>Nenhuma transação cadastrada</strong>
-                      <p>
-                        Clique em Nova transação para começar.
-                      </p>
+                      {transactions.length > 0 && activePage === 'Transações' ? (
+                        <>
+                          <strong>Nenhuma transação encontrada</strong>
+                          <p>Tente outra busca ou limpe os filtros.</p>
+                        </>
+                      ) : (
+                        <>
+                          <strong>Nenhuma transação cadastrada</strong>
+                          <p>
+                            Clique em Nova transação para começar.
+                          </p>
+                        </>
+                      )}
                     </div>
                   ) : (
                     filteredTransactions

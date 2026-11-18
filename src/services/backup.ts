@@ -51,6 +51,7 @@ import {
 } from './backupModules'
 
 import { DEFAULT_PROFILE_ID, withProfileView } from './profileScope'
+import { markBackupDone } from './backupReminder'
 import {
   ensureProfilesFromBackup,
   getFinancialProfiles,
@@ -239,11 +240,15 @@ export async function exportBackup(): Promise<'web' | 'android'> {
 
   const filename = `personal-finance-backup-v5-${localDateStamp()}.json`
 
-  return saveTextFile(filename, json, {
+  const result = await saveTextFile(filename, json, {
     title: 'Backup Personal Finance',
     text: 'Cópia de segurança do Personal Finance',
     dialogTitle: 'Salvar ou compartilhar backup',
   })
+
+  // Lembrete de backup volta a contar a partir de agora
+  markBackupDone()
+  return result
 }
 
 
