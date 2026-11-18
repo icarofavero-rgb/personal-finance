@@ -2921,3 +2921,357 @@
 .pf-import-amount {
   text-align: right;
 }
+
+/* ---------- 27. Bloqueio do app ---------- */
+
+/* Enquanto bloqueado, nada do app aparece por trás */
+:root[data-pf-locked] .app,
+:root[data-pf-locked] .pf-onb-overlay {
+  visibility: hidden;
+}
+
+.pf-lock {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: grid;
+  place-items: center;
+  padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 30%, rgba(var(--pf-accent-rgb), 0.28), transparent 55%),
+    var(--pf-bg, #0d0f16);
+  color: var(--pf-text, #eef0f7);
+  animation: pf-fade-in 0.25s ease both;
+}
+
+:root[data-pf-theme='light'] .pf-lock {
+  background:
+    radial-gradient(circle at 50% 30%, rgba(var(--pf-accent-rgb), 0.2), transparent 55%),
+    #f2f4fa;
+}
+
+.pf-lock.is-unlocking {
+  animation: pf-lock-out 0.26s ease forwards;
+}
+
+.pf-lock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(340px, 100%);
+  text-align: center;
+}
+
+.pf-lock-logo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 6px;
+  border-radius: 22px;
+  color: var(--pf-accent-contrast, #fff);
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 55%),
+    var(--pf-accent, #8b5cf6);
+  box-shadow: 0 14px 34px rgba(var(--pf-accent-rgb), 0.45);
+}
+
+.pf-lock-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--pf-accent-ink, var(--pf-accent));
+  background: var(--pf-bg, #0d0f16);
+  border: 2px solid rgba(var(--pf-accent-rgb), 0.6);
+}
+
+:root[data-pf-theme='light'] .pf-lock-badge {
+  background: #ffffff;
+}
+
+.pf-lock-card h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.pf-lock-card p {
+  margin: 0;
+  min-height: 20px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--pf-text-secondary, #9aa3b8);
+}
+
+.pf-lock-dots {
+  display: flex;
+  gap: 14px;
+  margin: 18px 0 20px;
+}
+
+.pf-lock-dots span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--pf-accent-rgb), 0.6);
+  transition: background 0.15s ease, transform 0.2s var(--pf-ease-spring, ease);
+}
+
+.pf-lock-dots span.is-filled {
+  background: var(--pf-accent);
+  transform: scale(1.1);
+}
+
+.pf-lock-dots.is-error,
+.pf-lock-code.is-error {
+  animation: pf-lock-shake 0.4s ease;
+}
+
+.pf-lock-dots.is-error span {
+  border-color: #f87171;
+  background: #f87171;
+}
+
+.pf-lock-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 72px);
+  gap: 14px 22px;
+}
+
+.pf-lock-keypad button {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.25);
+  background: rgba(var(--pf-accent-rgb), 0.08);
+  color: var(--pf-text, #eef0f7);
+  font: inherit;
+  font-size: 26px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s var(--pf-ease-spring, ease), background 0.15s ease;
+}
+
+.pf-lock-keypad button:active:not(:disabled) {
+  transform: scale(0.9);
+  background: rgba(var(--pf-accent-rgb), 0.25);
+}
+
+.pf-lock-keypad button:disabled {
+  opacity: 0.4;
+}
+
+.pf-lock-keypad button.is-tool {
+  border-color: transparent;
+  background: transparent;
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+.pf-lock-link {
+  margin-top: 14px;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--pf-text-secondary, #9aa3b8);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.pf-lock-recovery {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  width: 100%;
+}
+
+.pf-lock-code {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  min-height: 50px;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.45);
+  background: rgba(var(--pf-accent-rgb), 0.08);
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+.pf-lock-code input {
+  flex: 1;
+  min-width: 0;
+  border: 0 !important;
+  outline: none;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.pf-lock-recovery .primary-button {
+  justify-content: center;
+  min-height: 48px;
+}
+
+@keyframes pf-lock-shake {
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+@keyframes pf-lock-out {
+  to { opacity: 0; transform: scale(1.04); }
+}
+
+@media (max-height: 640px) {
+  .pf-lock-keypad {
+    grid-template-columns: repeat(3, 62px);
+    gap: 10px 18px;
+  }
+
+  .pf-lock-keypad button {
+    width: 62px;
+    height: 62px;
+    font-size: 22px;
+  }
+}
+
+/* Quadro nas Configurações */
+.pf-lock-settings {
+  max-width: 620px;
+}
+
+.pf-lock-enable {
+  align-self: flex-start;
+}
+
+.pf-lock-on {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pf-lock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.pf-lock-after {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--pf-text-secondary);
+}
+
+.pf-lock-after select {
+  min-height: 42px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, var(--pf-surface));
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 13.5px;
+}
+
+.pf-lock-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.4);
+  background: rgba(var(--pf-accent-rgb), 0.07);
+  animation: pf-menu-in 0.25s var(--pf-ease-spring, ease) both;
+}
+
+.pf-lock-setup strong {
+  font-size: 14.5px;
+  color: var(--pf-text);
+}
+
+.pf-lock-setup small {
+  font-size: 12.5px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-lock-setup input {
+  max-width: 220px;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, var(--pf-surface));
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 22px;
+  letter-spacing: 0.4em;
+}
+
+.pf-lock-setup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pf-lock-code-box {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.pf-lock-code-box > svg {
+  flex-shrink: 0;
+  color: #22c55e;
+}
+
+.pf-lock-code-box strong {
+  color: var(--pf-text);
+}
+
+.pf-lock-code-box p {
+  margin: 4px 0 10px;
+  font-size: 13px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-lock-code-box code {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--pf-text);
+  background: rgba(127, 127, 127, 0.14);
+  user-select: all;
+}

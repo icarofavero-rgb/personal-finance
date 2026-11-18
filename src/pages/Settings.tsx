@@ -29,6 +29,7 @@ import AvatarPhotoEditor from '../components/AvatarPhotoEditor'
 import LayoutSettings from '../components/LayoutSettings'
 import ProfilesSettings from '../components/ProfilesSettings'
 import NotificationPermissionCard from '../components/NotificationPermissionCard'
+import LockSettingsCard from '../components/LockSettingsCard'
 import { requestOpenTutorial } from '../services/onboardingStorage'
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
@@ -973,6 +974,12 @@ return (
 ) : activeSection === 'security' ? (
 
   <div className="settings-appearance">
+    <LockSettingsCard
+      onMessage={(message, type = 'success') =>
+        setToast({ id: crypto.randomUUID(), type, message })
+      }
+    />
+
     <div className="settings-appearance-group">
       <h3>Estado de segurança</h3>
       <p>

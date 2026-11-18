@@ -6,6 +6,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import AppSplash from './components/AppSplash'
+import AppLockScreen from './components/AppLockScreen'
 import Onboarding from './components/Onboarding'
 import { installChangeTracking } from './services/sync/changeTracker'
 import {
@@ -88,6 +89,7 @@ function AppWithSplash() {
   return (
     <>
       <App />
+      <AppLockScreen />
       {showSplash && (
         <AppSplash onComplete={finishSplash} />
       )}
