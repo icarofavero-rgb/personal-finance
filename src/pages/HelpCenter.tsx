@@ -64,7 +64,7 @@ const TOPICS: Topic[] = [
       },
       {
         question: 'Como vejo o tutorial de novo?',
-        answer: 'Use o botão “Ver tutorial novamente” aqui na Central de ajuda, ou em Configurações → Dados e armazenamento.',
+        answer: 'Use o botão “Ver tutorial novamente” aqui na Central de ajuda (quadro “Atalhos”).',
       },
       {
         question: 'O que são os “Destaques do mês” no Dashboard?',

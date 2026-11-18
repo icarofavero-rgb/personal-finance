@@ -3350,3 +3350,120 @@
   line-height: 1.45;
   color: var(--pf-text-secondary);
 }
+
+/* Configurações: botões do tamanho do texto (não a largura toda) */
+.settings-appearance-group > button,
+.settings-appearance-group > .primary-button {
+  align-self: flex-start;
+  width: auto;
+  max-width: 100%;
+}
+
+/* ---------- 29. Menu do usuário (menu lateral) ---------- */
+
+.pf-sidenav-profile-chevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--pf-text-secondary);
+}
+
+.pf-side-profile-menu {
+  position: fixed;
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 240px;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid var(--pf-glass-border, var(--pf-border));
+  background: var(--pf-glass-strong, var(--pf-surface, #191e2a));
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.35);
+  -webkit-backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+  backdrop-filter: blur(var(--pf-glass-blur, 20px)) saturate(150%);
+  transform-origin: bottom left;
+}
+
+:root:not([data-pf-glass]) .pf-side-profile-menu {
+  background: var(--pf-surface, #191e2a);
+}
+
+:root[data-pf-theme='light']:not([data-pf-glass]) .pf-side-profile-menu {
+  background: #ffffff;
+}
+
+.pf-side-profile-divider {
+  height: 1px;
+  margin: 4px 6px;
+  background: var(--pf-control-border, var(--pf-border));
+}
+
+.pf-side-profile-icon {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  color: var(--pf-accent-ink, var(--pf-accent));
+  background: rgba(var(--pf-accent-rgb), 0.14);
+}
+
+.pf-profile-menu-item.is-create {
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+/* ---------- 30. Layout: alças de arrastar ---------- */
+
+.pf-layout-handle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 40px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  color: var(--pf-text-secondary);
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.pf-layout-handle:hover,
+.pf-layout-handle:focus-visible {
+  color: var(--pf-accent-ink, var(--pf-accent));
+  background: rgba(var(--pf-accent-rgb), 0.12);
+}
+
+.pf-layout-list.is-dragging,
+.pf-layout-list.is-dragging .pf-layout-handle {
+  cursor: grabbing;
+}
+
+.pf-layout-row {
+  position: relative;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, scale 0.2s ease;
+}
+
+/* A seção que está sendo arrastada "levanta" */
+.pf-layout-row.is-dragged {
+  z-index: 2;
+  scale: 1.03;
+  border-color: rgba(var(--pf-accent-rgb), 0.7);
+  background: var(--pf-glass-strong, var(--pf-surface, #191e2a));
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.3),
+    0 0 calc(8px + var(--pf-neon-strength, 0.15) * 40px) rgba(var(--pf-accent-rgb), 0.25);
+}
+
+.pf-layout-row.is-dragged .pf-layout-handle {
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+.pf-profile-menu-item > span.pf-side-profile-icon {
+  flex: 0 0 26px;
+}

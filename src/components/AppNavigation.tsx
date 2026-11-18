@@ -30,6 +30,7 @@ import {
 import type { DeviceClass } from '../hooks/useDeviceClass'
 import { Capacitor } from '@capacitor/core'
 import { exitApp } from '../services/appExit'
+import SideProfileMenu from './SideProfileMenu'
 import {
   getLayoutPreferences,
   LAYOUT_CHANGED_EVENT,
@@ -315,23 +316,15 @@ function SideNavigation({
         ))}
       </div>
 
-      <button
-        type="button"
-        className={`pf-sidenav-profile ${activePage === 'Configurações' ? 'is-active' : ''}`}
-        onClick={() => onNavigate('Configurações')}
-        aria-label="Abrir meu perfil"
-        title="Abrir meu perfil"
-      >
-        <span className="pf-sidenav-avatar" style={{ background: profileBackground }}>
-          {profileAvatar}
-        </span>
-        {!compact && (
-          <span className="pf-sidenav-profile-info">
-            <strong>{profileName || 'Meu perfil'}</strong>
-            <small>{profileSubtitle ? `Perfil: ${profileSubtitle}` : 'Ver perfil'}</small>
-          </span>
-        )}
-      </button>
+      <SideProfileMenu
+        compact={compact}
+        active={activePage === 'Configurações'}
+        profileName={profileName}
+        profileAvatar={profileAvatar}
+        profileBackground={profileBackground}
+        profileSubtitle={profileSubtitle}
+        onOpenSettings={() => onNavigate('Configurações')}
+      />
     </aside>
   )
 }

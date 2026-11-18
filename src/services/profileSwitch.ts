@@ -3,8 +3,19 @@ import { setActiveFinancialProfile } from './financialProfilesStorage'
 /** Pede para abrir Configurações → Perfis (o App escuta este evento). */
 export const OPEN_PROFILES_SETTINGS_EVENT = 'personal-finance-open-profiles-settings'
 
-export function requestOpenProfilesSettings(): void {
+let createRequested = false
+
+/** Abre Configurações → Perfis (com `create`, já no formulário de perfil novo). */
+export function requestOpenProfilesSettings(options: { create?: boolean } = {}): void {
+  createRequested = Boolean(options.create)
   window.dispatchEvent(new Event(OPEN_PROFILES_SETTINGS_EVENT))
+}
+
+/** A tela de Perfis pergunta (uma vez) se deve abrir o formulário de criação. */
+export function consumeCreateProfileRequest(): boolean {
+  const requested = createRequested
+  createRequested = false
+  return requested
 }
 
 /**

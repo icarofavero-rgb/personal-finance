@@ -1217,10 +1217,12 @@ const [cardInstallments, setCardInstallments] = useState('1')
 
   // Seção aberta ao entrar em Configurações ("Gerenciar perfis" abre Perfis)
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('profile')
+  const [settingsOpenRevision, setSettingsOpenRevision] = useState(0)
 
   useEffect(() => {
     const openProfiles = () => {
       setSettingsSection('profiles')
+      setSettingsOpenRevision(value => value + 1)
       navigate('Configurações')
     }
     window.addEventListener(OPEN_PROFILES_SETTINGS_EVENT, openProfiles)
@@ -2314,7 +2316,7 @@ function handleDashboardInvoicePayment(
 
 {activePage === 'Configurações' && (
   <Settings
-    key={settingsSection}
+    key={`${settingsSection}-${settingsOpenRevision}`}
     initialSection={settingsSection}
     onOpenBackup={() => {
       setActivePage('Backup e restauração')

@@ -13,7 +13,7 @@ import {
   type FinancialProfile,
 } from '../services/financialProfilesStorage'
 import { DEFAULT_PROFILE_ID } from '../services/profileScope'
-import { switchToProfile } from '../services/profileSwitch'
+import { consumeCreateProfileRequest, switchToProfile } from '../services/profileSwitch'
 
 type ProfilesSettingsProps = {
   onMessage: (message: string, type?: 'success' | 'error') => void
@@ -30,7 +30,8 @@ const EMPTY_DRAFT: Draft = { id: null, name: '', color: PROFILE_COLORS[1], icon:
 export default function ProfilesSettings({ onMessage }: ProfilesSettingsProps) {
   const [profiles, setProfiles] = useState(getFinancialProfiles)
   const activeId = getFinancialProfilesState().activeProfileId
-  const [draft, setDraft] = useState<Draft | null>(null)
+  // "Criar perfil" no menu do usuário já abre o formulário
+  const [draft, setDraft] = useState<Draft | null>(() => (consumeCreateProfileRequest() ? { ...EMPTY_DRAFT } : null))
   const [toDelete, setToDelete] = useState<FinancialProfile | null>(null)
 
   const refresh = () => setProfiles(getFinancialProfiles())

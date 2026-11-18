@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronUp, LayoutGrid, Plus, RotateCcw } from 'lucide-react'
+import { GripVertical, LayoutGrid, Plus, RotateCcw } from 'lucide-react'
 import { findNavItem } from './AppNavigation'
 import {
   assignPhoneTab,
@@ -16,7 +16,7 @@ type LayoutSettingsProps = {
 }
 
 /** Anima os itens deslizando até a nova posição quando a ordem muda. */
-function useReorderAnimation(order: string[]) {
+function useReorderAnimation(order: string[], skip: React.RefObject<string | null>) {
   const items = useRef(new Map<string, HTMLElement>())
   const positions = useRef(new Map<string, number>())
 
@@ -28,6 +28,8 @@ function useReorderAnimation(order: string[]) {
       const before = positions.current.get(key)
       positions.current.set(key, top)
 
+      // O item sendo arrastado acompanha o dedo; só os outros deslizam
+      if (key === skip.current) return
       if (reduced || before === undefined || before === top) return
 
       element.animate(
@@ -37,19 +39,96 @@ function useReorderAnimation(order: string[]) {
     })
   }, [order])
 
-  return (key: string) => (element: HTMLElement | null) => {
+  const register = (key: string) => (element: HTMLElement | null) => {
     if (element) items.current.set(key, element)
     else items.current.delete(key)
   }
+
+  return { register, items }
 }
+
+const GAP = 8
 
 export default function LayoutSettings({ onSaved }: LayoutSettingsProps) {
   const [layout, setLayout] = useState<LayoutPreferences>(getLayoutPreferences)
   const [slot, setSlot] = useState(0)
-  const register = useReorderAnimation(layout.mainOrder)
+  const [dragging, setDragging] = useState<string | null>(null)
+  const draggingRef = useRef<string | null>(null)
+  const drag = useRef<{ pointerId: number; startY: number } | null>(null)
+  const orderRef = useRef(layout.mainOrder)
+  orderRef.current = layout.mainOrder
+  const { register, items } = useReorderAnimation(layout.mainOrder, draggingRef)
 
   function move(index: number, to: number) {
     setLayout(current => ({ ...current, mainOrder: moveItem(current.mainOrder, index, to) }))
+  }
+
+  // ---------- arrastar pela alça ----------
+
+  function startDrag(event: React.PointerEvent<HTMLButtonElement>, page: string) {
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    drag.current = { pointerId: event.pointerId, startY: event.clientY }
+    draggingRef.current = page
+    setDragging(page)
+  }
+
+  function moveDrag(event: React.PointerEvent<HTMLButtonElement>) {
+    const state = drag.current
+    const page = draggingRef.current
+    if (!state || !page || state.pointerId !== event.pointerId) return
+
+    const order = orderRef.current
+    const index = order.indexOf(page)
+    const row = items.current.get(page)
+    if (!row) return
+
+    let offset = event.clientY - state.startY
+    const height = row.offsetHeight + GAP
+
+    // Passou da metade do vizinho: troca de lugar com ele
+    if (offset < -height / 2 && index > 0) {
+      state.startY -= height
+      offset += height
+      orderRef.current = moveItem(order, index, index - 1)
+      move(index, index - 1)
+    } else if (offset > height / 2 && index < order.length - 1) {
+      state.startY += height
+      offset -= height
+      orderRef.current = moveItem(order, index, index + 1)
+      move(index, index + 1)
+    }
+
+    row.style.transform = `translateY(${offset}px)`
+  }
+
+  function endDrag() {
+    const page = draggingRef.current
+    const row = page ? items.current.get(page) : null
+
+    if (row) {
+      // Volta suavemente para o lugar certo
+      row.style.transition = 'transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1)'
+      row.style.transform = ''
+      window.setTimeout(() => {
+        row.style.transition = ''
+      }, 240)
+    }
+
+    drag.current = null
+    draggingRef.current = null
+    setDragging(null)
+  }
+
+  /** Teclado: setas para cima/baixo na alça também movem. */
+  function keyMove(event: React.KeyboardEvent, index: number) {
+    if (event.key === 'ArrowUp' && index > 0) {
+      event.preventDefault()
+      move(index, index - 1)
+    } else if (event.key === 'ArrowDown' && index < layout.mainOrder.length - 1) {
+      event.preventDefault()
+      move(index, index + 1)
+    }
   }
 
   function choose(page: string) {
@@ -94,40 +173,35 @@ export default function LayoutSettings({ onSaved }: LayoutSettingsProps) {
     <div className="settings-appearance pf-layout-settings">
       <div className="settings-appearance-group">
         <h3>Ordem do menu principal</h3>
-        <p>Use as setas para mudar a posição das seções no menu (e no painel “Mais” do celular).</p>
+        <p>Segure a alça (⋮⋮) e arraste para mudar a posição das seções no menu (e no painel “Mais” do celular).</p>
 
-        <ol className="pf-layout-list">
+        <ol className={`pf-layout-list ${dragging ? 'is-dragging' : ''}`}>
           {layout.mainOrder.map((page, index) => {
             const item = findNavItem(page)
             if (!item) return null
             const Icon = item.icon
 
             return (
-              <li key={page} ref={register(page)} className="pf-layout-row">
+              <li key={page} ref={register(page)} className={`pf-layout-row ${dragging === page ? 'is-dragged' : ''}`}>
                 <span className="pf-layout-position">{index + 1}</span>
                 <span className="pf-layout-icon">
                   <Icon size={19} strokeWidth={1.9} />
                 </span>
                 <span className="pf-layout-name">{item.label}</span>
 
-                <span className="pf-layout-arrows">
-                  <button
-                    type="button"
-                    onClick={() => move(index, index - 1)}
-                    disabled={index === 0}
-                    aria-label={`Subir ${item.label}`}
-                  >
-                    <ChevronUp size={18} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => move(index, index + 1)}
-                    disabled={index === layout.mainOrder.length - 1}
-                    aria-label={`Descer ${item.label}`}
-                  >
-                    <ChevronDown size={18} />
-                  </button>
-                </span>
+                <button
+                  type="button"
+                  className="pf-layout-handle"
+                  aria-label={`Arrastar ${item.label} (ou use as setas do teclado)`}
+                  title="Segure e arraste"
+                  onPointerDown={event => startDrag(event, page)}
+                  onPointerMove={moveDrag}
+                  onPointerUp={endDrag}
+                  onPointerCancel={endDrag}
+                  onKeyDown={event => keyMove(event, index)}
+                >
+                  <GripVertical size={20} />
+                </button>
               </li>
             )
           })}
