@@ -25,6 +25,7 @@ import {
   CalendarDays,
   X,
   Search,
+  Repeat,
   Trash2,
   Pencil,
   Download,
@@ -52,6 +53,7 @@ import {
   addTransaction,
   deleteTransaction,
   updateTransaction,
+  saveTransactions,
   type Transaction,
 } from './services/storage'
 
@@ -72,6 +74,14 @@ import {
 import { matchesSearch, summarize } from './services/transactionSearch'
 import BackupReminderBanner from './components/BackupReminderBanner'
 import MonthInsights from './components/MonthInsights'
+import RecurringManager from './components/RecurringManager'
+import {
+  createRuleFromTransaction,
+  getRecurringRules,
+  planRecurring,
+  saveRecurringRules,
+  RECURRING_CHANGED_EVENT,
+} from './services/recurringStorage'
 import { exportBackupAs, importBackup, type BackupFormat } from './services/backup'
 
 const EXPORT_FORMATS = [
@@ -855,6 +865,43 @@ return {
   remindersRevision,
 ])
 
+// Transações recorrentes: lança sozinho os meses que já chegaram
+const [recurringRevision, setRecurringRevision] = useState(0)
+
+useEffect(() => {
+  const bump = () => setRecurringRevision(previous => previous + 1)
+  window.addEventListener(RECURRING_CHANGED_EVENT, bump)
+  return () => window.removeEventListener(RECURRING_CHANGED_EVENT, bump)
+}, [])
+
+useEffect(() => {
+  try {
+    const rules = getRecurringRules()
+    if (rules.length === 0) return
+
+    const current = getTransactions()
+    const plan = planRecurring(rules, new Set(current.map(item => item.id)), notificationToday)
+
+    // Primeiro as transações, depois as regras (se algo falhar no meio,
+    // na próxima abertura o mês é lançado de novo, sem duplicar)
+    if (plan.transactions.length > 0) {
+      saveTransactions([...current, ...(plan.transactions as Transaction[])])
+      setTransactions(getTransactions())
+      showToast(
+        'success',
+        plan.transactions.length === 1
+          ? '1 lançamento recorrente adicionado.'
+          : `${plan.transactions.length} lançamentos recorrentes adicionados.`
+      )
+    }
+
+    if (plan.changed) saveRecurringRules(plan.rules)
+  } catch (error) {
+    console.error('Erro ao lançar transações recorrentes:', error)
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [notificationToday, recurringRevision])
+
 // Muda quando o tutorial termina (para pedir a permissão de notificações)
 const [onboardingDoneRevision, setOnboardingDoneRevision] = useState(0)
 
@@ -1133,6 +1180,7 @@ const [cardInstallments, setCardInstallments] = useState('1')
   const [filterCategory, setFilterCategory] = useState('Todas')
   const [filterType, setFilterType] = useState('Todos')
   const [searchText, setSearchText] = useState('')
+  const [repeatMonthly, setRepeatMonthly] = useState(false)
 
   // Formato do arquivo exportado na página de Backup
   const [backupFormat, setBackupFormat] = useState<BackupFormat>('json')
@@ -1653,6 +1701,7 @@ const filteredSummary = summarize(filteredTransactions)
 // Abre o formulário sempre limpo (evita herdar dados de uma edição cancelada).
 function openNewTransaction() {
   setEditingId(null)
+  setRepeatMonthly(false)
   setType('expense')
   setCategory(lastExpenseCategory)
   setDescription('')
@@ -1810,7 +1859,13 @@ if (editingId) {
   showToast('success', 'Transação atualizada com sucesso!')
 } else {
   addTransaction(transaction)
-  showToast('success', 'Transação cadastrada com sucesso!')
+
+  if (repeatMonthly) {
+    createRuleFromTransaction(transaction)
+    showToast('success', 'Transação cadastrada! Ela vai se repetir todo mês.')
+  } else {
+    showToast('success', 'Transação cadastrada com sucesso!')
+  }
 }
 
 
@@ -3309,6 +3364,8 @@ background:
                     <p>Suas movimentações financeiras</p>
                   </div>
 
+                  {activePage === 'Transações' && <RecurringManager />}
+
                   {activePage === 'Dashboard' && (
                     <button
                       className="text-button"
@@ -3947,6 +4004,28 @@ options={[
     required
   />
 </div>
+
+{/* Repetir todo mês (transação recorrente) */}
+{editingId === null && !(type === 'expense' && paymentMethod === 'credit') && (
+  <label className="pf-repeat-toggle">
+    <span className="pf-repeat-toggle-icon"><Repeat size={18} /></span>
+    <span className="pf-repeat-toggle-text">
+      <strong>Repetir todo mês</strong>
+      <small>
+        {repeatMonthly
+          ? `Será lançada sozinha todo dia ${Number(date.slice(8, 10)) || 1}.`
+          : 'Ideal para salário, aluguel e assinaturas.'}
+      </small>
+    </span>
+    <input
+      type="checkbox"
+      className="settings-toggle-input"
+      role="switch"
+      checked={repeatMonthly}
+      onChange={event => setRepeatMonthly(event.target.checked)}
+    />
+  </label>
+)}
 
 {type === 'expense' && editingId === null && (
   <>

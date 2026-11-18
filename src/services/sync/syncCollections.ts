@@ -33,6 +33,7 @@ export const SYNC_COLLECTIONS: readonly SyncCollection[] = [
   { name: 'manualForecasts', storageKey: 'personal-finance-manual-forecasts', kind: 'array' },
   { name: 'savings', storageKey: 'personal-finance-savings-v1', kind: 'array' },
   { name: 'reminders', storageKey: 'personal-finance-reminders-v1', kind: 'array' },
+  { name: 'recurring', storageKey: 'personal-finance-recurring-v1', kind: 'array' },
   { name: 'userPreferences', storageKey: 'personal-finance-user-preferences', kind: 'singleton' },
   { name: 'appearance', storageKey: 'personal-finance-appearance', kind: 'singleton' },
   { name: 'notificationPreferences', storageKey: 'personal-finance-notification-preferences-v1', kind: 'singleton' },

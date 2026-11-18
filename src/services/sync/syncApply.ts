@@ -68,6 +68,7 @@ const COLLECTION_LABELS: Record<string, string> = {
   manualForecasts: 'previsões',
   savings: 'movimentações do Guardado',
   reminders: 'lembretes',
+  recurring: 'transações recorrentes',
   userPreferences: 'perfil',
   appearance: 'aparência',
   notificationPreferences: 'notificações',

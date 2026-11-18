@@ -85,6 +85,13 @@ export const BACKUP_MODULES: readonly ModuleDefinition[] = [
     },
   },
   {
+    key: 'personal-finance-recurring-v1',
+    label: 'Transações recorrentes',
+    validate: value => {
+      if (!Array.isArray(value)) throw new Error('As transações recorrentes do backup são inválidas.')
+    },
+  },
+  {
     key: 'personal-finance-user-preferences',
     label: 'Perfil',
     validate: requireObject('preferências de perfil'),

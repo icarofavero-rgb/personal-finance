@@ -28,6 +28,7 @@ const DATASETS: Dataset[] = [
   { key: 'personal-finance-manual-forecasts', table: 'previsoes', sheet: 'Previsões' },
   { key: 'personal-finance-savings-v1', table: 'guardado', sheet: 'Guardado' },
   { key: 'personal-finance-reminders-v1', table: 'lembretes', sheet: 'Lembretes' },
+  { key: 'personal-finance-recurring-v1', table: 'recorrentes', sheet: 'Recorrentes' },
 ]
 
 /** Títulos das colunas na planilha (o SQLite usa os nomes originais). */

@@ -33,6 +33,7 @@ export const PROFILE_SCOPED_KEYS: ReadonlySet<string> = new Set([
   'personal-finance-manual-forecasts',
   'personal-finance-savings-v1',
   'personal-finance-reminders-v1',
+  'personal-finance-recurring-v1',
   'personal-finance-notification-read-v1',
   'personal-finance-notification-history-v1',
   'personal-finance-notification-history-v1-lock',
