@@ -290,3 +290,71 @@
   font-size: 12px;
   color: var(--pf-text-secondary);
 }
+
+/* Busca na Central de ajuda */
+.pf-help-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 50px;
+  padding: 0 8px 0 16px;
+  border-radius: 16px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, var(--pf-surface-secondary));
+  color: var(--pf-text-secondary);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pf-help-search:focus-within {
+  border-color: rgba(var(--pf-accent-rgb), 0.7);
+  box-shadow: 0 0 0 3px rgba(var(--pf-accent-rgb), 0.14);
+}
+
+.pf-help-search input,
+:root[data-pf-glass] .pf-help-search input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0 !important;
+  border: 0 !important;
+  outline: none;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.pf-help-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.pf-help-search button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(var(--pf-accent-rgb), 0.12);
+  color: var(--pf-accent-ink, var(--pf-accent));
+  cursor: pointer;
+}
+
+.pf-help-empty {
+  padding: 18px 20px;
+  border-radius: 18px;
+}
+
+.pf-help-empty strong {
+  color: var(--pf-text);
+}
+
+.pf-help-empty p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--pf-text-secondary);
+}
