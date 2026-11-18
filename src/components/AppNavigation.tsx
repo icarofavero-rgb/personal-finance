@@ -9,6 +9,8 @@ import {
 } from 'react'
 import {
   ArrowLeftRight,
+  CalendarDays,
+  PiggyBank,
   ChartNoAxesCombined,
   CreditCard,
   DatabaseBackup,
@@ -38,6 +40,8 @@ export const MAIN_NAV: NavItem[] = [
   { page: 'Dashboard', label: 'Dashboard', shortLabel: 'Início', icon: LayoutDashboard },
   { page: 'Transações', label: 'Transações', icon: ArrowLeftRight },
   { page: 'Cartões', label: 'Cartões', icon: CreditCard },
+  { page: 'Calendário', label: 'Calendário', icon: CalendarDays },
+  { page: 'Guardado', label: 'Guardado', icon: PiggyBank },
   { page: 'Devedores', label: 'Devedores', icon: UsersRound },
   { page: 'Orçamentos', label: 'Orçamentos', icon: Wallet },
   { page: 'Metas', label: 'Metas', icon: Target },
@@ -87,27 +91,53 @@ function useIndicator(
       return
     }
 
+    // Posição relativa ao contêiner, medida na tela (não depende de qual
+    // elemento o navegador considera "pai" para o offsetLeft/offsetTop).
+    const box = container.getBoundingClientRect()
+    const item = active.getBoundingClientRect()
+
     setStyle(
       axis === 'y'
         ? {
             opacity: 1,
-            transform: `translateY(${active.offsetTop}px)`,
-            height: active.offsetHeight,
+            transform: `translateY(${item.top - box.top + container.scrollTop - container.clientTop}px)`,
+            height: item.height,
           }
         : {
             opacity: 1,
-            transform: `translateX(${active.offsetLeft}px)`,
-            width: active.offsetWidth,
+            transform: `translateX(${item.left - box.left - container.clientLeft}px)`,
+            width: item.width,
           }
     )
   }, [containerRef, activeKey, axis])
 
   useLayoutEffect(measure, [measure])
 
+  // Mede de novo sempre que o tamanho da barra mudar (rotação, fontes
+  // carregando, o WebView do Android ajustando a largura no início...).
   useEffect(() => {
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [measure])
+    const container = containerRef.current
+    let frame = 0
+    const schedule = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(measure)
+    }
+
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null
+    if (container && observer) {
+      observer.observe(container)
+      container.querySelectorAll('[data-nav-key]').forEach(item => observer.observe(item))
+    }
+
+    window.addEventListener('resize', schedule)
+    void document.fonts?.ready.then(schedule)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      observer?.disconnect()
+      window.removeEventListener('resize', schedule)
+    }
+  }, [containerRef, measure])
 
   return style
 }

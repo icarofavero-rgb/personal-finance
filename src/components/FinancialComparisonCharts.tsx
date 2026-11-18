@@ -1,4 +1,5 @@
 
+import { chartAnimation } from './chartMotion'
 import { useEffect, useMemo, useState } from 'react'
 import {
   ResponsiveContainer,
@@ -317,7 +318,7 @@ const { categoryData, categories } = useMemo(() => {
   name="Valor"
   radius={[0, 9, 9, 0]}
   maxBarSize={38}
-  isAnimationActive
+  {...chartAnimation}
   shape={props => {
     const { x, y, width, height, payload } = props
 
@@ -518,7 +519,7 @@ const { categoryData, categories } = useMemo(() => {
                     connectNulls
                     legendType="none"
                     tooltipType="none"
-                    isAnimationActive
+                    {...chartAnimation}
                   />
                 ))}
 
@@ -540,7 +541,7 @@ const { categoryData, categories } = useMemo(() => {
     fill: isLightTheme ? '#ffffff' : '#1d222d',
   }}
   connectNulls
-  isAnimationActive
+  {...chartAnimation}
   animationDuration={850}
 
 style={{

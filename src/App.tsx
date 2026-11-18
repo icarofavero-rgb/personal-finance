@@ -5,7 +5,8 @@ import {
   buildCategoryValue,
 } from './services/categories'
 import { createPortal } from 'react-dom'
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback, useTransition } from 'react'
+import Deferred from './components/Deferred'
 import {
   ArrowLeftRight,
   ChartNoAxesCombined,
@@ -121,8 +122,14 @@ import { checkPaymentSafety } from './services/cardPaymentSafety'
 import Debtors from './pages/Debtors'
 import Sync from './pages/Sync'
 import AppBackdrop from './components/AppBackdrop'
+import Savings from './pages/Savings'
+import CalendarPage, { REMINDERS_CHANGED_EVENT } from './pages/CalendarPage'
+import { getReminders } from './services/remindersStorage'
+import { generateReminderNotifications } from './services/calendarEvents'
+import { syncSystemNotifications } from './services/systemNotifications'
 import AppNavigation, { PAGE_ORDER } from './components/AppNavigation'
 import { useDeviceClass } from './hooks/useDeviceClass'
+import { markBusy } from './hooks/busyMarker'
 import DatePicker from './components/DatePicker'
 import ConfirmDialog from './components/ConfirmDialog'
 import Toast, { type ToastMessage } from './components/Toast'
@@ -518,8 +525,23 @@ const [selectedInvoiceMonth, setSelectedInvoiceMonth] =
   useState('')
 
   const [activePage, setActivePage] = useState('Dashboard')
+  const [isPagePending, startPageTransition] = useTransition()
 
 const device = useDeviceClass()
+
+// Aba destacada no menu: muda NA HORA do toque. A página em si é montada
+// em seguida, "em pedaços" (startTransition), sem travar o celular.
+const [navPage, setNavPage] = useState(activePage)
+
+if (navPage !== activePage && !isPagePending) {
+  // Mudanças de página feitas por outros botões (ex.: "Ver todas").
+  setNavPage(activePage)
+}
+
+const navigate = useCallback((page: string) => {
+  setNavPage(page)
+  startPageTransition(() => setActivePage(page))
+}, [])
 
 // Direção da transição: avançar no menu desliza para um lado, voltar para o outro.
 const [previousPage, setPreviousPage] = useState(activePage)
@@ -534,8 +556,9 @@ if (previousPage !== activePage) {
   )
 }
 
-// Cada página nova começa do topo.
+// Cada página nova começa do topo; o fundo animado pausa durante a troca.
 useEffect(() => {
+  markBusy(450)
   window.scrollTo({ top: 0 })
 }, [activePage])
 
@@ -601,6 +624,15 @@ const [backupWarning] = useState(() =>
   
 const [notificationPreferencesRevision, setNotificationPreferencesRevision] =
   useState(0)
+
+// Muda sempre que os lembretes do Calendário são alterados.
+const [remindersRevision, setRemindersRevision] = useState(0)
+
+useEffect(() => {
+  const bump = () => setRemindersRevision(previous => previous + 1)
+  window.addEventListener(REMINDERS_CHANGED_EVENT, bump)
+  return () => window.removeEventListener(REMINDERS_CHANGED_EVENT, bump)
+}, [])
 
 const [notificationToday, setNotificationToday] = useState(() => {
   const now = new Date()
@@ -721,12 +753,30 @@ const notificationResult = useMemo(() => {
     const payments = getCardPayments()
     const preferences = getNotificationPreferences()
 
-    const notifications = generateCardInvoiceNotifications(
+    const invoiceNotifications = generateCardInvoiceNotifications(
       cards,
       purchases,
       payments,
       preferences,
       notificationToday
+    )
+
+    // Lembretes do Calendário (boletos, contas...). Um problema aqui não
+    // pode esconder os avisos de fatura.
+    let reminderNotifications: ReturnType<typeof generateReminderNotifications> = []
+
+    try {
+      reminderNotifications = generateReminderNotifications(
+        getReminders(),
+        preferences,
+        notificationToday
+      )
+    } catch (error) {
+      console.error('Erro ao calcular avisos dos lembretes:', error)
+    }
+
+    const notifications = [...invoiceNotifications, ...reminderNotifications].sort(
+      (a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? '')
     )
 
 const readIds = new Set(getReadNotificationIds())
@@ -764,7 +814,31 @@ return {
   notificationToday,
   notificationPreferencesRevision,
   notificationReadRevision,
+  remindersRevision,
 ])
+
+// Notificações fora do app (Android): reagenda quando algo muda.
+useEffect(() => {
+  const timer = window.setTimeout(() => {
+    try {
+      void syncSystemNotifications(
+        {
+          cards: getCards(),
+          purchases: getCardPurchases(),
+          payments: getCardPayments(),
+          reminders: getReminders(),
+          forecasts: [],
+          debts: [],
+        },
+        getNotificationPreferences()
+      ).catch(error => console.error('Erro ao agendar notificações:', error))
+    } catch (error) {
+      console.error('Erro ao preparar notificações:', error)
+    }
+  }, 1500)
+
+  return () => window.clearTimeout(timer)
+}, [cardsRevision, remindersRevision, notificationPreferencesRevision, notificationToday])
 
 
 const [manualForecasts, setManualForecasts] =
@@ -1807,8 +1881,8 @@ function handleDashboardInvoicePayment(
     <div className="app">
       <AppNavigation
         device={device}
-        activePage={activePage}
-        onNavigate={setActivePage}
+        activePage={navPage}
+        onNavigate={navigate}
         onNewTransaction={openNewTransaction}
         profileName={userName}
         profileBackground={sidebarAvatarGradient}
@@ -3005,11 +3079,15 @@ background:
       </div>
     </div>
 
+    {/* Gráficos entram logo depois da página: a troca de aba não trava */}
+    <Deferred minHeight={760} delay={380}>
     <FinanceCharts
       transactions={transactions}
       projection={financialProjection}
     />
+    </Deferred>
 
+    <Deferred minHeight={760} delay={650}>
     <FinancialComparisonCharts
       transactions={dashboardChartTransactions}
       categoryTransactions={transactions.filter(transaction => {
@@ -3030,6 +3108,7 @@ background:
       })}
       categoryEndMonth={dashboardMonth}
     />
+    </Deferred>
   </section>
 )}
 
@@ -3350,6 +3429,10 @@ background:
 )}
 
 {activePage === 'Devedores' && <Debtors />}
+
+{activePage === 'Guardado' && <Savings transactions={transactions} />}
+
+{activePage === 'Calendário' && <CalendarPage />}
 
 {activePage === 'Sincronização' && <Sync />}
 

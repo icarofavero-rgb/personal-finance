@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import { chartAnimation } from './chartMotion'
 import {
   ResponsiveContainer,
   BarChart,
@@ -58,10 +59,20 @@ const CATEGORY_ICONS = {
   ellipsis: Ellipsis,
 }
 
+/** Cores das barras: [topo, base] */
+const BAR_GRADIENTS: Record<string, [string, string]> = {
+  income: ['#67e8f9', '#38bdf8'],
+  expense: ['#c4b5fd', '#8b5cf6'],
+  paid: ['#6ee7b7', '#36c995'],
+  pending: ['#fcd34d', '#f0b85d'],
+}
+
 function FinanceCharts({
   transactions,
   projection,
 }: Props) {
+  // Ids únicos: o gráfico aparece no Dashboard e nos Relatórios.
+  const gradientId = `pf-bars-${useId().replace(/:/g, '')}`
 
 
 const [isLightTheme, setIsLightTheme] = useState(
@@ -177,6 +188,16 @@ const totalCategoryExpenses = categoryData.reduce(
     bottom: 8,
   }}
 >
+                {/* Gradientes "de vidro": cor viva no topo, mais transparente na base */}
+                <defs>
+                  {Object.entries(BAR_GRADIENTS).map(([key, [top, bottom]]) => (
+                    <linearGradient key={key} id={`${gradientId}-${key}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={top} stopOpacity={1} />
+                      <stop offset="100%" stopColor={bottom} stopOpacity={0.55} />
+                    </linearGradient>
+                  ))}
+                </defs>
+
                 <CartesianGrid
   stroke={gridColor}
   strokeDasharray="3 3"
@@ -289,49 +310,49 @@ return (
 
 {projection ? (
   <>
-    <Bar
+    <Bar {...chartAnimation}
       dataKey="entradas"
       name="Receitas cadastradas"
-      fill="#38BDF8"
-      radius={[6, 6, 0, 0]}
+      fill={`url(#${gradientId}-income)`}
+      radius={[8, 8, 0, 0]}
     />
 
-    <Bar
+    <Bar {...chartAnimation}
       dataKey="saidas"
       name="Outras despesas"
-      fill="#A78BFA"
-      radius={[6, 6, 0, 0]}
+      fill={`url(#${gradientId}-expense)`}
+      radius={[8, 8, 0, 0]}
     />
 
-    <Bar
+    <Bar {...chartAnimation}
       dataKey="faturasPagas"
       name="Faturas pagas"
       stackId="faturas"
-      fill="#36C995"
+      fill={`url(#${gradientId}-paid)`}
     />
 
-    <Bar
+    <Bar {...chartAnimation}
       dataKey="faturasPendentes"
       name="Faturas pendentes"
       stackId="faturas"
-      fill="#F0B85D"
-      radius={[6, 6, 0, 0]}
+      fill={`url(#${gradientId}-pending)`}
+      radius={[8, 8, 0, 0]}
     />
   </>
 ) : (
   <>
-    <Bar
+    <Bar {...chartAnimation}
       dataKey="entradas"
       name="Entradas"
-      fill="#36C995"
-      radius={[6, 6, 0, 0]}
+      fill={`url(#${gradientId}-paid)`}
+      radius={[8, 8, 0, 0]}
     />
 
-    <Bar
+    <Bar {...chartAnimation}
       dataKey="saidas"
       name="Saídas"
-      fill="#A78BFA"
-      radius={[6, 6, 0, 0]}
+      fill={`url(#${gradientId}-expense)`}
+      radius={[8, 8, 0, 0]}
     />
   </>
 )}
@@ -356,13 +377,16 @@ return (
             <div className="chart-container">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
+                  <Pie {...chartAnimation}
                     data={categoryData}
                     dataKey="value"
                     nameKey="name"
-innerRadius="45%"
-outerRadius="68%"
-paddingAngle={4}
+innerRadius="52%"
+outerRadius="74%"
+paddingAngle={3}
+cornerRadius={8}
+stroke="rgba(255, 255, 255, 0.35)"
+strokeWidth={1.5}
                   >
                     {categoryData.map(item => (
                       <Cell

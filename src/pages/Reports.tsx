@@ -5,6 +5,7 @@ import type { Transaction } from '../services/storage'
 import MonthPicker from '../components/MonthPicker'
 import SelectField from '../components/SelectField'
 import FinancialComparisonCharts from '../components/FinancialComparisonCharts'
+import Deferred from '../components/Deferred'
 
 type ReportsProps = {
   transactions: Transaction[]
@@ -140,8 +141,9 @@ export default function Reports({ transactions }: ReportsProps) {
         </div>
       </div>
 
+      <Deferred minHeight={760}>
       <FinanceCharts transactions={filteredTransactions} />
-      
+
 <FinancialComparisonCharts
   transactions={filteredTransactions}
   categoryTransactions={
@@ -186,6 +188,7 @@ categoryEndMonth={
 }
 
 />
+      </Deferred>
 
     </div>
   )

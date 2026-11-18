@@ -1,0 +1,373 @@
+/* =========================================================
+   PERSONAL FINANCE — LIQUID GLASS (estilo iPhone) + AJUSTES
+   Carregado depois de experience.css.
+
+   1. Áreas seguras do Android (relógio/bateria e barra de navegação)
+   2. Texto legível sobre a cor de destaque
+   3. Menus suspensos por cima dos cartões
+   4. Liquid Glass evidente (fundo com ondas, borda brilhante, seleções)
+   5. Gráficos em vidro
+   6. Desempenho (menos trabalho no celular, pausa ao rolar)
+   ========================================================= */
+
+/* ---------- 1. Áreas seguras ---------- */
+
+:root {
+  /* O Capacitor informa os valores corretos em --safe-area-inset-*
+     (o env() do WebView antigo pode vir zerado). */
+  --pf-safe-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  --pf-safe-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+  --pf-safe-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
+  --pf-safe-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
+}
+
+.main > .topbar {
+  height: calc(76px + var(--pf-safe-top));
+  min-height: calc(76px + var(--pf-safe-top));
+  padding-top: var(--pf-safe-top);
+}
+
+@media (max-width: 650px) {
+  .main > .topbar {
+    height: calc(56px + var(--pf-safe-top)) !important;
+    min-height: calc(56px + var(--pf-safe-top)) !important;
+    padding-top: var(--pf-safe-top) !important;
+  }
+}
+
+.pf-sidenav {
+  padding-top: calc(26px + var(--pf-safe-top));
+  padding-left: calc(16px + var(--pf-safe-left));
+  padding-bottom: calc(18px + var(--pf-safe-bottom));
+}
+
+.pf-sidenav.is-rail {
+  padding-top: calc(20px + var(--pf-safe-top));
+  padding-left: calc(10px + var(--pf-safe-left));
+  padding-bottom: calc(14px + var(--pf-safe-bottom));
+}
+
+.pf-tabbar {
+  padding-bottom: calc(10px + var(--pf-safe-bottom));
+}
+
+:root[data-pf-device='phone'] .app > .main .content {
+  padding-bottom: calc(110px + var(--pf-safe-bottom));
+}
+
+:root[data-pf-device='tablet'] .app > .main .content {
+  padding-bottom: calc(40px + var(--pf-safe-bottom));
+}
+
+.pf-sheet {
+  padding-bottom: calc(24px + var(--pf-safe-bottom));
+}
+
+/* ---------- 2. Texto sobre a cor de destaque ---------- */
+
+.pf-sidenav-new,
+.pf-tabbar-fab,
+.pf-sidenav-logo {
+  color: var(--pf-accent-contrast, #ffffff);
+}
+
+/* ---------- 3. Menus suspensos sempre por cima ---------- */
+
+/* Vidro cria "camadas" próprias; um cartão com seletor aberto sobe para
+   a frente, senão o menu ficaria escondido atrás dos cartões seguintes. */
+:is(.panel, .summary-card, .finance-chart-card, .reports-filters, .monthly-forecast-panel, .dashboard-cards-panel, .budgets-summary, .section-heading, .settings-content):is(:focus-within, :has([aria-expanded='true'], .pf-calendar-popup, .pf-select-options)) {
+  position: relative;
+  z-index: 60;
+}
+
+/* ---------- 4. Liquid Glass (iPhone) ---------- */
+
+/* Fundo: tons prateados/azulados com ondas de luz */
+:root[data-pf-style='apple-glass'] {
+  --pf-backdrop-base:
+    radial-gradient(ellipse at 20% 0%, #26304d 0%, transparent 60%),
+    linear-gradient(160deg, #0b1222 0%, #0e1426 45%, #141228 100%);
+  --pf-wave-1: rgba(120, 160, 255, 0.35);
+  --pf-wave-2: rgba(190, 210, 255, 0.22);
+  --pf-wave-3: rgba(var(--pf-accent-rgb), 0.28);
+  --pf-wave-line: rgba(220, 232, 255, 0.55);
+
+  --pf-glass-bg: linear-gradient(140deg, rgba(255, 255, 255, 0.13) 0%, rgba(255, 255, 255, 0.05) 55%, rgba(255, 255, 255, 0.08) 100%);
+  --pf-glass-bg-strong: rgba(24, 30, 48, 0.72);
+  --pf-glass-border: rgba(255, 255, 255, 0.16);
+  --pf-glass-rim: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.08) 32%, rgba(255, 255, 255, 0.02) 60%, rgba(255, 255, 255, 0.35));
+  --pf-glass-shadow:
+    0 18px 40px rgba(2, 6, 23, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+  --pf-glass-blur: 26px;
+  --pf-control-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+  --pf-control-border: rgba(255, 255, 255, 0.22);
+}
+
+:root[data-pf-style='apple-glass'][data-pf-theme='light'] {
+  --pf-backdrop-base:
+    radial-gradient(ellipse at 15% 0%, #ffffff 0%, transparent 55%),
+    linear-gradient(160deg, #c9d8ee 0%, #dfe7f5 40%, #e9e4f5 75%, #f3e9f1 100%);
+  --pf-wave-1: rgba(255, 255, 255, 0.85);
+  --pf-wave-2: rgba(140, 170, 230, 0.35);
+  --pf-wave-3: rgba(var(--pf-accent-rgb), 0.2);
+  --pf-wave-line: rgba(255, 255, 255, 0.95);
+
+  --pf-glass-bg: linear-gradient(140deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.38) 60%, rgba(255, 255, 255, 0.55) 100%);
+  --pf-glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --pf-glass-border: rgba(255, 255, 255, 0.9);
+  --pf-glass-rim: linear-gradient(135deg, #ffffff, rgba(255, 255, 255, 0.4) 35%, rgba(255, 255, 255, 0.1) 65%, rgba(255, 255, 255, 0.85));
+  --pf-glass-shadow:
+    0 16px 36px rgba(60, 80, 140, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+  --pf-control-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.55));
+  --pf-control-border: rgba(255, 255, 255, 0.95);
+}
+
+/* Neon: mesmas formas, com luz colorida */
+:root[data-pf-style='neon-glass'] {
+  --pf-wave-1: rgba(236, 72, 153, 0.45);
+  --pf-wave-2: rgba(34, 211, 238, 0.32);
+  --pf-wave-3: rgba(var(--pf-accent-rgb), 0.45);
+  --pf-wave-line: rgba(255, 170, 240, 0.85);
+  --pf-glass-rim: linear-gradient(135deg, rgba(var(--pf-accent-rgb), 0.85), rgba(236, 72, 153, 0.15) 35%, rgba(34, 211, 238, 0.1) 65%, rgba(34, 211, 238, 0.7));
+  --pf-control-bg: linear-gradient(180deg, rgba(var(--pf-accent-rgb), 0.18), rgba(var(--pf-accent-rgb), 0.06));
+  --pf-control-border: rgba(var(--pf-accent-rgb), 0.4);
+}
+
+:root[data-pf-style='neon-glass'][data-pf-theme='light'] {
+  --pf-wave-1: rgba(236, 72, 153, 0.25);
+  --pf-wave-2: rgba(34, 211, 238, 0.25);
+  --pf-wave-line: rgba(var(--pf-accent-rgb), 0.45);
+}
+
+/* Ondas de luz do fundo */
+.pf-waves {
+  display: none;
+}
+
+:root[data-pf-glass] .pf-waves {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+:root[data-pf-style='neon-glass'] .pf-waves {
+  animation: pf-wave-drift 28s ease-in-out infinite alternate;
+}
+
+@keyframes pf-wave-drift {
+  to { transform: translate3d(-3%, 2%, 0) scale(1.04); }
+}
+
+/* No Liquid Glass (iPhone) as manchas de cor ficam mais discretas: o
+   destaque é das ondas de luz, como no papel de parede do iPhone. */
+:root[data-pf-style='apple-glass'] .pf-blob {
+  opacity: 0.65;
+}
+
+/* Superfícies de vidro: borda que brilha (reflexo) nas quinas */
+:root[data-pf-glass] :is(
+  .summary-card,
+  .panel,
+  .monthly-forecast-panel,
+  .dashboard-cards-panel,
+  .finance-chart-card,
+  .backup-feature-card,
+  .backup-security-panel,
+  .reports-summary-card,
+  .reports-filters,
+  .settings-content,
+  .pf-tabbar-inner,
+  .pf-sheet
+) {
+  position: relative;
+}
+
+:root[data-pf-glass] :is(
+  .summary-card,
+  .panel,
+  .monthly-forecast-panel,
+  .dashboard-cards-panel,
+  .finance-chart-card,
+  .backup-feature-card,
+  .backup-security-panel,
+  .reports-summary-card,
+  .reports-filters,
+  .settings-content,
+  .pf-tabbar-inner
+)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--pf-glass-rim);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+/* Seleções (menus, seletor de mês, campos) em vidro */
+:root[data-pf-glass] :is(.pf-select-trigger, .pf-calendar-trigger, .pf-cal-nav, .pf-cal-today, .pf-ghost-button, .clear-filters, .history-icon-button) {
+  background: var(--pf-control-bg);
+  border-color: var(--pf-control-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-pf-glass] :is(.pf-select-options, .pf-calendar-popup, .invoice-select-menu) {
+  background: var(--pf-glass-bg-strong);
+  border: 1px solid var(--pf-glass-border);
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(24px) saturate(180%);
+}
+
+:root[data-pf-glass] :is(.form-group input, .form-group textarea, .pf-form input, .filters input) {
+  background: var(--pf-control-bg);
+  border-color: var(--pf-control-border);
+}
+
+/* Botões principais com brilho de vidro por cima da cor */
+:root[data-pf-style='apple-glass'] .primary-button {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 55%),
+    var(--pf-accent, #8b5cf6);
+  color: var(--pf-accent-contrast, #ffffff);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 10px 24px rgba(var(--pf-accent-rgb), 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ---------- 5. Gráficos em vidro ---------- */
+
+:root[data-pf-glass] :is(.recharts-tooltip-wrapper > div, .recharts-default-tooltip) {
+  background: var(--pf-glass-bg-strong) !important;
+  border: 1px solid var(--pf-glass-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.22) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+
+:root[data-pf-glass] .recharts-cartesian-grid line {
+  stroke-opacity: 0.35;
+}
+
+/* Linhas dos gráficos com brilho (só no computador: no celular custaria
+   desempenho) */
+@media (hover: hover) and (min-width: 1101px) {
+  :root[data-pf-glass] :is(.recharts-line-curve, .recharts-bar-rectangle path) {
+    filter: drop-shadow(0 0 6px rgba(var(--pf-accent-rgb), 0.35));
+  }
+}
+
+/* ---------- 6. Desempenho ---------- */
+
+/* As manchas do fundo ganham camada própria na placa de vídeo. */
+.pf-blob,
+.pf-waves,
+.pf-snow {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Telas de toque (celular/tablet): o desfoque é recalculado a cada
+   quadro quando o fundo atrás dele se mexe. Por isso:
+   - raio de desfoque menor nos cartões (bem mais barato);
+   - cartões internos sem desfoque;
+   - o fundo pausa enquanto a tela está rolando ou trocando de página. */
+@media (pointer: coarse) {
+  :root[data-pf-glass] {
+    --pf-glass-blur: 14px;
+  }
+
+  :root[data-pf-glass] :is(.summary-card, .finance-chart-card, .reports-summary-card, .backup-feature-card) {
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    backdrop-filter: blur(10px) saturate(140%);
+  }
+
+  :root[data-pf-glass] :is(.recharts-tooltip-wrapper > div, .recharts-default-tooltip) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* Movimento do fundo mais lento: menos quadros para recalcular */
+  :root[data-pf-style='neon-glass'] .pf-blob {
+    animation-duration: 60s !important;
+  }
+
+  .pf-backdrop-sheen {
+    animation: none !important;
+  }
+}
+
+/* Gráficos montados logo depois da página (componente Deferred) */
+.pf-deferred {
+  border-radius: 20px;
+  background: linear-gradient(100deg, transparent 30%, rgba(var(--pf-accent-rgb), 0.06) 50%, transparent 70%);
+  background-size: 300% 100%;
+  animation: pf-shimmer 1.4s linear infinite;
+}
+
+.pf-deferred-in {
+  animation: pf-fade-in 0.35s ease backwards;
+}
+
+@keyframes pf-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+
+/* Partes fora da tela não são desenhadas até chegarem perto (rolagem) */
+:is(.dashboard-analysis-section, .transactions-panel, .pf-savings-history) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+/* Pausado enquanto rola ou troca de página (marcado pelo app) */
+:root[data-pf-busy] :is(.pf-blob, .pf-waves, .pf-snow, .pf-snowflake, .pf-xmas-light) {
+  animation-play-state: paused !important;
+}
+
+/* Troca de página no celular: mais curta e só com transform/opacity */
+@media (pointer: coarse) {
+  :root[data-pf-device='phone'] {
+    --pf-page-duration: 0.3s;
+  }
+
+  :root[data-pf-device='phone'] .pf-page[data-direction='forward'] {
+    animation-name: pf-page-phone-forward-lite;
+  }
+
+  :root[data-pf-device='phone'] .pf-page[data-direction='back'] {
+    animation-name: pf-page-phone-back-lite;
+  }
+}
+
+@keyframes pf-page-phone-forward-lite {
+  from { opacity: 0; transform: translate3d(14%, 0, 0); }
+}
+
+@keyframes pf-page-phone-back-lite {
+  from { opacity: 0; transform: translate3d(-14%, 0, 0); }
+}
+
+/* Animações desligadas/reduzidas também param o fundo */
+:root[data-pf-animations='off'] :is(.pf-waves, .pf-snow, .pf-snowflake, .pf-xmas-light),
+:root[data-pf-animations='reduced'] :is(.pf-waves, .pf-snowflake, .pf-xmas-light) {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.pf-waves, .pf-snowflake, .pf-xmas-light) {
+    animation: none !important;
+  }
+}

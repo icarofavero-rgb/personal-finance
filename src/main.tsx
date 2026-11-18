@@ -26,6 +26,12 @@ import {
 
 // Camada visual (fundo, vidro, navegação, transições). Deve vir por último.
 import './styles/experience.css'
+import './styles/liquid-ios.css'
+import './styles/christmas.css'
+import { installBusyMarker } from './hooks/busyMarker'
+
+// Pausa o fundo animado enquanto a tela rola (mais fluidez no celular).
+installBusyMarker()
 
 // Registra quando cada dado foi criado/alterado/excluído (base da sincronização).
 // Não interfere nas gravações do app: só observa.

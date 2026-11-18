@@ -5,6 +5,7 @@ export type VisualStyle =
   | 'classic'
   | 'apple-glass'
   | 'neon-glass'
+  | 'christmas'
 
 export type AnimationPreference =
   | 'normal'
@@ -78,6 +79,7 @@ const validVisualStyles: VisualStyle[] = [
   'classic',
   'apple-glass',
   'neon-glass',
+  'christmas',
 ]
 
 const validColors: AccentColor[] = [
@@ -199,6 +201,13 @@ export function applyAccentColor(color: AccentColor): void {
   root.style.setProperty('--pf-accent', selected.hex)
   root.style.setProperty('--pf-accent-rgb', selected.rgb)
   root.style.setProperty('--pf-accent-text', selected.text)
+
+  // Cor do texto SOBRE a cor de destaque: cores claras (branco, amarelo)
+  // precisam de texto escuro para continuarem legíveis.
+  root.style.setProperty(
+    '--pf-accent-contrast',
+    color === 'white' || color === 'yellow' || color === 'cyan' ? '#15121f' : '#ffffff'
+  )
 }
 
 
@@ -235,10 +244,16 @@ export function applyAppTheme(theme: AppTheme): void {
 export function applyVisualStyle(
   style: VisualStyle
 ): void {
-  document.documentElement.setAttribute(
-    'data-pf-style',
-    style
-  )
+  const root = document.documentElement
+
+  root.setAttribute('data-pf-style', style)
+
+  // Estilos com vidro e fundo em gradiente (todos menos o Clássico).
+  if (style === 'classic') {
+    root.removeAttribute('data-pf-glass')
+  } else {
+    root.setAttribute('data-pf-glass', '')
+  }
 }
 
 export function applyAnimationPreference(

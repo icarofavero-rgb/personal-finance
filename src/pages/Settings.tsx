@@ -530,8 +530,9 @@ return (
   <div className="settings-choice-grid">
     {([
       ['classic', 'Clássico'],
-      ['apple-glass', 'Apple Liquid Glass'],
+      ['apple-glass', 'Liquid Glass (iPhone)'],
       ['neon-glass', 'Neon Liquid Glass'],
+      ['christmas', '🎄 Natal'],
     ] as const).map(([value, label]) => (
       <button
         key={value}

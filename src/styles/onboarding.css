@@ -49,8 +49,9 @@
   background:
     radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--onb-color) 45%, transparent), transparent 40%),
     radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--onb-color) 30%, #ec4899 10%), transparent 45%);
-  filter: blur(40px);
+  /* Sem filter: blur — o gradiente já é suave e o filtro animado pesava no celular */
   opacity: 0.55;
+  will-change: transform;
   transition: background 0.8s ease;
   animation: pf-onb-aurora 16s ease-in-out infinite alternate;
   pointer-events: none;

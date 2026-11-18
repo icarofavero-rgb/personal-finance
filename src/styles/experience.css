@@ -59,8 +59,7 @@ body {
   display: none;
 }
 
-:root[data-pf-style='apple-glass'] .pf-backdrop,
-:root[data-pf-style='neon-glass'] .pf-backdrop {
+:root[data-pf-glass] .pf-backdrop {
   display: block;
   position: fixed;
   inset: 0;
@@ -71,21 +70,19 @@ body {
 }
 
 /* O app fica transparente para o gradiente aparecer por trás */
-:root[data-pf-style='apple-glass'] .app,
-:root[data-pf-style='neon-glass'] .app {
+:root[data-pf-glass] .app {
   position: relative;
   z-index: 1;
   background: transparent !important;
   animation: none !important;
 }
 
-:root[data-pf-style='neon-glass'] .app::before,
-:root[data-pf-style='apple-glass'] .app::before {
+:root[data-pf-glass] .app::before {
   display: none !important;
 }
 
 /* A área principal também não pode ter fundo sólido (cobriria o gradiente) */
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) :is(.main, .content) {
+:root[data-pf-glass] :is(.main, .content) {
   background: transparent !important;
 }
 
@@ -234,7 +231,7 @@ body {
 }
 
 /* Cartões de conteúdo com desfoque (vidro) */
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) :is(
+:root[data-pf-glass] :is(
   .summary-card,
   .panel,
   .monthly-forecast-panel,
@@ -255,18 +252,18 @@ body {
 }
 
 /* Os cartões de resumo tinham uma regra mais específica (só escura) */
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) .summary-grid .summary-card {
+:root[data-pf-glass] .summary-grid .summary-card {
   background: var(--pf-glass-bg);
   border-color: var(--pf-glass-border);
 }
 
 /* O reflexo do vidro fica ATRÁS do texto (antes cobria e apagava o texto) */
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) :is(.summary-card, .panel) {
+:root[data-pf-glass] :is(.summary-card, .panel) {
   isolation: isolate;
 }
 
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) .summary-grid .summary-card::before,
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) :is(.summary-card, .panel)::before {
+:root[data-pf-glass] .summary-grid .summary-card::before,
+:root[data-pf-glass] :is(.summary-card, .panel)::before {
   z-index: -1 !important;
 }
 
@@ -277,7 +274,7 @@ body {
 }
 
 /* Cartões internos: translúcidos, sem desfoque (mais leve no celular) */
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) :is(
+:root[data-pf-glass] :is(
   .budget-card,
   .debtor-debt-card,
   .manual-forecast-summary,
@@ -289,14 +286,14 @@ body {
 }
 
 /* Barra superior e janelas */
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) .topbar {
+:root[data-pf-glass] .topbar {
   background: var(--pf-nav-bg);
   border-bottom: 1px solid var(--pf-nav-border);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   backdrop-filter: blur(20px) saturate(160%);
 }
 
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) .modal {
+:root[data-pf-glass] .modal {
   background: var(--pf-glass-bg-strong);
   border: 1px solid var(--pf-glass-border);
   -webkit-backdrop-filter: blur(28px) saturate(160%);
@@ -304,7 +301,7 @@ body {
 }
 
 /* Tema claro: janela branca e fundo escurecido mais leve (antes ficava cinza) */
-:root[data-pf-theme='light']:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) .modal {
+:root[data-pf-theme='light'][data-pf-glass] .modal {
   background: rgba(255, 255, 255, 0.94);
 }
 
@@ -359,8 +356,10 @@ body {
   transition: transform 0.35s var(--pf-ease-spring), color 0.25s ease;
 }
 
-.pf-nav-item:active {
-  transform: scale(0.95);
+/* O "afundar" ao tocar fica só no ícone: o botão em si não muda de
+   tamanho, assim a pílula indicadora é sempre medida corretamente. */
+.pf-nav-item:active .pf-nav-icon {
+  transform: scale(0.88);
 }
 
 .pf-nav-item.is-active .pf-nav-icon {
@@ -706,7 +705,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-:root:is([data-pf-style='apple-glass'], [data-pf-style='neon-glass']) .pf-tabbar-fab {
+:root[data-pf-glass] .pf-tabbar-fab {
   box-shadow:
     0 12px 28px rgba(var(--pf-accent-rgb), 0.45),
     0 0 0 4px rgba(255, 255, 255, 0.12);
@@ -751,7 +750,7 @@ body {
   animation: pf-sheet-up 0.45s var(--pf-ease-out) both;
 }
 
-:root:not([data-pf-style='apple-glass']):not([data-pf-style='neon-glass']) .pf-sheet {
+:root:not([data-pf-glass]) .pf-sheet {
   background: var(--pf-surface, #141821);
 }
 

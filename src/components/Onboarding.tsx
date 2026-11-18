@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ComponentType } from 'react'
 import {
   AlertTriangle,
+  BellRing,
+  CalendarDays,
   ArrowLeftRight,
   ArrowRight,
   ChartNoAxesCombined,
@@ -82,12 +84,21 @@ const STEPS: Step[] = [
     tips: ['Orçamentos: limite por categoria e mês', 'Metas: depósitos e retiradas', 'Devedores: dívidas e recebimentos'],
   },
   {
+    icon: PiggyBank,
+    orbit: [CalendarDays, BellRing, Wallet],
+    color: '#36c995',
+    eyebrow: 'Guardado e Calendário',
+    title: 'Guarde a sobra e não esqueça de nada',
+    text: 'No Guardado você separa o que sobrou do mês ou qualquer valor. No Calendário ficam faturas, boletos e lembretes, com avisos.',
+    tips: ['Avisos no sininho e no Android', 'Lembretes podem repetir todo mês'],
+  },
+  {
     icon: Palette,
     orbit: [Sparkles, Smartphone, Globe],
     color: '#a78bfa',
     eyebrow: 'Do seu jeito',
     title: 'Personalize a aparência',
-    text: 'Escolha tema claro ou escuro, a cor de destaque e os estilos Liquid Glass ou Neon Liquid Glass.',
+    text: 'Escolha tema claro ou escuro, a cor de destaque e os estilos Liquid Glass (iPhone), Neon ou o tema de Natal.',
     tips: ['Configurações → Aparência', 'Ajuste ou desligue as animações'],
   },
   {
