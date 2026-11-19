@@ -347,7 +347,7 @@ const { categoryData, categories } = useMemo(() => {
 <Bar
   dataKey="value"
   name="Valor"
-  radius={[0, 9, 9, 0]}
+  radius={[6, 10, 10, 6]}
   maxBarSize={38}
   {...chartAnimation}
   shape={props => {

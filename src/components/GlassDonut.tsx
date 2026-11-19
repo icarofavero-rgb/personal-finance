@@ -31,7 +31,8 @@ const C = SIZE / 2
 const RADIUS = 76
 const STROKE = 24
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
-const GAP = 2.4
+// Espaço entre as cores (as pontas são arredondadas)
+const GAP = 7
 
 export function formatPercent(value: number): string {
   return `${value.toLocaleString('pt-BR', {
@@ -64,12 +65,16 @@ export default function GlassDonut({
   let offset = 0
   const arcs = segments.map((segment, index) => {
     const length = (segment.value / whole) * CIRCUMFERENCE
-    const gap = segments.length > 1 && length > GAP * 2 ? GAP : 0
+    // Ponta redonda avança meia espessura para cada lado: desconta isso
+    // e o espaço, para cada cor ficar separada da outra
+    const rounded = !(single && segment.value >= whole)
+    const trim = rounded ? STROKE + (segments.length > 1 ? GAP : 0) : 0
+    const dash = Math.max(0.001, length - trim)
     const arc = {
       segment,
       index,
-      dash: Math.max(0.001, length - gap),
-      offset: -offset,
+      dash,
+      offset: -(offset + (rounded ? (length - dash) / 2 : 0)),
       percent: (segment.value / whole) * 100,
     }
     offset += length
@@ -128,7 +133,7 @@ export default function GlassDonut({
               fill="none"
               stroke={`url(#${id}-g${arc.index})`}
               strokeWidth={STROKE}
-              strokeLinecap={single && !fullCircle ? 'round' : 'butt'}
+              strokeLinecap={fullCircle ? 'butt' : 'round'}
               style={
                 {
                   strokeDasharray: fullCircle

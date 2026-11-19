@@ -1,6 +1,5 @@
-
-import { useState } from 'react'
-import { CreditCard } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { ChevronLeft, ChevronRight, CreditCard } from 'lucide-react'
 
 type StackCard = {
   id: string
@@ -8,104 +7,123 @@ type StackCard = {
   bank: string
   color?: string
   image?: string
+  /** fatura do mês escolhido em "Período" */
+  monthInvoice?: number
+  monthPaid?: number
 }
 
 type DashboardCardStackProps = {
   cards: StackCard[]
+  /** nome do mês escolhido (ex.: "novembro") */
+  monthLabel?: string
   onOpenCard: (cardId: string) => void
 }
 
-export default function DashboardCardStack({
-  cards,
-  onOpenCard,
-}: DashboardCardStackProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    null
-  )
+const money = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+
+/**
+ * Cartões no Dashboard: um por vez, com setas, pontinhos e arrastar
+ * (funciona com qualquer quantidade de cartões). Mesmo visual da página
+ * Cartões: fundo preto com borda, ícone e textos na cor do cartão.
+ */
+export default function DashboardCardStack({ cards, monthLabel, onOpenCard }: DashboardCardStackProps) {
+  const [index, setIndex] = useState(0)
+  const [direction, setDirection] = useState<'next' | 'prev'>('next')
+  const touchStart = useRef<number | null>(null)
 
   if (cards.length === 0) {
     return (
       <div className="dashboard-cards-placeholder">
         <CreditCard size={34} />
         <strong>Nenhum cartão cadastrado</strong>
-        <p>
-          Cadastre um cartão na seção Cartões para
-          visualizá-lo aqui.
-        </p>
+        <p>Cadastre um cartão na seção Cartões para visualizá-lo aqui.</p>
       </div>
     )
   }
 
+  const safeIndex = Math.min(index, cards.length - 1)
+  const card = cards[safeIndex]
+  const go = (step: number) => {
+    setDirection(step > 0 ? 'next' : 'prev')
+    setIndex((safeIndex + step + cards.length) % cards.length)
+  }
+  const invoice = card.monthInvoice ?? 0
+  const paid = Math.min(invoice, card.monthPaid ?? 0)
+
   return (
-    <div className="dashboard-card-stack">
-      <div className="dashboard-card-stack-stage">
-        {cards.map((card, index) => {
-          const isSelected = selectedId === card.id
-          const selectedIndex = cards.findIndex(
-            item => item.id === selectedId
-          )
+    <div className="dashboard-card-stack pf-dash-cards">
+      <div className="pf-dash-cards-row">
+        <button type="button" className="card-carousel-arrow" onClick={() => go(-1)} disabled={cards.length <= 1} aria-label="Cartão anterior">
+          <ChevronLeft size={20} />
+        </button>
 
-          const position =
-  selectedIndex === -1
-    ? index
-    : isSelected
-      ? 0
-      : index < selectedIndex
-        ? index + 1
-        : index
+        <button
+          key={card.id}
+          type="button"
+          className={`pf-dash-card is-${direction} ${card.image ? 'has-custom-image' : ''}`}
+          style={
+            {
+              '--credit-card-color': card.color || '#6d5dfc',
+              ...(card.image
+                ? {
+                    backgroundImage: `linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.75) 100%), url("${card.image}")`,
+                  }
+                : {}),
+            } as React.CSSProperties
+          }
+          onClick={() => onOpenCard(card.id)}
+          onTouchStart={event => {
+            touchStart.current = event.touches[0].clientX
+          }}
+          onTouchEnd={event => {
+            const start = touchStart.current
+            touchStart.current = null
+            if (start === null) return
+            const dx = event.changedTouches[0].clientX - start
+            if (Math.abs(dx) > 45 && cards.length > 1) {
+              event.preventDefault()
+              go(dx < 0 ? 1 : -1)
+            }
+          }}
+          aria-label={`Ver detalhes do cartão ${card.name}`}
+        >
+          <span className="pf-dash-card-top">
+            <strong>{card.name}</strong>
+            <CreditCard size={24} />
+          </span>
+          <span className="pf-dash-card-bank">{card.bank}</span>
+        </button>
 
-          return (
-            <button
-              key={card.id}
-              type="button"
-              className={`dashboard-stack-card ${
-                isSelected ? 'is-selected' : ''
-              }`}
-              style={{
-                '--stack-position': position,
-                '--stack-color': card.color || '#6d5dfc',
-                zIndex: isSelected
-                  ? cards.length + 1
-                  : position + 1,
-                ...(card.image
-                  ? {
-                      backgroundImage: `
-                        linear-gradient(
-                          rgba(10, 14, 25, 0.3),
-                          rgba(10, 14, 25, 0.75)
-                        ),
-                        url("${card.image}")
-                      `,
-                    }
-                  : {}),
-              } as React.CSSProperties}
-              onClick={() => {
-                if (selectedId === card.id) {
-                  onOpenCard(card.id)
-                } else {
-                  setSelectedId(card.id)
-                }
-              }}
-              aria-label={`Selecionar cartão ${card.name}`}
-            >
-              <div className="dashboard-stack-card-top">
-                <span>{card.bank}</span>
-                <CreditCard size={22} />
-              </div>
-
-              <div className="dashboard-stack-card-bottom">
-                <strong>{card.name}</strong>
-                <span>PERSONAL FINANCE</span>
-              </div>
-            </button>
-          )
-        })}
+        <button type="button" className="card-carousel-arrow" onClick={() => go(1)} disabled={cards.length <= 1} aria-label="Próximo cartão">
+          <ChevronRight size={20} />
+        </button>
       </div>
 
-      <p className="dashboard-card-stack-hint">
-        Clique para selecionar. Clique novamente para
-        visualizar os detalhes.
-      </p>
+      {cards.length > 1 && (
+        <div className="card-carousel-indicators">
+          {cards.map((item, dot) => (
+            <button
+              key={item.id}
+              type="button"
+              className={`card-carousel-dot ${dot === safeIndex ? 'active' : ''}`}
+              onClick={() => {
+                setDirection(dot > safeIndex ? 'next' : 'prev')
+                setIndex(dot)
+              }}
+              aria-label={`Mostrar cartão ${dot + 1}`}
+              aria-current={dot === safeIndex ? 'true' : undefined}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="pf-dash-card-invoice" style={{ '--credit-card-color': card.color || '#6d5dfc' } as React.CSSProperties}>
+        <span>Fatura de {monthLabel ?? 'este mês'}</span>
+        <strong>{money(invoice)}</strong>
+        <small>{invoice <= 0 ? 'Sem compras nesta fatura' : paid >= invoice ? 'Paga' : paid > 0 ? `Falta ${money(invoice - paid)}` : 'Em aberto'}</small>
+      </div>
+
+      <p className="dashboard-card-stack-hint">Toque no cartão para ver os detalhes e pagar a fatura.</p>
     </div>
   )
 }

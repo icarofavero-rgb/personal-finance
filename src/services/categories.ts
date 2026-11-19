@@ -112,6 +112,19 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     ],
   },
   {
+    // Boletos: categoria própria; aparecem no Calendário no dia do pagamento
+    id: 'bills',
+    name: 'Boletos',
+    icon: 'barcode',
+    color: '#F472B6',
+    subcategories: [
+      'Boleto',
+      'Contas de consumo',
+      'Carnês e parcelamentos',
+      'Taxas e tributos',
+    ],
+  },
+  {
     id: 'other',
     name: 'Outros',
     icon: 'ellipsis',
@@ -172,6 +185,11 @@ export const SUBCATEGORY_ICONS: Record<string, string> = {
   Juros: 'percent',
   Impostos: 'landmark',
   'Outras despesas financeiras': 'banknote',
+  // Boletos
+  Boleto: 'barcode',
+  'Contas de consumo': 'receipt-text',
+  'Carnês e parcelamentos': 'scroll-text',
+  'Taxas e tributos': 'file-text',
   // Outros
   Geral: 'circle-ellipsis',
 }
@@ -360,4 +378,12 @@ export function buildCategoryValue(
   if (!subcategory) return groupName
 
   return `${groupName} / ${subcategory}`
+}
+
+
+/** Categoria "Boletos" (vai para o Calendário no dia do pagamento). */
+export const BOLETO_CATEGORY = 'Boletos / Boleto'
+
+export function isBoletoCategory(category: string): boolean {
+  return getMainCategory(category).id === 'bills'
 }

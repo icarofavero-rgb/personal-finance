@@ -72,6 +72,9 @@ import {
 } from './services/notificationReadStorage'
 
 import { matchesSearch, summarize } from './services/transactionSearch'
+import { buildSpendingEntries } from './services/spending'
+import CardSpendingChart from './components/CardSpendingChart'
+import { buildNextMonthProjection } from './services/nextMonthProjection'
 import { usePresence } from './hooks/usePresence'
 import BackupReminderBanner from './components/BackupReminderBanner'
 import MonthInsights from './components/MonthInsights'
@@ -681,6 +684,13 @@ const [backupWarning] = useState(() =>
     () => getTransactions()
   )
   const [cardsRevision, setCardsRevision] = useState(0)
+
+  // Gastos de TODAS as formas de pagamento (cartão de crédito parcela por
+  // parcela + Pix/débito/dinheiro/boleto). Base do Dashboard e dos gráficos.
+  const spendingEntries = useMemo(
+    () => buildSpendingEntries(transactions, getCardPurchases(), getCardPayments(), getCards()),
+    [transactions, cardsRevision]
+  )
   
 const [notificationPreferencesRevision, setNotificationPreferencesRevision] =
   useState(0)
@@ -917,6 +927,18 @@ useEffect(() => {
   }, 2000)
   return () => window.clearTimeout(timer)
 }, [activePage, transactions])
+
+// Virada do mês com o app aberto: se o Dashboard estava no mês atual,
+// ele passa sozinho para o mês novo.
+const lastTodayRef = useRef(notificationToday)
+useEffect(() => {
+  const previousMonth = lastTodayRef.current.slice(0, 7)
+  const currentMonth = notificationToday.slice(0, 7)
+  lastTodayRef.current = notificationToday
+  if (previousMonth !== currentMonth) {
+    setDashboardMonth(month => (month === previousMonth ? currentMonth : month))
+  }
+}, [notificationToday])
 
 // Transações recorrentes: lança sozinho os meses que já chegaram
 const [recurringRevision, setRecurringRevision] = useState(0)
@@ -1245,14 +1267,14 @@ const [cardInstallments, setCardInstallments] = useState('1')
 
   // Widget da tela inicial (Android): saldo do mês do perfil aberto
   useEffect(() => {
-    const push = () => void updateHomeWidget(transactions, activeProfileLabel).catch(() => {})
+    const push = () => void updateHomeWidget(spendingEntries, activeProfileLabel).catch(() => {})
     const timer = window.setTimeout(push, 1200)
     window.addEventListener(LOCK_CHANGED_EVENT, push)
     return () => {
       window.clearTimeout(timer)
       window.removeEventListener(LOCK_CHANGED_EVENT, push)
     }
-  }, [transactions, activeProfileLabel])
+  }, [spendingEntries, activeProfileLabel])
 
   // Seção aberta ao entrar em Configurações ("Gerenciar perfis" abre Perfis)
   const [settingsSection, setSettingsSection] = useState<SettingsSection>('profile')
@@ -1283,7 +1305,7 @@ const [cardInstallments, setCardInstallments] = useState('1')
     const start = new Date(year, month - 6, 1)
     const startMonth = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`
 
-    return transactions.filter(transaction => {
+    return spendingEntries.filter(transaction => {
       const transactionMonth = transaction.date.slice(0, 7)
 
       return (
@@ -1292,7 +1314,7 @@ const [cardInstallments, setCardInstallments] = useState('1')
         (filterCategory === 'Todas' || transaction.category === filterCategory)
       )
     })
-  }, [transactions, transactionsEvolutionEnd, filterCategory])
+  }, [spendingEntries, transactionsEvolutionEnd, filterCategory])
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
@@ -1392,7 +1414,7 @@ useEffect(() => {
   }
 }, [historySection, isHistoryClosing])
 
-const historyTransactions = transactions
+const historyTransactions = spendingEntries
   .filter(transaction => {
     if (historySection === 'monthly') {
       return transaction.date.startsWith(dashboardMonth)
@@ -1501,8 +1523,8 @@ if (
 }
 
 const monthlySummary = useMemo(
-  () => calculateMonthlyDashboard(transactions, dashboardMonth),
-  [transactions, dashboardMonth]
+  () => calculateMonthlyDashboard(spendingEntries, dashboardMonth),
+  [spendingEntries, dashboardMonth]
 )
 
 const monthlyIncome = monthlySummary.income
@@ -1511,10 +1533,10 @@ const monthlyBalance = monthlySummary.balance
 
 const dashboardChartTransactions = useMemo(
   () =>
-    transactions.filter(transaction =>
+    spendingEntries.filter(transaction =>
       transaction.date.startsWith(dashboardMonth)
     ),
-  [transactions, dashboardMonth]
+  [spendingEntries, dashboardMonth]
 )
 
 const manualForecastSummary = useMemo(
@@ -1548,12 +1570,16 @@ const financialProjection = useMemo(() => {
 
   const invoices = getCardInvoices(purchases, cards)
 
+  // Começa no mês escolhido em "Período"
+  const [year, month] = dashboardMonth.split('-').map(Number)
+
   return calculateFinancialProjection({
     transactions,
     invoices,
     payments,
+    referenceDate: new Date(year, month - 1, 1),
   })
-}, [transactions, cardsRevision])
+}, [transactions, cardsRevision, dashboardMonth])
 
 
 
@@ -1622,12 +1648,36 @@ const projectionBreakdown = useMemo(() => {
 }
 }, [transactions, financialProjection])
 
-const projectedBalance = projectionBreakdown.finalBalance
+void projectionBreakdown.finalBalance
+
+// Saldo projetado para o mês seguinte ao escolhido em "Período"
+const nextProjection = useMemo(
+  () =>
+    buildNextMonthProjection({
+      month: dashboardMonth,
+      entries: spendingEntries,
+      cards: getCards(),
+      purchases: getCardPurchases(),
+      payments: getCardPayments(),
+      reminders: getReminders(),
+      recurring: getRecurringRules(),
+      forecasts: manualForecasts,
+    }),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [dashboardMonth, spendingEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts]
+)
+
+function monthLabelLong(month: string): string {
+  return new Date(`${month}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+}
 
 const dashboardCards = useMemo(() => {
   const cards = getCards()
   const purchases = getCardPurchases()
   const payments = getCardPayments()
+
+  // Fatura de cada cartão no mês escolhido em "Período"
+  const invoices = getCardInvoices(purchases, cards).filter(invoice => invoice.invoiceMonth === dashboardMonth)
 
   return cards.map(card => ({
     ...card,
@@ -1637,8 +1687,12 @@ const dashboardCards = useMemo(() => {
       purchases,
       payments
     ),
+    monthInvoice: invoices.find(invoice => invoice.cardId === card.id)?.total ?? 0,
+    monthPaid: payments
+      .filter(payment => payment.cardId === card.id && payment.invoiceMonth === dashboardMonth)
+      .reduce((sum, payment) => sum + payment.amount, 0),
   }))
-}, [cardsRevision])
+}, [cardsRevision, dashboardMonth])
 
 const dashboardCardsSummary = useMemo(() => {
   const totals = dashboardCards.reduce(
@@ -2500,14 +2554,14 @@ function handleDashboardInvoicePayment(
 {/* SALDO PROJETADO */}
 <div className="summary-card projected-card">
   <div className="card-top">
-    <span>Saldo projetado geral</span>
+    <span>Saldo projetado para o mês seguinte</span>
     <div className="card-icon blue">
       <Wallet size={19} />
     </div>
   </div>
 
   <h2>
-  <AnimatedMoney value={projectedBalance} />
+  <AnimatedMoney value={nextProjection.total} />
 </h2>
 <button
   type="button"
@@ -2522,15 +2576,38 @@ function handleDashboardInvoicePayment(
   
 
 <span className="card-caption projected-caption">
-  Saldo estimado considerando movimentações futuras
-  e faturas pendentes
+  {monthLabelLong(nextProjection.month)}: faturas {formatMoney(nextProjection.invoices)} · boletos {formatMoney(nextProjection.boletos)} · outras {formatMoney(nextProjection.otherExpenses)}
 </span>
 
   </div>
 </div>
 
 {/* Destaques: comparação automática com o mês anterior */}
-<MonthInsights transactions={transactions} month={dashboardMonth} />
+<MonthInsights transactions={spendingEntries} month={dashboardMonth} />
+
+{/* Comparação de entradas e saídas + evolução por categoria (acima do planejamento) */}
+<Deferred minHeight={420} delay={450}>
+<FinancialComparisonCharts
+  transactions={dashboardChartTransactions}
+  categoryTransactions={spendingEntries.filter(transaction => {
+    const [year, month] = dashboardMonth.split('-').map(Number)
+    const start = new Date(year, month - 6, 1)
+
+    const startMonth = [
+      start.getFullYear(),
+      String(start.getMonth() + 1).padStart(2, '0'),
+    ].join('-')
+
+    const transactionMonth = transaction.date.slice(0, 7)
+
+    return (
+      transactionMonth >= startMonth &&
+      transactionMonth <= dashboardMonth
+    )
+  })}
+  categoryEndMonth={dashboardMonth}
+/>
+</Deferred>
 
 {/* SEÇÃO DE PLANEJAMENTO FINANCEIRO */}
 <div className="dashboard-section-heading dashboard-planning-heading">
@@ -2754,6 +2831,7 @@ function handleDashboardInvoicePayment(
 
 <DashboardCardStack
   cards={dashboardCards}
+  monthLabel={new Date(`${dashboardMonth}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long' })}
   onOpenCard={cardId => {
     setDashboardCardDetailsId(cardId)
   }}
@@ -3345,33 +3423,12 @@ background:
     {/* Gráficos entram logo depois da página: a troca de aba não trava */}
     <Deferred minHeight={760} delay={380}>
     <FinanceCharts
-      transactions={transactions}
-      projection={financialProjection}
-    />
-    </Deferred>
-
-    <Deferred minHeight={760} delay={650}>
-    <FinancialComparisonCharts
       transactions={dashboardChartTransactions}
-      categoryTransactions={transactions.filter(transaction => {
-        const [year, month] = dashboardMonth.split('-').map(Number)
-        const start = new Date(year, month - 6, 1)
-
-        const startMonth = [
-          start.getFullYear(),
-          String(start.getMonth() + 1).padStart(2, '0'),
-        ].join('-')
-
-        const transactionMonth = transaction.date.slice(0, 7)
-
-        return (
-          transactionMonth >= startMonth &&
-          transactionMonth <= dashboardMonth
-        )
-      })}
-      categoryEndMonth={dashboardMonth}
+      projection={financialProjection}
+      extraChart={<CardSpendingChart month={dashboardMonth} revision={cardsRevision} />}
     />
     </Deferred>
+
   </section>
 )}
 
@@ -3400,7 +3457,7 @@ background:
               {activePage === 'Transações' && (
                 <div className="pf-transactions-charts">
                   <TransactionsCategoryChart
-                    transactions={transactions}
+                    transactions={spendingEntries}
                     month={filterMonth}
                     category={filterCategory}
                     type={filterType}
@@ -4351,84 +4408,51 @@ options={[
       {historySection === 'projected' ? (
   <>
     <div className="history-total">
-      <span>Saldo final projetado</span>
-      <h2>{formatMoney(projectedBalance)}</h2>
+      <span>Saldo projetado para {monthLabelLong(nextProjection.month)}</span>
+      <h2 className={nextProjection.total < 0 ? 'negative' : ''}>{formatMoney(nextProjection.total)}</h2>
     </div>
 
-<div className="projection-breakdown">
-  <div className="projection-history-row">
-    <span>Saldo acumulado</span>
-    <strong>
-      {formatMoney(projectionBreakdown.currentBalance)}
-    </strong>
-  </div>
-
-  <div className="projection-history-row">
-    <span>Movimentações futuras</span>
-    <strong>
-      {formatMoney(projectionBreakdown.futureMovement)}
-    </strong>
-  </div>
-
-  <div className="projection-history-row">
-    <span>Faturas pendentes</span>
-    <strong className="negative">
-      -{formatMoney(projectionBreakdown.pendingInvoices)}
-    </strong>
-  </div>
-</div>
+    <div className="projection-breakdown">
+      <div className="projection-history-row">
+        <span>Resultado de {monthLabelLong(dashboardMonth)}</span>
+        <strong>{formatMoney(nextProjection.base)}</strong>
+      </div>
+      <div className="projection-history-row">
+        <span>Entradas previstas</span>
+        <strong className="positive">+{formatMoney(nextProjection.incomes)}</strong>
+      </div>
+      <div className="projection-history-row">
+        <span>Faturas em aberto</span>
+        <strong className="negative">-{formatMoney(nextProjection.invoices)}</strong>
+      </div>
+      <div className="projection-history-row">
+        <span>Boletos a pagar</span>
+        <strong className="negative">-{formatMoney(nextProjection.boletos)}</strong>
+      </div>
+      <div className="projection-history-row">
+        <span>Outras despesas agendadas</span>
+        <strong className="negative">-{formatMoney(nextProjection.otherExpenses)}</strong>
+      </div>
+    </div>
 
     <div className="history-list">
-      <h3 className="projection-history-title">
-        Detalhamento mensal
-      </h3>
-
-      {financialProjection.map(month => (
-        <div className="projection-history-month" key={month.key}>
-          <div className="projection-history-month-title">
-            <CalendarDays size={18} />
-            <strong>
-  {new Date(`${month.key}-01T12:00:00`).toLocaleDateString(
-    'pt-BR',
-    {
-      month: 'long',
-      year: 'numeric',
-    }
-  )}
-</strong>
-          </div>
-
-          <div className="projection-history-row">
-            <span>Entradas</span>
-            <strong className="positive">
-              +{formatMoney(month.entradas)}
+      <h3 className="projection-history-title">O que já está previsto</h3>
+      {nextProjection.items.length === 0 ? (
+        <p className="history-empty">Nada agendado para {monthLabelLong(nextProjection.month)} ainda.</p>
+      ) : (
+        nextProjection.items.map((item, index) => (
+          <div className="projection-history-row" key={`${item.kind}-${index}`}>
+            <span>
+              {item.kind === 'invoice' ? '💳 ' : item.kind === 'boleto' ? '🧾 ' : item.kind === 'income' ? '⬆️ ' : '📌 '}
+              {item.label}
+              {item.date ? ` · ${item.date.slice(8, 10)}/${item.date.slice(5, 7)}` : ''}
+            </span>
+            <strong className={item.kind === 'income' ? 'positive' : 'negative'}>
+              {item.kind === 'income' ? '+' : '-'}{formatMoney(item.amount)}
             </strong>
           </div>
-
-          <div className="projection-history-row">
-            <span>Outras despesas</span>
-            <strong className="negative">
-              -{formatMoney(month.saidas)}
-            </strong>
-          </div>
-
-
-
-<div className="projection-history-row">
-  <span>Faturas pagas</span>
-  <strong className="positive">
-    {formatMoney(month.faturasPagas)}
-  </strong>
-</div>
-
-          <div className="projection-history-row">
-            <span>Faturas pendentes</span>
-            <strong className="negative">
-              -{formatMoney(month.faturasPendentes)}
-            </strong>
-          </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   </>
 ) : (

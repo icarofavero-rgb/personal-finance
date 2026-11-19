@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react'
+import { useEffect, useId, useState, type ReactNode } from 'react'
 import { chartAnimation } from './chartMotion'
 import GlassDonut, { formatPercent } from './GlassDonut'
 import CategoryIcon from './CategoryIcon'
@@ -25,6 +25,8 @@ import type {
 type Props = {
   transactions: Transaction[]
   projection?: FinancialProjectionMonth[]
+  /** gráfico extra ao lado de "Despesas por categoria" (o fluxo ocupa a linha toda) */
+  extraChart?: ReactNode
 }
 
 const money = (value: number) =>
@@ -67,6 +69,7 @@ function BarLegend({ payload }: { payload?: ReadonlyArray<{ value?: unknown; col
 function FinanceCharts({
   transactions,
   projection,
+  extraChart,
 }: Props) {
   // Ids únicos: o gráfico aparece no Dashboard e nos Relatórios.
   const gradientId = `pf-bars-${useId().replace(/:/g, '')}`
@@ -164,10 +167,10 @@ const totalCategoryExpenses = categoryData.reduce(
 )
 
   return (
-    <div className="finance-charts">
+    <div className={`finance-charts ${extraChart ? 'has-wide-flow' : ''}`}>
       <section className="finance-chart-card">
         <h3>Fluxo financeiro projetado</h3>
-         <p>Mês atual e próximos 5 meses — valores cadastrados</p>
+         <p>Mês escolhido e os 5 seguintes — valores cadastrados</p>
 
         {monthlyData.length === 0 ? (
           <div className="chart-empty">
@@ -311,14 +314,14 @@ return (
       dataKey="entradas"
       name="Receitas cadastradas"
       fill={`url(#${gradientId}-income)`}
-      radius={[8, 8, 0, 0]}
+      radius={[8, 8, 4, 4]}
     />
 
     <Bar {...chartAnimation}
       dataKey="saidas"
       name="Outras despesas"
       fill={`url(#${gradientId}-expense)`}
-      radius={[8, 8, 0, 0]}
+      radius={[8, 8, 4, 4]}
     />
 
     <Bar {...chartAnimation}
@@ -326,6 +329,7 @@ return (
       name="Faturas pagas"
       stackId="faturas"
       fill={`url(#${gradientId}-paid)`}
+      radius={[0, 0, 4, 4]}
     />
 
     <Bar {...chartAnimation}
@@ -333,7 +337,7 @@ return (
       name="Faturas pendentes"
       stackId="faturas"
       fill={`url(#${gradientId}-pending)`}
-      radius={[8, 8, 0, 0]}
+      radius={[8, 8, 4, 4]}
     />
   </>
 ) : (
@@ -342,14 +346,14 @@ return (
       dataKey="entradas"
       name="Entradas"
       fill={`url(#${gradientId}-paid)`}
-      radius={[8, 8, 0, 0]}
+      radius={[8, 8, 4, 4]}
     />
 
     <Bar {...chartAnimation}
       dataKey="saidas"
       name="Saídas"
       fill={`url(#${gradientId}-expense)`}
-      radius={[8, 8, 0, 0]}
+      radius={[8, 8, 4, 4]}
     />
   </>
 )}
@@ -421,6 +425,8 @@ return (
           </>
         )}
       </section>
+
+      {extraChart}
     </div>
   )
 }
