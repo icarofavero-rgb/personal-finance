@@ -23,6 +23,7 @@ import {
   applyAnimationPreference,
   applyAppTheme,
   applyVisualStyle,
+  applyBackground,
 } from './services/appearanceStorage'
 
 // Camada visual (fundo, vidro, navegação, transições). Deve vir por último.
@@ -57,6 +58,7 @@ applyNeonIntensity(initialAppearance.neonIntensity)
 applyAnimationPreference(initialAppearance.animations)
 applyAppTheme(initialAppearance.theme)
 applyVisualStyle(initialAppearance.visualStyle)
+applyBackground(initialAppearance.background)
 applyDeviceAttributes()
 
 function AppWithSplash() {

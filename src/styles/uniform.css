@@ -4200,3 +4200,216 @@
   background: color-mix(in srgb, var(--card-color) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--card-color) 40%, transparent);
 }
+
+/* ---------- 37. Fundo parado + fundos abstratos ---------- */
+
+/* Nada no fundo se mexe (leve para o celular) */
+.pf-backdrop,
+.pf-backdrop * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.pf-backdrop-sheen,
+.pf-lightshow,
+.pf-snow,
+.pf-xmas-lights {
+  display: none !important;
+}
+
+/* Fundos abstratos também no estilo Clássico */
+:root:not([data-pf-glass])[data-pf-bg]:not([data-pf-bg='style']) .pf-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #0d0f14;
+}
+
+:root[data-pf-theme='light']:not([data-pf-glass])[data-pf-bg]:not([data-pf-bg='style']) .pf-backdrop {
+  background: #f4f6fb;
+}
+
+:root:not([data-pf-glass])[data-pf-bg]:not([data-pf-bg='style']) .app {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+:root:not([data-pf-glass])[data-pf-bg]:not([data-pf-bg='style']) :is(.main, .content) {
+  background: transparent !important;
+}
+
+.pf-bgp-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pf-backdrop[data-pattern='aurora'] {
+  background-image:
+    radial-gradient(60% 50% at 12% 8%, rgba(var(--pf-accent-rgb), 0.38), transparent 70%),
+    radial-gradient(45% 40% at 92% 18%, color-mix(in srgb, rgb(var(--pf-accent-rgb)) 40%, #ec4899) 0%, transparent 70%),
+    radial-gradient(60% 50% at 70% 105%, rgba(var(--pf-accent-rgb), 0.28), transparent 70%),
+    radial-gradient(40% 35% at 5% 90%, color-mix(in srgb, rgb(var(--pf-accent-rgb)) 50%, #22d3ee) 0%, transparent 70%) !important;
+  background-blend-mode: normal;
+}
+
+:root:not([data-pf-theme='light']) .pf-backdrop[data-pattern='aurora'] {
+  background-color: #0b0c14 !important;
+}
+
+.pf-backdrop[data-pattern='aurora']::after,
+.pf-backdrop[data-pattern='mesh']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--pf-pattern-veil, rgba(8, 9, 16, 0.28));
+}
+
+:root[data-pf-theme='light'] .pf-backdrop {
+  --pf-pattern-veil: rgba(255, 255, 255, 0.55);
+}
+
+.pf-backdrop[data-pattern='mesh'] {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(var(--pf-accent-rgb), 0.45) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, color-mix(in srgb, rgb(var(--pf-accent-rgb)) 55%, #000000) 0px, transparent 55%),
+    radial-gradient(at 100% 100%, rgba(var(--pf-accent-rgb), 0.35) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, color-mix(in srgb, rgb(var(--pf-accent-rgb)) 45%, #ffffff) 0px, transparent 45%),
+    radial-gradient(at 50% 50%, rgba(var(--pf-accent-rgb), 0.12) 0px, transparent 60%) !important;
+}
+
+.pf-backdrop[data-pattern='dots'] {
+  background-image:
+    radial-gradient(rgba(var(--pf-accent-rgb), 0.32) 1.3px, transparent 1.8px),
+    radial-gradient(70% 60% at 50% 0%, rgba(var(--pf-accent-rgb), 0.16), transparent 70%) !important;
+  background-size: 24px 24px, 100% 100% !important;
+}
+
+/* Liso: só a cor do tema, com um leve brilho na cor de destaque no topo */
+.pf-backdrop[data-pattern='plain'] {
+  background-image: radial-gradient(80% 40% at 50% 0%, rgba(var(--pf-accent-rgb), 0.1), transparent 70%) !important;
+}
+
+/* ---------- Natal: festões decorados (parados) ---------- */
+
+.pf-garland {
+  position: fixed;
+  top: var(--pf-safe-top, 0px);
+  left: 0;
+  z-index: 2200;
+  width: 100%;
+  height: 34px;
+  pointer-events: none;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.35));
+}
+
+/* ---------- Desempenho no celular ---------- */
+/* O vidro com desfoque é recalculado a cada quadro ao rolar a página:
+   é o que mais esquenta o celular. Na tela de toque os blocos ficam com
+   vidro "fosco" (cor translúcida), sem recalcular o desfoque. */
+@media (pointer: coarse) {
+  :root .pf-page,
+  :root .pf-page *,
+  :root .settings-sidebar,
+  :root .pf-live,
+  :root .pf-live * {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Sem o desfoque, o vidro fica um pouco mais opaco para continuar legível */
+  :root[data-pf-glass]:not([data-pf-theme='light']) .pf-page :is(.panel, .summary-card, .finance-chart-card, .backup-feature-card, .backup-security-panel, .settings-content, .settings-sidebar, .reports-summary-card, .monthly-forecast-panel, .dashboard-cards-panel) {
+    background-color: rgba(18, 20, 32, 0.55) !important;
+  }
+
+  :root[data-pf-glass][data-pf-theme='light'] .pf-page :is(.panel, .summary-card, .finance-chart-card, .backup-feature-card, .backup-security-panel, .settings-content, .settings-sidebar, .reports-summary-card, .monthly-forecast-panel, .dashboard-cards-panel) {
+    background-color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  /* As ondas do fundo ficam suaves (desfocadas uma vez só, paradas) */
+  .pf-waves {
+    filter: blur(5px);
+  }
+
+  /* Sombras grandes custam caro para desenhar: mais leves */
+  .pf-page :is(.panel, .summary-card, .finance-chart-card) {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16) !important;
+  }
+}
+
+/* Seletor de fundo (Aparência) */
+.pf-bg-picker {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: 10px;
+  max-width: 640px;
+}
+
+.pf-bg-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 8px;
+  border-radius: 14px;
+  border: 1.5px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, transparent);
+  color: var(--pf-text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), border-color 0.2s ease;
+}
+
+.pf-bg-option.is-selected {
+  border-color: rgba(var(--pf-accent-rgb), 0.9);
+  color: var(--pf-accent-ink, var(--pf-accent));
+  box-shadow: 0 0 calc(6px + var(--pf-neon-strength, 0.15) * 40px) rgba(var(--pf-accent-rgb), 0.25);
+}
+
+.pf-bg-option:active {
+  transform: scale(0.95);
+}
+
+.pf-bg-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 10px;
+  background-color: #0d0f16;
+  background-size: cover;
+}
+
+:root[data-pf-theme='light'] .pf-bg-thumb {
+  background-color: #eef1f8;
+}
+
+.pf-bg-thumb-style { background-image: linear-gradient(160deg, rgba(var(--pf-accent-rgb), 0.35), transparent 55%), radial-gradient(circle at 80% 85%, rgba(236, 72, 153, 0.35), transparent 50%); }
+.pf-bg-thumb-aurora { background-image: radial-gradient(60% 60% at 15% 10%, rgba(var(--pf-accent-rgb), 0.6), transparent 70%), radial-gradient(50% 50% at 90% 20%, rgba(236, 72, 153, 0.45), transparent 70%), radial-gradient(60% 50% at 70% 100%, rgba(var(--pf-accent-rgb), 0.45), transparent 70%); }
+.pf-bg-thumb-mesh { background-image: radial-gradient(at 0% 0%, rgba(var(--pf-accent-rgb), 0.7), transparent 55%), radial-gradient(at 100% 100%, rgba(var(--pf-accent-rgb), 0.5), transparent 55%), radial-gradient(at 0% 100%, color-mix(in srgb, rgb(var(--pf-accent-rgb)) 45%, #ffffff), transparent 50%); }
+.pf-bg-thumb-waves { background-image: radial-gradient(120% 60% at 50% 110%, rgba(var(--pf-accent-rgb), 0.55), transparent 60%), radial-gradient(120% 50% at 30% 95%, rgba(var(--pf-accent-rgb), 0.35), transparent 60%); }
+.pf-bg-thumb-geometric { background-image: linear-gradient(135deg, rgba(var(--pf-accent-rgb), 0.45) 0 30%, transparent 30%), linear-gradient(315deg, rgba(var(--pf-accent-rgb), 0.3) 0 25%, transparent 25%); }
+.pf-bg-thumb-lines { background-image: repeating-linear-gradient(160deg, rgba(var(--pf-accent-rgb), 0.45) 0 1.5px, transparent 1.5px 9px); }
+.pf-bg-thumb-dots { background-image: radial-gradient(rgba(var(--pf-accent-rgb), 0.7) 1px, transparent 1.6px); background-size: 8px 8px; }
+.pf-bg-thumb-rings { background-image: repeating-radial-gradient(circle at 90% 10%, rgba(var(--pf-accent-rgb), 0.5) 0 1.5px, transparent 1.5px 10px); }
+.pf-bg-thumb-plain { background-image: radial-gradient(80% 50% at 50% 0%, rgba(var(--pf-accent-rgb), 0.25), transparent 70%); }
+
+/* Mais leve: fundos e brilhos que antes ficavam se mexendo sem parar */
+:root body,
+:root .app,
+:root .app::before,
+:root .app::after,
+:root .neon-dot,
+:root .pf-header-title .neon-dot {
+  animation: none !important;
+}
+
+/* Ponto piscando no título: parado (economia de bateria) */
+:root .pf-typing-cursor {
+  animation: none !important;
+}

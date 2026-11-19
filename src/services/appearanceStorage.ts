@@ -23,6 +23,20 @@ export type AccentColor =
   | 'pink'
   | 'white'
 
+/** Fundo da tela (sempre parado, na cor de destaque escolhida). */
+export type BackgroundPattern =
+  | 'style'
+  | 'aurora'
+  | 'mesh'
+  | 'waves'
+  | 'geometric'
+  | 'lines'
+  | 'dots'
+  | 'rings'
+  | 'plain'
+
+export const BACKGROUND_PATTERNS: BackgroundPattern[] = ['style', 'aurora', 'mesh', 'waves', 'geometric', 'lines', 'dots', 'rings', 'plain']
+
 export type NeonIntensity =
   | 'off'
   | 'subtle'
@@ -34,6 +48,7 @@ export type AppearancePreferences = {
   accentColor: AccentColor
   neonIntensity: NeonIntensity
   animations: AnimationPreference
+  background: BackgroundPattern
 }
 
 const STORAGE_KEY = 'personal-finance-appearance'
@@ -44,6 +59,7 @@ export const DEFAULT_APPEARANCE: AppearancePreferences = {
   accentColor: 'purple',
   neonIntensity: 'subtle',
   animations: 'normal',
+  background: 'style',
 }
 
 export function getAppearancePreferences(): AppearancePreferences {
@@ -120,6 +136,10 @@ visualStyle: validVisualStyles.includes(
       accentColor: validColors.includes(data.accentColor as AccentColor)
         ? data.accentColor as AccentColor
         : DEFAULT_APPEARANCE.accentColor,
+
+      background: BACKGROUND_PATTERNS.includes(data.background as BackgroundPattern)
+        ? (data.background as BackgroundPattern)
+        : DEFAULT_APPEARANCE.background,
 
       neonIntensity: validNeon.includes(
         data.neonIntensity as NeonIntensity
@@ -263,4 +283,9 @@ export function applyAnimationPreference(
     'data-pf-animations',
     preference
   )
+}
+
+/** Aplica o fundo escolhido (o desenho em si fica no AppBackdrop). */
+export function applyBackground(pattern: BackgroundPattern): void {
+  document.documentElement.setAttribute('data-pf-bg', pattern)
 }

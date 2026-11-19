@@ -30,6 +30,7 @@ import ProfilesSettings from '../components/ProfilesSettings'
 import NotificationPermissionCard from '../components/NotificationPermissionCard'
 import LockSettingsCard from '../components/LockSettingsCard'
 import DangerZone from '../components/DangerZone'
+import BackgroundPicker from '../components/BackgroundPicker'
 
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
@@ -44,6 +45,7 @@ import {
   applyNeonIntensity,
   applyAppTheme,
   applyVisualStyle,
+  applyBackground,
   applyAnimationPreference,
   type AppearancePreferences,
 } from '../services/appearanceStorage'
@@ -330,6 +332,7 @@ function handleSaveAppearance() {
     applyNeonIntensity(appearance.neonIntensity)
     applyAppTheme(appearance.theme)
     applyVisualStyle(appearance.visualStyle)
+    applyBackground(appearance.background)
     applyAnimationPreference(appearance.animations)
 
     setToast({
@@ -661,6 +664,17 @@ return (
       </button>
     ))}
   </div>
+</div>
+
+<div className="settings-appearance-group">
+  <h3>Fundo da tela</h3>
+  <p>
+    Escolha um desenho para o fundo. Todos ficam parados (sem animação, mais leves) e usam a sua cor de destaque.
+  </p>
+  <BackgroundPicker
+    value={appearance.background}
+    onChange={background => setAppearance(previous => ({ ...previous, background }))}
+  />
 </div>
 
     <div className="settings-appearance-group">

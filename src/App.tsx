@@ -193,6 +193,7 @@ import {
   applyNeonIntensity,
   applyAppTheme,
   applyVisualStyle,
+  applyBackground,
   applyAnimationPreference,
 } from './services/appearanceStorage'
 
@@ -910,6 +911,7 @@ useEffect(() => {
     applyNeonIntensity(appearance.neonIntensity)
     applyAppTheme(appearance.theme)
     applyVisualStyle(appearance.visualStyle)
+    applyBackground(appearance.background)
     applyAnimationPreference(appearance.animations)
 
     // Remonta a página aberta (Metas, Guardado, Calendário... leem de novo)
@@ -2128,6 +2130,7 @@ async function handleConfirmImportBackup() {
     applyNeonIntensity(appearance.neonIntensity)
     applyAppTheme(appearance.theme)
     applyVisualStyle(appearance.visualStyle)
+    applyBackground(appearance.background)
     applyAnimationPreference(appearance.animations)
 
     await waitSpin()
