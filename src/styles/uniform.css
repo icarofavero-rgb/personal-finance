@@ -3845,38 +3845,40 @@
   }
 }
 
-/* Tablet em pé e celular: faixa de atalhos presa embaixo do topo */
+/* Tablet em pé e celular: todas as seções visíveis numa grade (sem
+   ficar por cima do conteúdo). Tocar numa seção desce até ela. */
 @media (max-width: 800px) {
-  .settings-layout > .settings-sidebar {
-    position: sticky;
-    top: 8px;
-    z-index: 30;
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    gap: 6px;
-    padding: 8px !important;
-    overflow-x: auto;
-    scrollbar-width: none;
-    grid-template-columns: none !important;
+  .settings-page .settings-layout > .settings-sidebar {
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 10px !important;
   }
 
-  .settings-layout > .settings-sidebar::-webkit-scrollbar {
-    display: none;
+  .settings-page .settings-layout > .settings-sidebar .settings-nav-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 46px;
+    padding: 8px 10px !important;
+    white-space: normal !important;
+    justify-content: flex-start;
   }
 
-  .settings-layout > .settings-sidebar .settings-nav-item {
-    flex: 0 0 auto;
-    min-width: max-content;
-    min-height: 40px;
-    padding: 0 12px;
-    white-space: nowrap;
+  /* número ímpar de seções: a última ocupa a linha toda */
+  .settings-page .settings-layout > .settings-sidebar .settings-nav-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
-}
 
-@media (max-width: 650px) {
-  .settings-layout > .settings-sidebar {
-    top: calc(var(--pf-safe-top, 0px) + 64px);
+  .settings-page .settings-layout > .settings-sidebar .settings-nav-item:last-child:nth-child(even) {
+    grid-column: auto;
+  }
+
+  /* ao descer até a seção, não fica escondida embaixo do topo */
+  .settings-page .settings-content {
+    scroll-margin-top: calc(var(--pf-safe-top, 0px) + 76px);
   }
 }
 

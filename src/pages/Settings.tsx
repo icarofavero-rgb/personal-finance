@@ -397,6 +397,13 @@ return (
   }
 
   setActiveSection(section.id)
+
+  // No celular o menu fica acima do conteúdo: desce até a seção escolhida
+  if (window.matchMedia('(max-width: 800px)').matches) {
+    window.setTimeout(() => {
+      document.querySelector('.settings-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 60)
+  }
 }}
               >
                 <SectionIcon size={19} />
