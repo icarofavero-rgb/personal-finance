@@ -55,6 +55,7 @@ const KIND_META: Record<CalendarEventKind, { label: string; icon: typeof Receipt
   'forecast-income': { label: 'Entrada prevista', icon: TrendingUp, tone: 'income' },
   'forecast-expense': { label: 'Saída prevista', icon: TrendingDown, tone: 'expense' },
   'debt-due': { label: 'A receber', icon: HandCoins, tone: 'debt' },
+  'debt-pay': { label: 'A pagar', icon: HandCoins, tone: 'reminder' },
   boleto: { label: 'Boleto', icon: Barcode, tone: 'reminder' },
 }
 
@@ -83,7 +84,11 @@ function loadSources(reminders: Reminder[]) {
     purchases: safe(getCardPurchases, []),
     payments: safe(getCardPayments, []),
     forecasts: safe(getManualForecasts, []),
-    debts: safe(() => getDebtorsData().debts, []),
+    debts: safe(() => {
+      const data = getDebtorsData()
+      const iOwe = new Set(data.debtors.filter(debtor => debtor.kind === 'i-owe').map(debtor => debtor.id))
+      return data.debts.map(debt => ({ ...debt, owedByMe: iOwe.has(debt.debtorId) }))
+    }, []),
     reminders,
     // Boletos cadastrados em "Nova transação" aparecem no dia do pagamento
     transactions: safe(getTransactions, []),

@@ -1,5 +1,11 @@
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { calculateFinancialProjection } from '../services/financialProjection'
+import { getTransactions } from '../services/storage'
+import { getCards } from '../services/cardsStorage'
+import { getCardPurchases } from '../services/cardPurchasesStorage'
+import { getCardPayments } from '../services/cardPaymentsStorage'
+import { getCardInvoices } from '../services/cardInvoices'
 import { FinanceCharts } from '../components/FinanceCharts'
 import type { Transaction } from '../services/storage'
 import MonthPicker from '../components/MonthPicker'
@@ -31,6 +37,22 @@ export default function Reports({ transactions }: ReportsProps) {
   const [selectedYear, setSelectedYear] = useState(
     String(new Date().getFullYear())
   )
+
+  // Fluxo financeiro projetado: o mesmo cálculo do Dashboard (8 meses,
+  // com as faturas dos cartões), começando no mês escolhido.
+  const projectionStart = period === 'month' ? selectedMonth : new Date().toLocaleDateString('en-CA').slice(0, 7)
+  const projection = useMemo(() => {
+    void transactions
+    const [year, month] = projectionStart.split('-').map(Number)
+    const cards = getCards()
+    return calculateFinancialProjection({
+      transactions: getTransactions(),
+      invoices: getCardInvoices(getCardPurchases(), cards),
+      payments: getCardPayments(),
+      referenceDate: new Date(year, month - 1, 1),
+      months: 8,
+    })
+  }, [projectionStart, transactions])
 
   const filteredTransactions = transactions.filter(item => {
     if (period === 'month') {
@@ -145,6 +167,7 @@ export default function Reports({ transactions }: ReportsProps) {
       <Deferred minHeight={760}>
       <FinanceCharts
         transactions={filteredTransactions}
+        projection={projection}
         extraChart={<CardSpendingChart month={period === 'month' ? selectedMonth : new Date().toLocaleDateString('en-CA').slice(0, 7)} />}
       />
 

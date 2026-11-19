@@ -94,8 +94,6 @@ const cardModalTimer = useRef<
   // Mês mostrado em "Compras no cartão" e "Minhas faturas"
   const [cardsMonth, setCardsMonth] = useState(() => new Date().toLocaleDateString('en-CA').slice(0, 7))
 
-  const [, setExpandedPurchaseMonths] =
-  useState<string[]>([])
 
 const [, setExpandedInvoiceMonths] =
   useState<string[]>([])
@@ -104,22 +102,23 @@ const [, setExpandedInvoiceMonths] =
   useState<CardPurchase[]>(getCardPurchases)
 
   const invoices = getCardInvoices(purchases, cards)
-  const purchasesByMonth = Object.entries(
-  purchases.reduce<Record<string, CardPurchase[]>>(
-    (groups, purchase) => {
-      const month = purchase.date.slice(0, 7)
 
-      if (!groups[month]) {
-        groups[month] = []
-      }
-
-      groups[month].push(purchase)
-
-      return groups
-    },
-    {}
-  )
-).sort(([a], [b]) => a.localeCompare(b))
+// Compras no cartão do mês escolhido: as feitas no mês e também as
+// parcelas de compras antigas que caem nas faturas deste mês.
+const monthPurchaseRows = purchases
+  .map(purchase => {
+    const card = cards.find(item => item.id === purchase.cardId)
+    let installments: ReturnType<typeof calculateInstallments> = []
+    try {
+      installments = card ? calculateInstallments(purchase, card) : []
+    } catch {
+      installments = []
+    }
+    const installment = installments.find(item => item.invoiceMonth === cardsMonth)
+    return { purchase, card, installment, installments }
+  })
+  .filter(row => row.installment || row.purchase.date.slice(0, 7) === cardsMonth)
+  .sort((a, b) => b.purchase.date.localeCompare(a.purchase.date))
 
 const invoicesByMonth = Object.entries(
   invoices.reduce<Record<string, typeof invoices>>(
@@ -683,14 +682,6 @@ async function handleCardImageUpload(
   }
 }
 
-function togglePurchaseMonth(month: string) {
-  setExpandedPurchaseMonths(current =>
-    current.includes(month)
-      ? current.filter(item => item !== month)
-      : [...current, month]
-  )
-}
-
 function toggleInvoiceMonth(month: string) {
   setExpandedInvoiceMonths(current =>
     current.includes(month)
@@ -883,85 +874,83 @@ return (
     </div>
   </div>
 
-  {purchasesByMonth.every(([month]) => month !== cardsMonth) ? (
-    <p className="pf-cards-empty">Nenhuma compra em {formatMonth(cardsMonth)}.</p>
+  {monthPurchaseRows.length === 0 ? (
+    <p className="pf-cards-empty">Nenhuma compra ou parcela em {formatMonth(cardsMonth)}.</p>
   ) : (
     <div className="monthly-groups">
-      {purchasesByMonth.filter(([month]) => month === cardsMonth).map(([month, monthPurchases]) => {
-        // Só o mês escolhido, já aberto com tudo dentro
-        const expanded = true
+      <div className="monthly-group">
+        <div className="monthly-group-header">
+          <span>{formatMonth(cardsMonth)}</span>
+          <span>
+            {monthPurchaseRows.length} {monthPurchaseRows.length === 1 ? 'item' : 'itens'} · {formatMoney(monthPurchaseRows.reduce((sum, row) => sum + (row.installment?.amount ?? 0), 0))} nas faturas do mês
+          </span>
+        </div>
 
-        return (
-          <div className="monthly-group" key={month}>
-            <button
-              type="button"
-              className="monthly-group-header"
-              aria-expanded={expanded}
-              onClick={() => togglePurchaseMonth(month)}
-            >
-              <span>
-                {formatMonth(month)}
-              </span>
+        <div className="cards-list monthly-group-content">
+          {monthPurchaseRows.map(({ purchase, card, installment, installments }) => {
+            const boughtThisMonth = purchase.date.slice(0, 7) === cardsMonth
 
-              <span>
-                {monthPurchases.length} {monthPurchases.length === 1 ? 'compra' : 'compras'} · {formatMoney(monthPurchases.reduce((sum, item) => sum + item.amount, 0))}
-                {' '}
-                
-              </span>
-            </button>
+            return (
+              <div className="purchase-item" key={purchase.id}>
+                <div className="pf-purchase-top">
+                  <h3>{purchase.description}</h3>
+                  <strong>{formatMoney(installment?.amount ?? purchase.amount)}</strong>
+                </div>
 
-            {expanded && (
-              <div className="cards-list monthly-group-content">
-                {monthPurchases.map(purchase => {
-                  const card = cards.find(
-                    item => item.id === purchase.cardId
-                  )
+                <p className="pf-purchase-meta">
+                  <span className="pf-purchase-card" style={{ '--chip-color': card?.color ?? DEFAULT_CARD_COLOR } as React.CSSProperties}>
+                    {card?.name ?? 'Cartão não encontrado'}
+                  </span>
+                  <span>{purchase.category}</span>
+                </p>
 
-                  return (
-                    <div
-                      className="purchase-item"
-                      key={purchase.id}
-                    >
-                      <div className="pf-purchase-top">
-                        <h3>{purchase.description}</h3>
-                        <strong>{formatMoney(purchase.amount)}</strong>
-                      </div>
+                <div className="pf-purchase-facts">
+                  <span>
+                    <small>Compra</small>
+                    {formatDay(purchase.date)}
+                  </span>
+                  <span>
+                    <small>Parcela</small>
+                    {installment
+                      ? `${installment.installmentNumber} de ${installment.totalInstallments}`
+                      : purchase.installments === 1
+                        ? 'À vista'
+                        : `${purchase.installments}x`}
+                  </span>
+                  <span>
+                    <small>Valor da parcela</small>
+                    {formatMoney(installment?.amount ?? installments[0]?.amount ?? purchase.amount)}
+                  </span>
+                  <span>
+                    <small>Total</small>
+                    {formatMoney(purchase.amount)}
+                  </span>
+                </div>
 
-                      <p className="pf-purchase-meta">
-                        <span className="pf-purchase-card" style={{ '--chip-color': card?.color ?? DEFAULT_CARD_COLOR } as React.CSSProperties}>
-                          {card?.name ?? 'Cartão não encontrado'}
-                        </span>
-                        <span>{purchase.category}</span>
-                        <span>{formatDay(purchase.date)}</span>
-                        <span>{purchase.installments}x</span>
-                      </p>
+                {!installment && boughtThisMonth && installments[0] && (
+                  <p className="pf-purchase-once">
+                    Comprada neste mês · a 1ª parcela entra na fatura de {formatMonth(installments[0].invoiceMonth)}
+                  </p>
+                )}
 
-                      {card && purchase.installments > 1 && (
-                        <div className="pf-purchase-parcels">
-                          {calculateInstallments(purchase, card).map(installment => (
-                            <span
-                              className={`pf-purchase-parcel ${installment.invoiceMonth === cardsMonth ? 'is-current' : ''}`}
-                              key={`${installment.purchaseId}-${installment.installmentNumber}`}
-                              title={`Fatura de ${formatMonth(installment.invoiceMonth)}`}
-                            >
-                              {installment.installmentNumber}/{installment.totalInstallments} · {shortMonth(installment.invoiceMonth)} · {formatMoney(installment.amount)}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      {card && purchase.installments === 1 && (
-                        <p className="pf-purchase-once">
-                          À vista · fatura de {formatMonth(calculateInstallments(purchase, card)[0].invoiceMonth)}
-                        </p>
-                      )}
-                    </div>
-                  )
-                })}
+                {installments.length > 1 && (
+                  <div className="pf-purchase-parcels">
+                    {installments.map(item => (
+                      <span
+                        className={`pf-purchase-parcel ${item.invoiceMonth === cardsMonth ? 'is-current' : ''} ${item.invoiceMonth < cardsMonth ? 'is-past' : ''}`}
+                        key={`${item.purchaseId}-${item.installmentNumber}`}
+                        title={`Fatura de ${formatMonth(item.invoiceMonth)}`}
+                      >
+                        {item.installmentNumber}/{item.totalInstallments} · {shortMonth(item.invoiceMonth)} · {formatMoney(item.amount)}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        )
-      })}
+            )
+          })}
+        </div>
+      </div>
     </div>
   )}
 </section>

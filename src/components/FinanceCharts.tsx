@@ -170,7 +170,7 @@ const totalCategoryExpenses = categoryData.reduce(
     <div className={`finance-charts ${extraChart ? 'has-wide-flow' : ''}`}>
       <section className="finance-chart-card">
         <h3>Fluxo financeiro projetado</h3>
-         <p>Mês escolhido e os 5 seguintes — valores cadastrados</p>
+         <p>Mês escolhido e os 7 seguintes — valores cadastrados</p>
 
         {monthlyData.length === 0 ? (
           <div className="chart-empty">

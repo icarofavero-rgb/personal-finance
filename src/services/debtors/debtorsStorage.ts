@@ -171,7 +171,7 @@ export function addDebtorPayment(
 
 export function updateDebtor(
   debtorId: string,
-  changes: Pick<Debtor, 'name' | 'notes'>
+  changes: Pick<Debtor, 'name' | 'notes'> & { kind?: Debtor['kind'] }
 ): void {
   const data = getDebtorsData()
 
@@ -196,6 +196,7 @@ export function updateDebtor(
           ...debtor,
           name,
           notes,
+          ...(changes.kind ? { kind: changes.kind } : {}),
         }
       : debtor
   )
@@ -342,4 +343,26 @@ export function updateDebtorPayment(
     ...data,
     payments: updatedPayments,
   })
+}
+
+/**
+ * Exclui uma dívida e os recebimentos dela.
+ * Devolve o id da compra no cartão ligada a ela (se houver), para a
+ * tela decidir se remove a compra também.
+ */
+export function deleteDebtorDebt(debtId: string): { cardPurchaseId?: string } {
+  const data = getDebtorsData()
+  const debt = data.debts.find(item => item.id === debtId)
+
+  if (!debt) {
+    throw new Error('Dívida não encontrada.')
+  }
+
+  saveDebtorsData({
+    ...data,
+    debts: data.debts.filter(item => item.id !== debtId),
+    payments: data.payments.filter(payment => payment.debtId !== debtId),
+  })
+
+  return { cardPurchaseId: debt.cardPurchaseId }
 }

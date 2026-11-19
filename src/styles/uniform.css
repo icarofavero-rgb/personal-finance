@@ -4783,3 +4783,141 @@
   line-height: 1;
   color: var(--pf-accent-ink, var(--pf-accent));
 }
+
+/* Devedores: botão de excluir dívida */
+.pf-debt-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.4) !important;
+}
+
+.pf-debt-head-side {
+  flex-wrap: wrap !important;
+}
+
+/* ---------- 42. Devedores: "Me devem" / "Eu devo" ---------- */
+
+.pf-debtors-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 4px 0 18px;
+  padding: 5px;
+  width: fit-content;
+  max-width: 100%;
+  border-radius: 14px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, transparent);
+}
+
+.pf-debtors-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--pf-text-secondary);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pf-debtors-tab > span {
+  min-width: 20px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: rgba(var(--pf-accent-rgb), 0.14);
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+.pf-debtors-tab.is-active {
+  background: var(--pf-accent);
+  color: var(--pf-accent-contrast, #fff);
+}
+
+.pf-debtors-tab.is-active > span {
+  background: rgba(255, 255, 255, 0.22);
+  color: inherit;
+}
+
+.pf-debtor-kind-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pf-text-secondary);
+}
+
+.pf-debtor-kind {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pf-debtor-kind > button {
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, transparent);
+  color: var(--pf-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pf-debtor-kind > button.is-active {
+  color: var(--pf-accent-ink, var(--pf-accent));
+  border-color: rgba(var(--pf-accent-rgb), 0.7);
+  background: rgba(var(--pf-accent-rgb), 0.14);
+}
+
+/* Compras no cartão: compra, parcela, valor da parcela e total */
+.pf-purchase-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.pf-purchase-facts > span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--pf-text);
+  background: rgba(var(--pf-accent-rgb), 0.06);
+}
+
+.pf-purchase-facts small {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--pf-text-secondary);
+}
+
+.pf-purchase-parcel.is-past {
+  opacity: 0.55;
+}
+
+@media (max-width: 420px) {
+  .pf-purchase-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.pf-purchase-facts {
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) !important;
+}
+
+.pf-purchase-facts > span {
+  white-space: nowrap;
+}

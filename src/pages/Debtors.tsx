@@ -1,7 +1,9 @@
 import AccentSelect from '../components/AccentSelect'
 import SelectField from '../components/SelectField'
 import { getCards } from '../services/cardsStorage'
-import { addCardPurchase, getCardPurchases } from '../services/cardPurchasesStorage'
+import { addCardPurchase, deleteCardPurchase, getCardPurchases } from '../services/cardPurchasesStorage'
+import { calculateInstallments } from '../services/cardInvoices'
+import ConfirmDialog from '../components/ConfirmDialog'
 import { getCardPayments } from '../services/cardPaymentsStorage'
 import { calculateCardAvailableLimitCents } from '../services/cardDashboard'
 import { formatDecimal } from '../services/format'
@@ -13,6 +15,7 @@ import {
   HandCoins,
   X,
   Pencil,
+  Trash2,
 } from 'lucide-react'
 
 import {
@@ -23,11 +26,13 @@ import {
   updateDebtor,
   updateDebtorDebt,
   updateDebtorPayment,
+  deleteDebtorDebt,
 } from '../services/debtors/debtorsStorage'
 
 import type {
   Debtor,
   DebtorDebt,
+  DebtorKind,
   DebtorPayment,
 } from '../services/debtors/debtorsTypes'
 
@@ -60,6 +65,52 @@ const [debtorSort, setDebtorSort] =
 const [payments, setPayments] = useState<DebtorPayment[]>(() =>
   getDebtorsData().payments
 )
+
+  // Aba: pessoas que me devem / pessoas para quem eu devo
+  const [view, setView] = useState<DebtorKind>('owes-me')
+  const [debtorKind, setDebtorKind] = useState<DebtorKind>('owes-me')
+  const iOwe = view === 'i-owe'
+  const kindOf = (debtor: Debtor | undefined): DebtorKind => debtor?.kind ?? 'owes-me'
+
+  // Exclusão de dívida (com confirmação)
+  const [deletingDebt, setDeletingDebt] = useState<DebtorDebt | null>(null)
+
+  /**
+   * A compra no cartão ligada à dívida sai junto, a não ser que alguma
+   * fatura dela já tenha pagamento (aí a compra fica, porque já foi paga).
+   */
+  function linkedPurchaseIsPaid(purchaseId: string): boolean {
+    const purchase = getCardPurchases().find(item => item.id === purchaseId)
+    const card = purchase ? getCards().find(item => item.id === purchase.cardId) : undefined
+    if (!purchase || !card) return false
+    const months = new Set(calculateInstallments(purchase, card).map(item => item.invoiceMonth))
+    return getCardPayments().some(payment => payment.cardId === card.id && months.has(payment.invoiceMonth))
+  }
+
+  function handleDeleteDebt(debt: DebtorDebt) {
+    try {
+      const { cardPurchaseId } = deleteDebtorDebt(debt.id)
+
+      let keptPurchase = false
+      if (cardPurchaseId) {
+        if (linkedPurchaseIsPaid(cardPurchaseId)) keptPurchase = true
+        else deleteCardPurchase(cardPurchaseId)
+        window.dispatchEvent(new Event('personal-finance-cards-changed'))
+      }
+
+      const updated = getDebtorsData()
+      setDebts(updated.debts)
+      setPayments(updated.payments)
+      setDeletingDebt(null)
+
+      if (keptPurchase) {
+        window.alert('Dívida excluída. A compra no seu cartão continua na fatura, porque essa fatura já tem pagamento registrado.')
+      }
+    } catch (error) {
+      setDeletingDebt(null)
+      window.alert(error instanceof Error ? error.message : 'Não foi possível excluir a dívida.')
+    }
+  }
   // Controle do formulário de dívidas
   const [selectedDebtorId, setSelectedDebtorId] =
     useState<string | null>(null)
@@ -210,7 +261,7 @@ function handleSave(event: React.FormEvent<HTMLFormElement>) {
   const trimmedName = name.trim()
 
   if (!trimmedName) {
-    setError('Informe o nome do devedor.')
+    setError('Informe o nome da pessoa.')
     return
   }
 
@@ -219,6 +270,7 @@ function handleSave(event: React.FormEvent<HTMLFormElement>) {
       updateDebtor(editingDebtorId, {
         name: trimmedName,
         notes: notes.trim(),
+        kind: debtorKind,
       })
     } else {
       const newDebtor: Debtor = {
@@ -226,6 +278,7 @@ function handleSave(event: React.FormEvent<HTMLFormElement>) {
         name: trimmedName,
         notes: notes.trim(),
         createdAt: new Date().toISOString(),
+        kind: debtorKind,
       }
 
       addDebtor(newDebtor)
@@ -362,9 +415,10 @@ function handleSaveDebt(
 
 
 
-const debtSummaries = debts.map(debt =>
-  calculateDebtSummary(debt, payments)
-)
+const viewDebtorIds = new Set(debtors.filter(debtor => kindOf(debtor) === view).map(debtor => debtor.id))
+const debtSummaries = debts
+  .filter(debt => viewDebtorIds.has(debt.debtorId))
+  .map(debt => calculateDebtSummary(debt, payments))
 
 const totalLentCents = debtSummaries.reduce(
   (total, summary) => total + summary.totalCents,
@@ -520,7 +574,9 @@ const debtorBalances = new Map(
   })
 )
 
-const filteredDebtors = debtors
+const viewDebtors = debtors.filter(debtor => kindOf(debtor) === view)
+
+const filteredDebtors = viewDebtors
   .filter(debtor => {
     const matchesSearch = debtor.name
       .toLocaleLowerCase('pt-BR')
@@ -568,15 +624,17 @@ const filteredDebtors = debtors
 <div className="panel-heading debtors-page-heading">
   <div className="debtors-heading-content">
     <span className="eyebrow">
-      CONTROLE DE RECEBIMENTOS
+      {iOwe ? 'CONTROLE DE PAGAMENTOS' : 'CONTROLE DE RECEBIMENTOS'}
     </span>
 
     <h1>
-      Meus devedores<span className="neon-dot">.</span>
+      {iOwe ? 'Minhas dívidas' : 'Meus devedores'}<span className="neon-dot">.</span>
     </h1>
 
     <p>
-      Gerencie empréstimos, compras e valores a receber.
+      {iOwe
+        ? 'Acompanhe o que você deve para outras pessoas e o que já pagou.'
+        : 'Gerencie empréstimos, compras e valores a receber.'}
     </p>
   </div>
 
@@ -584,11 +642,33 @@ const filteredDebtors = debtors
   <button
     type="button"
     className="primary-button debtors-new-button"
-    onClick={() => setShowForm(true)}
+    onClick={() => {
+      setDebtorKind(view)
+      setShowForm(true)
+    }}
   >
     <Plus size={18} />
-    Novo devedor
+    {iOwe ? 'Nova pessoa' : 'Novo devedor'}
   </button>
+</div>
+
+<div className="pf-debtors-tabs" role="tablist" aria-label="Quem deve">
+  {([
+    ['owes-me', 'Me devem'],
+    ['i-owe', 'Eu devo'],
+  ] as const).map(([value, label]) => (
+    <button
+      key={value}
+      type="button"
+      role="tab"
+      aria-selected={view === value}
+      className={`pf-debtors-tab ${view === value ? 'is-active' : ''}`}
+      onClick={() => setView(value)}
+    >
+      {label}
+      <span>{debtors.filter(debtor => kindOf(debtor) === value).length}</span>
+    </button>
+  ))}
 </div>
 
 
@@ -596,19 +676,19 @@ const filteredDebtors = debtors
 <div className="debtors-summary">
   <div className="panel">
     <Wallet size={24} />
-    <p>Total emprestado</p>
+    <p>{iOwe ? 'Total que peguei' : 'Total emprestado'}</p>
     <h3>{formatCents(totalLentCents)}</h3>
   </div>
 
   <div className="panel">
     <HandCoins size={24} />
-    <p>Total recebido</p>
+    <p>{iOwe ? 'Total já pago' : 'Total recebido'}</p>
     <h3>{formatCents(totalReceivedCents)}</h3>
   </div>
 
   <div className="panel">
     <UsersRound size={24} />
-    <p>Saldo a receber</p>
+    <p>{iOwe ? 'Saldo a pagar' : 'Saldo a receber'}</p>
     <h3>{formatCents(totalRemainingCents)}</h3>
   </div>
 </div>
@@ -622,7 +702,7 @@ const filteredDebtors = debtors
 <p>
   {debtors.length === 0
     ? 'Nenhuma pessoa cadastrada.'
-    : `${filteredDebtors.length} de ${debtors.length} pessoa(s) exibida(s).`}
+    : `${filteredDebtors.length} de ${viewDebtors.length} pessoa(s) exibida(s).`}
 </p>
 
           </div>
@@ -678,7 +758,7 @@ const filteredDebtors = debtors
             <UsersRound size={36} />
             <strong>Nenhum devedor cadastrado</strong>
             <p>
-              Clique em Novo devedor para cadastrar uma pessoa.
+              {iOwe ? 'Clique em Nova pessoa para registrar para quem você deve.' : 'Clique em Novo devedor para cadastrar uma pessoa.'}
             </p>
           </div>
         ) : (
@@ -710,6 +790,7 @@ const filteredDebtors = debtors
   className="debtor-expand-button"
   onClick={() => {
     setEditingDebtorId(debtor.id)
+    setDebtorKind(kindOf(debtor))
     setName(debtor.name)
     setNotes(debtor.notes ?? '')
     setError('')
@@ -734,7 +815,7 @@ const filteredDebtors = debtors
 </div>
 
 <div className="debtor-compact-balance">
-  <span>Saldo a receber</span>
+  <span>{iOwe ? 'Saldo a pagar' : 'Saldo a receber'}</span>
   <strong>
     {formatCents(
       debts
@@ -817,6 +898,16 @@ const filteredDebtors = debtors
   <Pencil size={14} />
   Editar dívida
 </button>
+<button
+  type="button"
+  className="debtor-expand-button pf-debt-delete"
+  onClick={() => setDeletingDebt(debt)}
+  aria-label={`Excluir a dívida ${debt.description}`}
+  title="Excluir dívida"
+>
+  <Trash2 size={14} />
+  Excluir
+</button>
     </div>
 
   </div>
@@ -828,7 +919,7 @@ const filteredDebtors = debtors
     </div>
 
     <div>
-      <span>Total recebido</span>
+      <span>{iOwe ? 'Total pago' : 'Total recebido'}</span>
       <strong>{formatCents(summary.receivedCents)}</strong>
     </div>
 
@@ -840,7 +931,7 @@ const filteredDebtors = debtors
 
   <div className="debtor-debt-progress">
     <div className="debtor-debt-progress-label">
-      <span>Progresso de recebimento</span>
+      <span>{iOwe ? 'Progresso do pagamento' : 'Progresso de recebimento'}</span>
       <strong>{formatDecimal(summary.progressPercent)}%</strong>
     </div>
 
@@ -961,6 +1052,19 @@ const filteredDebtors = debtors
         )}
       </div>
 
+      <ConfirmDialog
+        open={deletingDebt !== null}
+        title="Excluir esta dívida?"
+        message={
+          deletingDebt?.cardPurchaseId
+            ? `“${deletingDebt.description}” e os recebimentos dela serão apagados. A compra feita no seu cartão também sai da fatura (a não ser que essa fatura já tenha pagamento).`
+            : `“${deletingDebt?.description ?? ''}” e os recebimentos dela serão apagados. Isso não pode ser desfeito.`
+        }
+        confirmLabel="Excluir dívida"
+        onConfirm={() => deletingDebt && handleDeleteDebt(deletingDebt)}
+        onCancel={() => setDeletingDebt(null)}
+      />
+
       {showForm && (
         <div
 
@@ -988,8 +1092,8 @@ onClick={() =>
               <div>
                 <h2 id="debtor-modal-title">
   {editingDebtorId !== null
-    ? 'Editar devedor'
-    : 'Novo devedor'}
+    ? 'Editar pessoa'
+    : debtorKind === 'i-owe' ? 'Nova pessoa (eu devo)' : 'Novo devedor'}
 </h2>
                 <p>
   {editingDebtorId !== null
@@ -1027,6 +1131,30 @@ onClick={() =>
                     required
                     autoFocus
                   />
+                </div>
+
+                <div className="form-group">
+                  <span className="pf-debtor-kind-label">Quem deve?</span>
+                  <div className="pf-debtor-kind" role="radiogroup" aria-label="Quem deve">
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={debtorKind === 'owes-me'}
+                      className={debtorKind === 'owes-me' ? 'is-active' : ''}
+                      onClick={() => setDebtorKind('owes-me')}
+                    >
+                      Essa pessoa me deve
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={debtorKind === 'i-owe'}
+                      className={debtorKind === 'i-owe' ? 'is-active' : ''}
+                      onClick={() => setDebtorKind('i-owe')}
+                    >
+                      Eu devo para essa pessoa
+                    </button>
+                  </div>
                 </div>
 
                 <div className="form-group">
@@ -1147,7 +1275,7 @@ onClick={() =>
             />
           </div>
 
-          {editingDebtId === null && myCards.length > 0 && (
+          {editingDebtId === null && myCards.length > 0 && kindOf(debtors.find(item => item.id === selectedDebtorId)) === 'owes-me' && (
             <div className="form-group">
               <label htmlFor="debt-card">Usou o seu cartão de crédito?</label>
               <SelectField

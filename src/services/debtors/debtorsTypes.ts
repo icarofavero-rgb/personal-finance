@@ -1,9 +1,14 @@
 
+/** owes-me: a pessoa me deve (padrão) · i-owe: eu devo para a pessoa */
+export type DebtorKind = 'owes-me' | 'i-owe'
+
 export type Debtor = {
   id: string
   name: string
   notes?: string
   createdAt: string
+  /** quem deve para quem (sem o campo: a pessoa me deve) */
+  kind?: DebtorKind
 }
 
 export type DebtorDebt = {

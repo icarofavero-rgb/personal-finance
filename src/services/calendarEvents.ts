@@ -27,6 +27,7 @@ export type CalendarEventKind =
   | 'forecast-income'
   | 'forecast-expense'
   | 'debt-due'
+  | 'debt-pay'
   | 'boleto'
 
 export type CalendarEvent = {
@@ -47,7 +48,8 @@ export type CalendarSources = {
   payments: CardPayment[]
   reminders: Reminder[]
   forecasts: ManualForecast[]
-  debts: DebtorDebt[]
+  /** owedByMe: dívida que EU tenho com outra pessoa (a pagar) */
+  debts: (DebtorDebt & { owedByMe?: boolean })[]
   /** transações: só as da categoria Boletos entram no calendário */
   transactions?: { id: string; description: string; amount: number; type: string; category: string; date: string }[]
 }
@@ -220,9 +222,9 @@ export function buildCalendarEvents(
     events.push({
       id: `debt:${debt.id}`,
       date: debt.dueDate,
-      kind: 'debt-due',
+      kind: debt.owedByMe ? 'debt-pay' : 'debt-due',
       title: debt.description,
-      subtitle: 'Valor a receber de devedor',
+      subtitle: debt.owedByMe ? 'Valor que você deve pagar' : 'Valor a receber de devedor',
       amountCents: debt.amountCents,
       done: false,
     })
