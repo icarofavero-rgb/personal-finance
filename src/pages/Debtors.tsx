@@ -1,4 +1,9 @@
 import AccentSelect from '../components/AccentSelect'
+import SelectField from '../components/SelectField'
+import { getCards } from '../services/cardsStorage'
+import { addCardPurchase, getCardPurchases } from '../services/cardPurchasesStorage'
+import { getCardPayments } from '../services/cardPaymentsStorage'
+import { calculateCardAvailableLimitCents } from '../services/cardDashboard'
 import { formatDecimal } from '../services/format'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -76,6 +81,9 @@ const [editingDebtId, setEditingDebtId] =
   useState<string | null>(null)
 
 const [debtDueDate, setDebtDueDate] = useState('')
+// Pago com: dinheiro/Pix (empréstimo) ou um dos SEUS cartões de crédito
+const [debtCardId, setDebtCardId] = useState('')
+const myCards = getCards()
   
 const [selectedPaymentDebtId, setSelectedPaymentDebtId] =
   useState<string | null>(null)
@@ -289,6 +297,31 @@ function handleSaveDebt(
         dueDate: debtDueDate || undefined,
       })
     } else {
+      // Usou o seu cartão: a compra entra na fatura e fica ligada à dívida
+      let cardPurchaseId: string | undefined
+      const card = debtCardId ? myCards.find(item => item.id === debtCardId) : undefined
+
+      if (card) {
+        const available = calculateCardAvailableLimitCents(card, getCardPurchases(), getCardPayments())
+        if (amountCents > available) {
+          setDebtError(`Limite insuficiente no ${card.name}: disponível ${(available / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}.`)
+          return
+        }
+
+        const debtorName = debtors.find(item => item.id === selectedDebtorId)?.name ?? 'devedor'
+        cardPurchaseId = crypto.randomUUID()
+        addCardPurchase({
+          id: cardPurchaseId,
+          cardId: card.id,
+          description: `${description} (${debtorName})`,
+          amount: amountCents / 100,
+          category: 'Outros / Geral',
+          date: debtDate,
+          installments,
+        })
+        window.dispatchEvent(new Event('personal-finance-cards-changed'))
+      }
+
       const newDebt: DebtorDebt = {
         id: crypto.randomUUID(),
         debtorId: selectedDebtorId,
@@ -298,6 +331,7 @@ function handleSaveDebt(
         date: debtDate,
         dueDate: debtDueDate || undefined,
         createdAt: new Date().toISOString(),
+        ...(cardPurchaseId ? { cardPurchaseId } : {}),
       }
 
       addDebtorDebt(newDebt)
@@ -314,6 +348,7 @@ function handleSaveDebt(
     setDebtAmount('')
     setDebtInstallments('1')
     setDebtDueDate('')
+    setDebtCardId('')
     setDebtError('')
 
   } catch (error) {
@@ -736,6 +771,15 @@ const filteredDebtors = debtors
         {debt.installments} parcela(s) ·{' '}
         {debt.date.split('-').reverse().join('/')}
       </span>
+      {debt.cardPurchaseId && (() => {
+        const purchase = getCardPurchases().find(item => item.id === debt.cardPurchaseId)
+        const card = purchase ? myCards.find(item => item.id === purchase.cardId) : undefined
+        return card ? (
+          <span className="pf-debt-card-badge" style={{ '--card-color': card.color ?? '#8b5cf6' } as React.CSSProperties}>
+            💳 Usou seu {card.name} · {debt.installments}x
+          </span>
+        ) : null
+      })()}
     </div>
 
     <span
@@ -1108,6 +1152,27 @@ onClick={() =>
               required
             />
           </div>
+
+          {editingDebtId === null && myCards.length > 0 && (
+            <div className="form-group">
+              <label htmlFor="debt-card">Usou o seu cartão de crédito?</label>
+              <SelectField
+                id="debt-card"
+                value={debtCardId}
+                onChange={setDebtCardId}
+                options={[
+                  { value: '', label: 'Não — dinheiro, Pix ou empréstimo' },
+                  ...myCards.map(card => ({ value: card.id, label: `Sim — ${card.name}` })),
+                ]}
+                placeholder="Forma de pagamento"
+              />
+              {debtCardId && (
+                <small className="pf-debt-card-hint">
+                  A compra entra na fatura do cartão (e no Dashboard) nas parcelas escolhidas abaixo.
+                </small>
+              )}
+            </div>
+          )}
 
           <div className="form-row">
             <div className="form-group">

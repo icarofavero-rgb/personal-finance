@@ -920,6 +920,13 @@ useEffect(() => {
   return () => window.removeEventListener(DATA_SYNCED_EVENT, refresh)
 }, [])
 
+// Compras no cartão criadas fora da página Cartões (ex.: dívida de devedor)
+useEffect(() => {
+  const bump = () => setCardsRevision(value => value + 1)
+  window.addEventListener('personal-finance-cards-changed', bump)
+  return () => window.removeEventListener('personal-finance-cards-changed', bump)
+}, [])
+
 // Fotos de comprovantes de transações apagadas são removidas
 useEffect(() => {
   if (activePage !== 'Transações') return

@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useState } from 'react'
+import { getGoals } from '../services/goalsStorage'
 import {
   ArrowDownToLine,
   ArrowUpFromLine,
   CalendarCheck,
   PiggyBank,
   Sparkles,
+  Target,
   Trash2,
   Wallet,
 } from 'lucide-react'
@@ -59,6 +61,28 @@ function readMovements(): { movements: SavingsMovement[]; error: string | null }
   }
 }
 
+type GoalSavingsMovement = SavingsMovement & { goalName: string }
+
+/** Movimentações das Metas no formato do Guardado (só leitura). */
+function readGoalMovements(): GoalSavingsMovement[] {
+  try {
+    return getGoals().flatMap(goal =>
+      (goal.movements ?? []).map(movement => ({
+        id: `goal-${goal.id}-${movement.id}`,
+        type: movement.type,
+        source: 'manual' as const,
+        amountCents: Math.round(movement.amount * 100),
+        date: movement.date.slice(0, 10),
+        note: movement.note,
+        createdAt: movement.date,
+        goalName: goal.name,
+      }))
+    )
+  } catch {
+    return []
+  }
+}
+
 export default function Savings({ transactions }: SavingsProps) {
   const [{ movements, error: loadError }, setState] = useState(readMovements)
   const [month, setMonth] = useState(currentMonth)
@@ -77,7 +101,11 @@ export default function Savings({ transactions }: SavingsProps) {
 
   const reload = () => setState(readMovements())
 
-  const balanceCents = calculateSavingsBalanceCents(movements)
+  // Depósitos e retiradas das Metas também contam como dinheiro guardado
+  const goalMovements = useMemo(() => readGoalMovements(), [])
+  const allMovements = useMemo(() => [...movements, ...goalMovements], [movements, goalMovements])
+
+  const balanceCents = calculateSavingsBalanceCents(allMovements)
   const monthResultCents = calculateMonthResultCents(transactions, month)
   const suggestionCents = calculateLeftoverSuggestionCents(transactions, movements, month)
   const alreadyFromLeftover = movements
@@ -85,19 +113,19 @@ export default function Savings({ transactions }: SavingsProps) {
     .reduce((sum, item) => sum + item.amountCents, 0)
 
   const thisMonth = currentMonth()
-  const savedThisMonth = movements
+  const savedThisMonth = allMovements
     .filter(item => item.type === 'deposit' && item.date.startsWith(thisMonth))
     .reduce((sum, item) => sum + item.amountCents, 0)
 
   const history = useMemo(
     () =>
-      [...movements].sort(
+      [...allMovements].sort(
         (a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt)
       ),
-    [movements]
+    [allMovements]
   )
 
-  const series = useMemo(() => summarizeSavingsByMonth(movements, thisMonth, 6), [movements, thisMonth])
+  const series = useMemo(() => summarizeSavingsByMonth(allMovements, thisMonth, 6), [allMovements, thisMonth])
   const maxBalance = Math.max(1, ...series.map(item => item.balanceCents))
 
   function openForm(next: FormMode) {
@@ -301,12 +329,14 @@ export default function Savings({ transactions }: SavingsProps) {
           <ul className="pf-savings-list">
             {history.map((item, index) => (
               <li key={item.id} style={{ '--i': Math.min(index, 8) } as React.CSSProperties}>
-                <span className={`pf-savings-badge ${item.type}`}>
-                  {item.type === 'deposit' ? <ArrowDownToLine size={16} /> : <ArrowUpFromLine size={16} />}
+                <span className={`pf-savings-badge ${item.type} ${'goalName' in item ? 'is-goal' : ''}`}>
+                  {'goalName' in item ? <Target size={16} /> : item.type === 'deposit' ? <ArrowDownToLine size={16} /> : <ArrowUpFromLine size={16} />}
                 </span>
                 <div className="pf-savings-item-info">
                   <strong>
-                    {item.type === 'withdrawal'
+                    {'goalName' in item
+                      ? `${item.type === 'deposit' ? 'Depositado na meta' : 'Retirado da meta'} “${item.goalName}”`
+                      : item.type === 'withdrawal'
                       ? 'Retirada'
                       : item.source === 'leftover'
                         ? `Sobra de ${monthLabel(item.month ?? item.date.slice(0, 7))}`
@@ -320,14 +350,18 @@ export default function Savings({ transactions }: SavingsProps) {
                 <strong className={item.type === 'deposit' ? 'positive' : 'negative'}>
                   {item.type === 'deposit' ? '+' : '−'} {money(item.amountCents)}
                 </strong>
-                <button
-                  type="button"
-                  className="history-icon-button"
-                  aria-label="Excluir movimentação"
-                  onClick={() => setToDelete(item)}
-                >
-                  <Trash2 size={16} />
-                </button>
+                {'goalName' in item ? (
+                  <span className="pf-savings-goal-tag" title="Altere em Metas">Meta</span>
+                ) : (
+                  <button
+                    type="button"
+                    className="history-icon-button"
+                    aria-label="Excluir movimentação"
+                    onClick={() => setToDelete(item)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </li>
             ))}
           </ul>

@@ -4161,3 +4161,42 @@
     grid-column: 1 / -1;
   }
 }
+
+/* Guardado: movimentações vindas das Metas */
+.pf-savings-badge.is-goal {
+  color: var(--pf-accent-ink, var(--pf-accent)) !important;
+  background: rgba(var(--pf-accent-rgb), 0.16) !important;
+}
+
+.pf-savings-goal-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--pf-accent-ink, var(--pf-accent));
+  background: rgba(var(--pf-accent-rgb), 0.14);
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.35);
+}
+
+/* Devedores: dívida feita no seu cartão */
+.pf-debt-card-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-debt-card-badge {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px !important;
+  font-weight: 700;
+  color: var(--card-color) !important;
+  background: color-mix(in srgb, var(--card-color) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-color) 40%, transparent);
+}
