@@ -1,4 +1,5 @@
 
+import { formatAxisValue } from '../services/format'
 import { chartAnimation, isTouchDevice } from './chartMotion'
 import { resolveIcon } from './CategoryIcon'
 
@@ -320,11 +321,7 @@ const { categoryData, categories } = useMemo(() => {
                   type="number"
                   stroke={axisColor}
                   tick={{ fill: axisColor, fontSize: 11 }}
-                  tickFormatter={value =>
-                    Number(value).toLocaleString('pt-BR', {
-                      notation: 'compact',
-                    })
-                  }
+                  tickFormatter={formatAxisValue}
                 />
 
                 <YAxis
@@ -437,12 +434,8 @@ const { categoryData, categories } = useMemo(() => {
                 <YAxis
                   stroke={axisColor}
                   tick={{ fill: axisColor, fontSize: 11 }}
-                  width={48}
-                  tickFormatter={value =>
-                    Number(value).toLocaleString('pt-BR', {
-                      notation: 'compact',
-                    })
-                  }
+                  width={62}
+                  tickFormatter={formatAxisValue}
                 />
 
                

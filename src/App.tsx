@@ -1,4 +1,7 @@
 
+import { isDebtPaymentTransaction, syncDebtPaymentTransactions } from './services/debtors/debtPaymentTransactions'
+import { getDebtorsData } from './services/debtors/debtorsStorage'
+import { TRANSACTIONS_CHANGED_EVENT } from './services/storage'
 import { appAlert, appConfirm } from './services/appDialog'
 import { getCardInvoiceDueDate, getCurrentInvoiceMonth } from './services/cardInvoiceDueDate'
 import {
@@ -129,7 +132,7 @@ import {
 import { getCardPurchases } from './services/cardPurchasesStorage'
 import { getCardPayments } from './services/cardPaymentsStorage'
 import { getCardInvoices } from './services/cardInvoices'
-import { History, CreditCard as CardPaymentIcon } from 'lucide-react'
+import { History, CreditCard as CardPaymentIcon, HandCoins as HandCoinsIcon } from 'lucide-react'
 import { addCardPurchase } from './services/cardPurchasesStorage'
 import { calculateInstallments } from './services/cardInvoices'
 import { calculateInvoicePayment } from './services/cardPaymentsCalculations'
@@ -934,6 +937,23 @@ useEffect(() => {
 
   window.addEventListener(DATA_SYNCED_EVENT, refresh)
   return () => window.removeEventListener(DATA_SYNCED_EVENT, refresh)
+}, [])
+
+// Pagamentos já feitos em "Eu devo" viram saídas (uma vez, ao abrir)
+useEffect(() => {
+  try {
+    syncDebtPaymentTransactions(getDebtorsData())
+  } catch (error) {
+    console.error('Erro ao ligar pagamentos de dívidas às transações:', error)
+  }
+}, [])
+
+// Transações criadas fora do formulário (ex.: pagamento de uma dívida
+// em Devedores → Eu devo): lê a lista de novo
+useEffect(() => {
+  const reload = () => setTransactions(getTransactions())
+  window.addEventListener(TRANSACTIONS_CHANGED_EVENT, reload)
+  return () => window.removeEventListener(TRANSACTIONS_CHANGED_EVENT, reload)
 }, [])
 
 // Compras no cartão criadas fora da página Cartões (ex.: dívida de devedor)
@@ -3705,6 +3725,7 @@ background:
                               )}
                               {item.source !== 'card' && isBoletoCategory(item.category) && <span className="pf-tx-tag is-boleto">Boleto</span>}
                               {invoicePaymentIds.has(item.id) && <span className="pf-tx-tag">Pagamento de fatura</span>}
+                              {isDebtPaymentTransaction(item.id) && <span className="pf-tx-tag is-debt">Eu devo</span>}
                             </small>
                           </div>
 
@@ -3717,7 +3738,20 @@ background:
                           </div>
 
 
-{item.source === 'card' ? (
+{isDebtPaymentTransaction(item.id) ? (
+<div className="transaction-actions">
+  <ReceiptButton transactionId={item.id} description={item.description} onMessage={showToast} />
+  <button
+    type="button"
+    className="edit-button"
+    aria-label={`Ver ${item.description} em Devedores`}
+    title="Pagamento de dívida: edite em Devedores → Eu devo"
+    onClick={() => navigate('Devedores')}
+  >
+    <HandCoinsIcon size={16} strokeWidth={1.8} />
+  </button>
+</div>
+) : item.source === 'card' ? (
 <div className="transaction-actions">
   <button
     type="button"

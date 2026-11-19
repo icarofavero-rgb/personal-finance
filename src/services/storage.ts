@@ -11,6 +11,9 @@ export type Transaction = {
 
 const STORAGE_KEY = 'personal-finance-transactions'
 
+/** Avisa a tela principal que as transações mudaram fora do formulário. */
+export const TRANSACTIONS_CHANGED_EVENT = 'personal-finance-transactions-changed'
+
 export function getTransactions(): Transaction[] {
   try {
     const saved = localStorage.getItem(STORAGE_KEY)

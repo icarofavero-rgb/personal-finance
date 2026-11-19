@@ -108,6 +108,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
       'Tarifas',
       'Juros',
       'Impostos',
+      'Dívidas com pessoas',
       'Outras despesas financeiras',
     ],
   },
@@ -183,6 +184,7 @@ export const SUBCATEGORY_ICONS: Record<string, string> = {
   // Finanças
   Tarifas: 'receipt',
   Juros: 'percent',
+  'Dívidas com pessoas': 'hand-coins',
   Impostos: 'landmark',
   'Outras despesas financeiras': 'banknote',
   // Boletos
@@ -387,3 +389,6 @@ export const BOLETO_CATEGORY = 'Boletos / Boleto'
 export function isBoletoCategory(category: string): boolean {
   return getMainCategory(category).id === 'bills'
 }
+
+/** Pagamentos feitos em Devedores → Eu devo */
+export const DEBT_PAYMENT_CATEGORY = 'Finanças / Dívidas com pessoas'

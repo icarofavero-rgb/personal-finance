@@ -1,3 +1,4 @@
+import { formatAxisValue } from '../services/format'
 import { useEffect, useId, useState, type ReactNode } from 'react'
 import { chartAnimation } from './chartMotion'
 import GlassDonut, { formatPercent } from './GlassDonut'
@@ -213,7 +214,8 @@ const totalCategoryExpenses = categoryData.reduce(
 <YAxis
   stroke={axisColor}
   tick={{ fontSize: 11, fill: axisColor }}
-  width={55}
+  width={62}
+  tickFormatter={formatAxisValue}
 />
 
                 

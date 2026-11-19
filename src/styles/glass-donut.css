@@ -262,3 +262,14 @@
     padding: 18px;
   }
 }
+
+/* O texto do centro nunca quebra: diminui até caber (GlassDonut) */
+.pf-donut-center-content {
+  width: 100%;
+}
+
+.pf-donut-center-content > strong,
+.pf-donut-center-content > small {
+  max-width: 100%;
+  white-space: nowrap;
+}

@@ -41,6 +41,7 @@ import {
 } from '../services/debtors/debtorsCalculations'
 
 import DatePicker from '../components/DatePicker'
+import { syncDebtPaymentTransactions } from '../services/debtors/debtPaymentTransactions'
 
 export default function Debtors() {
   const [debtors, setDebtors] = useState<Debtor[]>(() =>
@@ -72,6 +73,10 @@ const [payments, setPayments] = useState<DebtorPayment[]>(() =>
   const iOwe = view === 'i-owe'
   const kindOf = (debtor: Debtor | undefined): DebtorKind => debtor?.kind ?? 'owes-me'
 
+  // O pagamento aberto é de uma dívida MINHA (aba "Eu devo")?
+  const paymentDebtorId = debts.find(debt => debt.id === selectedPaymentDebtId)?.debtorId
+  const paymentIsMine = kindOf(debtors.find(debtor => debtor.id === paymentDebtorId)) === 'i-owe'
+
   // Exclusão de dívida (com confirmação)
   const [deletingDebt, setDeletingDebt] = useState<DebtorDebt | null>(null)
 
@@ -99,6 +104,7 @@ const [payments, setPayments] = useState<DebtorPayment[]>(() =>
       }
 
       const updated = getDebtorsData()
+      syncDebtPaymentTransactions(updated)
       setDebts(updated.debts)
       setPayments(updated.payments)
       setDeletingDebt(null)
@@ -285,6 +291,7 @@ function handleSave(event: React.FormEvent<HTMLFormElement>) {
     }
 
     setDebtors(getDebtorsData().debtors)
+    syncDebtPaymentTransactions(getDebtorsData())
     handleClose()
   } catch (error) {
     setError(
@@ -391,6 +398,7 @@ function handleSaveDebt(
     }
 
     const updatedData = getDebtorsData()
+    syncDebtPaymentTransactions(updatedData)
 
     setDebts(updatedData.debts)
     setPayments(updatedData.payments)
@@ -522,6 +530,7 @@ if (amountCents > availableCents) {
     }
 
     const updatedData = getDebtorsData()
+    syncDebtPaymentTransactions(updatedData)
     setPayments(updatedData.payments)
 
     setSelectedPaymentDebtId(null)
@@ -1387,11 +1396,11 @@ onClick={() => closeDebtorModal('debt')}
 
 <h2 id="payment-modal-title">
   {editingPaymentId !== null
-    ? 'Editar recebimento'
+    ? (paymentIsMine ? 'Editar pagamento' : 'Editar recebimento')
     : 'Registrar pagamento'}
 </h2>
 
-          <p>Informe o valor recebido do devedor.</p>
+          <p>{paymentIsMine ? 'Informe quanto você pagou. O valor entra como saída em Transações e no Dashboard.' : 'Informe o valor recebido do devedor.'}</p>
         </div>
 
         <button
@@ -1408,7 +1417,7 @@ onClick={() => closeDebtorModal('debt')}
         <div className="transaction-modal-content">
           <div className="form-group">
             <label htmlFor="payment-amount">
-              Valor recebido (R$)
+              {paymentIsMine ? 'Valor pago (R$)' : 'Valor recebido (R$)'}
             </label>
             <input
               id="payment-amount"

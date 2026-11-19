@@ -1,4 +1,4 @@
-import { useId, useState, type ReactNode } from 'react'
+import { useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 
 import CategoryIcon from './CategoryIcon'
 import '../styles/glass-donut.css'
@@ -83,6 +83,30 @@ export default function GlassDonut({
 
   const activeArc = active !== null ? arcs[active] : null
 
+  // Valores grandes (ex.: R$ 1.218.515,97): o texto do centro diminui até
+  // caber dentro do anel, em vez de passar por cima dele.
+  const centerRef = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const box = centerRef.current
+    if (!box) return
+    const fit = () => {
+      const width = box.clientWidth
+      if (!width) return
+      box.querySelectorAll<HTMLElement>('strong, span, small').forEach(el => {
+        el.style.fontSize = ''
+        let size = parseFloat(getComputedStyle(el).fontSize)
+        while (el.scrollWidth > width && size > 10) {
+          size -= 1
+          el.style.fontSize = size + 'px'
+        }
+      })
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(box)
+    return () => observer.disconnect()
+  })
+
   return (
     <div
       className={`pf-donut ${activeArc ? 'has-active' : ''}`}
@@ -158,7 +182,7 @@ export default function GlassDonut({
         <circle className="pf-donut-rim is-inner" cx={C} cy={C} r={RADIUS - STROKE / 2 + 0.6} fill="none" />
       </svg>
 
-      <div className="pf-donut-center" aria-live="polite">
+      <div className="pf-donut-center" aria-live="polite" ref={centerRef}>
         {activeArc ? (
           <div key={activeArc.index} className="pf-donut-center-content">
             {activeArc.segment.icon && (
