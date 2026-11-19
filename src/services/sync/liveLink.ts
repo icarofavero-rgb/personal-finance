@@ -15,7 +15,7 @@ import { decodeSignal, encodeSignal } from './signalCodec'
 import { localDescriptionSdp, toTextChannel, waitForIceGathering } from './syncPeer'
 import { runSyncSession, type TextChannel } from './syncProtocol'
 import { applyRemoteSyncPackage, createLocalSyncPackage } from './syncApply'
-import { publish, subscribe } from './liveRelay'
+import { publish, relayBusyUntil, RelayBusyError, subscribe } from './liveRelay'
 import {
   createInvite,
   decryptText,
@@ -79,7 +79,8 @@ type Signal =
 type Control = { c: 'ping' } | { c: 'dirty' } | { c: 'sync' } | { c: 'bye' }
 
 const ICE_SERVERS: RTCIceServer[] = [{ urls: 'stun:stun.l.google.com:19302' }]
-const HELLO_EVERY = 15_000
+const HELLO_FIRST_RETRY = 30_000
+const HELLO_MAX_RETRY = 10 * 60_000
 const PING_EVERY = 8_000
 const DEAD_AFTER = 26_000
 const MAX_AGE = 120_000
@@ -106,6 +107,7 @@ class PeerLink {
   private lastSeen = 0
   private remotePending = false
   private helloTimer: number | undefined
+  private retryDelay = HELLO_FIRST_RETRY
   private pingTimer: number | undefined
   syncing = false
 
@@ -145,21 +147,38 @@ class PeerLink {
   async start() {
     this.key = await importKey(this.pairing.key)
     this.stopRelay = subscribe(this.pairing.topic, text => void this.onRelay(text), () => void this.sendHello(true))
-    window.clearInterval(this.helloTimer)
-    this.helloTimer = window.setInterval(() => {
-      if (this.state.status === 'connecting' || this.state.status === 'waiting-scan') void this.sendHello(false)
-    }, HELLO_EVERY)
+    this.scheduleHello()
   }
 
   stop() {
     this.stopRelay?.()
     this.stopRelay = null
     this.closePeer()
-    window.clearInterval(this.helloTimer)
+    window.clearTimeout(this.helloTimer)
   }
 
   wake() {
-    if (this.state.status !== 'connected' && this.state.status !== 'syncing') void this.sendHello(true)
+    if (this.state.status !== 'connecting') return
+    this.retryDelay = HELLO_FIRST_RETRY
+    void this.sendHello(true)
+    this.scheduleHello()
+  }
+
+  /**
+   * Enquanto procura o outro aparelho, manda "oi" cada vez mais espaçado
+   * (30 s, 1 min, 2 min… até 10 min) e só com o app aberto na tela.
+   * O QR esperando leitura não manda nada: quem lê é que chama.
+   */
+  private scheduleHello() {
+    window.clearTimeout(this.helloTimer)
+    if (this.state.status !== 'connecting') return
+
+    this.helloTimer = window.setTimeout(() => {
+      if (this.state.status !== 'connecting') return
+      if (document.visibilityState === 'visible') void this.sendHello(false)
+      this.retryDelay = Math.min(this.retryDelay * 2, HELLO_MAX_RETRY)
+      this.scheduleHello()
+    }, Math.max(this.retryDelay, relayBusyUntil() - Date.now() + 1_000))
   }
 
   // ---------- serviço de encontro ----------
@@ -167,13 +186,25 @@ class PeerLink {
   async signal(message: Record<string, unknown>) {
     if (!this.key) return
     const text = await encryptText(this.key, JSON.stringify({ ...message, from: this.hub.me, ts: Date.now() }))
-    await publish(this.pairing.topic, text)
+    await publish(this.pairing.topic, text, { essential: message.type !== 'hello' })
   }
 
-  private async sendHello(force: boolean) {
-    if (!force && Date.now() - this.lastHelloAt < 5_000) return
+  /**
+   * force: abriu o app / voltou para a tela; retry: tentativa espaçada;
+   * reply: resposta ao "oi" do outro aparelho (sai logo).
+   */
+  private async sendHello(kind: boolean | 'reply') {
+    if (this.state.status === 'waiting-scan' && kind !== 'reply') return
+    const minGap = kind === 'reply' ? 3_000 : kind ? 10_000 : 20_000
+    if (Date.now() - this.lastHelloAt < minGap) return
     this.lastHelloAt = Date.now()
-    await this.signal({ type: 'hello', name: deviceName() }).catch(error => this.set({ error: (error as Error).message }))
+    try {
+      await this.signal({ type: 'hello', name: deviceName() })
+      if (this.state.error) this.set({ error: undefined })
+    } catch (error) {
+      this.set({ error: (error as Error).message })
+      if (error instanceof RelayBusyError) this.scheduleHello()
+    }
   }
 
   private async onRelay(text: string) {
@@ -199,7 +230,7 @@ class PeerLink {
           this.set({ status: 'connecting' })
         }
         if (this.hub.me < message.from) await this.makeOffer()
-        else await this.sendHello(false)
+        else await this.sendHello('reply')
         return
       }
       case 'offer':
@@ -295,11 +326,15 @@ class PeerLink {
       if (this.peer === peer) {
         this.closePeer()
         this.set({ status: 'connecting' })
+        this.retryDelay = HELLO_FIRST_RETRY
         void this.sendHello(true)
+        this.scheduleHello()
       }
     })
 
     this.set({ status: 'connected', error: undefined })
+    window.clearTimeout(this.helloTimer)
+    this.retryDelay = HELLO_FIRST_RETRY
     this.hub.clearInvite(this.pairing.topic)
 
     window.clearInterval(this.pingTimer)
@@ -523,7 +558,7 @@ class LiveHub {
     // Se não conectar em 1 minuto, avisa (com a animação de erro)
     window.setTimeout(() => {
       if (this.links.get(pairing.topic) === link && link.state.status === 'connecting' && !link.state.lastSyncAt) {
-        feedback({ phase: 'error', peerName: link.state.peerName, message: 'Não foi possível conectar. Confira se o outro aparelho está com o app aberto e com internet.' })
+        feedback({ phase: 'error', peerName: link.state.peerName, message: link.state.error ?? 'Não foi possível conectar. Confira se o outro aparelho está com o app aberto e com internet.' })
       }
     }, 60_000)
   }

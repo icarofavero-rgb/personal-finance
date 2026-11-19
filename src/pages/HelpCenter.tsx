@@ -283,6 +283,11 @@ const TOPICS: Topic[] = [
           "É o resultado da sincronização, igual ao do backup: o símbolo gira enquanto sincroniza, vira ✓ verde quando deu certo (com o resumo do que mudou) e ✗ vermelho quando a conexão falhou (com o motivo). Se falhar, confira se o outro aparelho está com o app aberto e com internet.",
       },
       {
+        question: "Apareceu “limite gratuito do dia”. O que é?",
+        answer:
+          "Para os aparelhos se encontrarem, o app usa um serviço gratuito que aceita até 250 mensagens por dia em cada internet. O app economiza ao máximo (só uns poucos “oi” por conexão), mas se o limite acabar, ele mostra a hora em que volta e tenta de novo sozinho. Enquanto isso, use “Sem internet: com dois QR codes” na página Sincronização, que não depende desse serviço.",
+      },
+      {
         question: 'Para que serve o botão “Sincronizar” no topo da tela?',
         answer:
           'Ele aparece quando algo mudou em um dos aparelhos conectados. Ao tocar, os dois trocam e juntam as alterações, e as telas se atualizam na hora. Se o ícone do aparelho estiver cinza, a conexão caiu: abra o app no outro aparelho para ele se reconectar.',
