@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { getDebtorsData } from '../services/debtors/debtorsStorage'
 import ConfirmDialog from '../components/ConfirmDialog'
+import MonthPicker from '../components/MonthPicker'
+import CardSpendingChart from '../components/CardSpendingChart'
 import {
   Palette,
   X,
@@ -88,10 +90,13 @@ const cardModalTimer = useRef<
   const [newCardColor, setNewCardColor] =
   useState(DEFAULT_CARD_COLOR)
 
-  const [expandedPurchaseMonths, setExpandedPurchaseMonths] =
+  // Mês mostrado em "Compras no cartão" e "Minhas faturas"
+  const [cardsMonth, setCardsMonth] = useState(() => new Date().toLocaleDateString('en-CA').slice(0, 7))
+
+  const [, setExpandedPurchaseMonths] =
   useState<string[]>([])
 
-const [expandedInvoiceMonths, setExpandedInvoiceMonths] =
+const [, setExpandedInvoiceMonths] =
   useState<string[]>([])
 
   const [purchases, setPurchases] =
@@ -859,14 +864,20 @@ return (
     </div>
 </section>
       <section className="panel cards-purchases-section">
-  <h3>Compras no cartão</h3>
+  <div className="pf-cards-section-heading">
+    <h3>Compras no cartão</h3>
+    <div className="pf-cards-month">
+      <MonthPicker id="cards-purchases-month" value={cardsMonth} onChange={value => value && setCardsMonth(value)} />
+    </div>
+  </div>
 
-  {purchasesByMonth.length === 0 ? (
-    <p>Nenhuma compra registrada ainda.</p>
+  {purchasesByMonth.every(([month]) => month !== cardsMonth) ? (
+    <p className="pf-cards-empty">Nenhuma compra em {formatMonth(cardsMonth)}.</p>
   ) : (
     <div className="monthly-groups">
-      {purchasesByMonth.map(([month, monthPurchases]) => {
-        const expanded = expandedPurchaseMonths.includes(month)
+      {purchasesByMonth.filter(([month]) => month === cardsMonth).map(([month, monthPurchases]) => {
+        // Só o mês escolhido, já aberto com tudo dentro
+        const expanded = true
 
         return (
           <div className="monthly-group" key={month}>
@@ -950,15 +961,21 @@ return (
   )}
 </section>
 
+<div className="pf-cards-invoices-row">
 <section className="panel cards-invoices-section">
-  <h3>Minhas faturas</h3>
+  <div className="pf-cards-section-heading">
+    <h3>Minhas faturas</h3>
+    <div className="pf-cards-month">
+      <MonthPicker id="cards-invoices-month" value={cardsMonth} onChange={value => value && setCardsMonth(value)} />
+    </div>
+  </div>
 
-  {invoicesByMonth.length === 0 ? (
-    <p>Nenhuma fatura encontrada.</p>
+  {invoicesByMonth.every(([month]) => month !== cardsMonth) ? (
+    <p className="pf-cards-empty">Nenhuma fatura em {formatMonth(cardsMonth)}.</p>
   ) : (
     <div className="monthly-groups">
-      {invoicesByMonth.map(([month, monthInvoices]) => {
-        const expanded = expandedInvoiceMonths.includes(month)
+      {invoicesByMonth.filter(([month]) => month === cardsMonth).map(([month, monthInvoices]) => {
+        const expanded = true
 
         return (
           <div className="monthly-group" key={month}>
@@ -1000,7 +1017,7 @@ return (
                           <small>
                             {card?.name ?? 'Cartão não encontrado'}
                           </small>
-                          <h4>Fatura de {invoice.invoiceMonth}</h4>
+                          <h4>Fatura de {formatMonth(invoice.invoiceMonth)}</h4>
                         </div>
 
                         <strong>{formatMoney(invoice.total)}</strong>
@@ -1083,6 +1100,9 @@ return (
     </div>
   )}
 </section>
+
+<CardSpendingChart month={cardsMonth} revision={purchases.length * 1000 + payments.length + cards.length} />
+</div>
 
       <section className="cards-list cards-owned-section">
 <div className="card-carousel-heading">

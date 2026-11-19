@@ -6,6 +6,7 @@ import MonthPicker from '../components/MonthPicker'
 import SelectField from '../components/SelectField'
 import FinancialComparisonCharts from '../components/FinancialComparisonCharts'
 import Deferred from '../components/Deferred'
+import CardSpendingChart from '../components/CardSpendingChart'
 
 type ReportsProps = {
   transactions: Transaction[]
@@ -112,8 +113,8 @@ export default function Reports({ transactions }: ReportsProps) {
               <input
                 id="report-year"
                 type="number"
-                min="2000"
-                max="2100"
+                min="2026"
+                max="2040"
                 value={selectedYear}
                 onChange={event =>
                   setSelectedYear(event.target.value)
@@ -142,7 +143,10 @@ export default function Reports({ transactions }: ReportsProps) {
       </div>
 
       <Deferred minHeight={760}>
-      <FinanceCharts transactions={filteredTransactions} />
+      <FinanceCharts
+        transactions={filteredTransactions}
+        extraChart={<CardSpendingChart month={period === 'month' ? selectedMonth : new Date().toLocaleDateString('en-CA').slice(0, 7)} />}
+      />
 
 <FinancialComparisonCharts
   transactions={filteredTransactions}

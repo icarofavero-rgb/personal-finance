@@ -3857,7 +3857,7 @@ background:
 {activePage === 'Sincronização' && <Sync />}
 
           {activePage === 'Relatórios' && (
-            <Reports transactions={transactions} />
+            <Reports transactions={spendingEntries} />
           )}
 
           </div>

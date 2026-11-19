@@ -4091,3 +4091,73 @@
   gap: 10px;
   min-height: 240px;
 }
+
+/* ---------- 36. Cartões: filtro de mês e gráfico ao lado das faturas ---------- */
+
+.pf-cards-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.pf-cards-section-heading h3 {
+  margin: 0;
+}
+
+.pf-cards-month {
+  min-width: 200px;
+}
+
+.pf-cards-empty {
+  margin: 6px 0 0;
+  padding: 18px;
+  border-radius: 14px;
+  text-align: center;
+  color: var(--pf-text-secondary);
+  border: 1px dashed var(--pf-control-border, var(--pf-border));
+}
+
+/* O cabeçalho do mês não abre/fecha mais (sempre aberto) */
+.cards-purchases-section .monthly-group-header,
+.cards-invoices-section .monthly-group-header {
+  pointer-events: none;
+}
+
+.pf-cards-invoices-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.pf-cards-invoices-row > .cards-invoices-section {
+  margin: 0;
+}
+
+@media (max-width: 1100px) {
+  .pf-cards-invoices-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Página Cartões: compras na linha toda; faturas + gráfico lado a lado embaixo */
+@media (min-width: 901px) {
+  .cards-page > .cards-purchases-section {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+  }
+
+  .cards-page > .pf-cards-invoices-row {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+}
+
+@media (max-width: 900px) {
+  .cards-page > .pf-cards-invoices-row {
+    grid-column: 1 / -1;
+  }
+}
