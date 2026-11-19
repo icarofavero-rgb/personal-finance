@@ -30,6 +30,7 @@ public class WidgetBridgePlugin extends Plugin {
         editor.putString("expense", call.getString("expense", ""));
         editor.putString("accent", call.getString("accent", "#8b5cf6"));
         editor.putBoolean("negative", Boolean.TRUE.equals(call.getBoolean("negative", false)));
+        editor.putString("month", call.getString("month", ""));
         editor.putBoolean("locked", Boolean.TRUE.equals(call.getBoolean("locked", false)));
         editor.apply();
 

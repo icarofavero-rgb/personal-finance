@@ -16,6 +16,8 @@ type WidgetData = {
   accent: string
   negative: boolean
   locked: boolean
+  /** mês dos valores (AAAA-MM): o widget avisa quando o mês virar */
+  month: string
 }
 
 const WidgetBridge = registerPlugin<{ update(data: WidgetData): Promise<void> }>('WidgetBridge')
@@ -53,6 +55,7 @@ export function buildWidgetData(
     accent: options.accent || '#8b5cf6',
     negative: balance < 0,
     locked: options.locked,
+    month,
   }
 }
 

@@ -53,10 +53,20 @@ public class FinanceWidgetProvider extends AppWidgetProvider {
         int accent = parseColor(prefs.getString("accent", "#8b5cf6"), Color.parseColor("#8b5cf6"));
         boolean negative = prefs.getBoolean("negative", false);
 
+        // O mês virou e o app ainda não foi aberto: não mostra o saldo antigo como se fosse o atual
+        String month = prefs.getString("month", "");
+        String currentMonth = new java.text.SimpleDateFormat("yyyy-MM", java.util.Locale.US).format(new java.util.Date());
+        boolean stale = month != null && !month.isEmpty() && !month.equals(currentMonth);
+
         views.setTextViewText(R.id.widget_title, prefs.getString("title", "Personal Finance"));
         views.setInt(R.id.widget_accent_bar, "setBackgroundColor", accent);
 
-        if (!hasData || locked) {
+        if (hasData && !locked && stale) {
+            views.setTextViewText(R.id.widget_label, "Mês novo: toque para atualizar");
+            views.setTextViewText(R.id.widget_balance, "—");
+            views.setTextColor(R.id.widget_balance, Color.WHITE);
+            views.setViewVisibility(R.id.widget_row, View.GONE);
+        } else if (!hasData || locked) {
             // Sem dados ainda, ou app protegido por PIN: não mostra valores
             views.setTextViewText(R.id.widget_label, locked ? "Protegido por PIN" : "Abra o app para começar");
             views.setTextViewText(R.id.widget_balance, locked ? "•••••" : "—");
