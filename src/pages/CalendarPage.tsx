@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import {
+  Barcode,
   BellRing,
   CalendarClock,
   Check,
@@ -24,6 +25,7 @@ import SelectField from '../components/SelectField'
 import Toast, { type ToastMessage } from '../components/Toast'
 import { buildCalendarEvents, monthBounds, type CalendarEvent, type CalendarEventKind } from '../services/calendarEvents'
 import { getCards } from '../services/cardsStorage'
+import { getTransactions } from '../services/storage'
 import { getCardPurchases } from '../services/cardPurchasesStorage'
 import { getCardPayments } from '../services/cardPaymentsStorage'
 import { getDebtorsData } from '../services/debtors/debtorsStorage'
@@ -53,6 +55,7 @@ const KIND_META: Record<CalendarEventKind, { label: string; icon: typeof Receipt
   'forecast-income': { label: 'Entrada prevista', icon: TrendingUp, tone: 'income' },
   'forecast-expense': { label: 'Saída prevista', icon: TrendingDown, tone: 'expense' },
   'debt-due': { label: 'A receber', icon: HandCoins, tone: 'debt' },
+  boleto: { label: 'Boleto', icon: Barcode, tone: 'reminder' },
 }
 
 const money = (cents: number) =>
@@ -82,6 +85,8 @@ function loadSources(reminders: Reminder[]) {
     forecasts: safe(getManualForecasts, []),
     debts: safe(() => getDebtorsData().debts, []),
     reminders,
+    // Boletos cadastrados em "Nova transação" aparecem no dia do pagamento
+    transactions: safe(getTransactions, []),
   }
 }
 

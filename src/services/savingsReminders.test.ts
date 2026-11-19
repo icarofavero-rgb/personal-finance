@@ -197,17 +197,44 @@ describe('Eventos do Calendário', () => {
     expect(kinds).toContainEqual(['invoice-closing', '2026-12-05'])
 
     // Compra de 20/10 (depois do fechamento do dia 5) vence no dia 12 de algum mês seguinte.
-    const due = events.filter(item => item.kind === 'invoice-due')
+    // A fatura com compras (os outros meses aparecem como vencimento sem compras)
+    const due = events.filter(item => item.kind === 'invoice-due' && (item.amountCents ?? 0) > 0)
     expect(due).toHaveLength(1)
     expect(due[0].date.endsWith('-12')).toBe(true)
     expect(due[0].amountCents).toBe(30_000)
     expect(due[0].done).toBe(false)
   })
 
+  it('mostra o vencimento de TODOS os cartões, mesmo sem compras', () => {
+    const cards = [card, { ...card, id: 'c2', name: 'Inter', dueDay: 15 }, { ...card, id: 'c3', name: 'Itaú', dueDay: 20 }]
+    const events = buildCalendarEvents(
+      { cards, purchases: [purchase], payments: [], reminders: [], forecasts: [], debts: [] },
+      '2026-11-01',
+      '2026-11-30'
+    )
+    const due = events.filter(item => item.kind === 'invoice-due').map(item => item.title).sort()
+    expect(due).toEqual(['Fatura Inter', 'Fatura Itaú', 'Fatura ' + card.name].sort())
+  })
+
+  it('boletos (categoria Boletos) entram no dia do pagamento; outras transações não', () => {
+    const events = buildCalendarEvents(
+      {
+        cards: [], purchases: [], payments: [], reminders: [], forecasts: [], debts: [],
+        transactions: [
+          { id: 'b1', description: 'Conta de luz', amount: 120, type: 'expense', category: 'Boletos / Boleto', date: '2026-11-20' },
+          { id: 'x1', description: 'Mercado', amount: 50, type: 'expense', category: 'Alimentação / Supermercado', date: '2026-11-20' },
+        ],
+      },
+      '2026-11-01',
+      '2026-11-30'
+    )
+    expect(events.map(item => [item.kind, item.title, item.date])).toEqual([['boleto', 'Conta de luz', '2026-11-20']])
+  })
+
   it('marca a fatura como concluída quando está paga', () => {
     const sources = { cards: [card], purchases: [purchase], payments: [], reminders: [], forecasts: [], debts: [] }
     const [due] = buildCalendarEvents(sources, '2026-11-01', '2026-12-31').filter(
-      item => item.kind === 'invoice-due'
+      item => item.kind === 'invoice-due' && (item.amountCents ?? 0) > 0
     )
     const invoiceMonth = due.id.split(':')[2]
 
@@ -220,7 +247,7 @@ describe('Eventos do Calendário', () => {
       '2026-12-31'
     )
 
-    expect(paidEvents.find(item => item.kind === 'invoice-due')?.done).toBe(true)
+    expect(paidEvents.find(item => item.id === due.id)?.done).toBe(true)
   })
 })
 

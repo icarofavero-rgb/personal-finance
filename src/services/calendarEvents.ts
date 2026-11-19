@@ -4,6 +4,7 @@
  */
 
 import type { CreditCard } from './cardsStorage'
+import { isBoletoCategory } from './categories'
 import type { CardPurchase } from './cardPurchasesStorage'
 import type { CardPayment } from './cardPaymentsStorage'
 import type { ManualForecast } from './manualForecastStorage'
@@ -26,6 +27,7 @@ export type CalendarEventKind =
   | 'forecast-income'
   | 'forecast-expense'
   | 'debt-due'
+  | 'boleto'
 
 export type CalendarEvent = {
   id: string
@@ -46,6 +48,8 @@ export type CalendarSources = {
   reminders: Reminder[]
   forecasts: ManualForecast[]
   debts: DebtorDebt[]
+  /** transações: só as da categoria Boletos entram no calendário */
+  transactions?: { id: string; description: string; amount: number; type: string; category: string; date: string }[]
 }
 
 export function monthBounds(month: string): { from: string; to: string } {
@@ -99,6 +103,44 @@ export function buildCalendarEvents(
     })
   }
 
+  // Vencimento de TODOS os cartões, todo mês (mesmo sem compras na fatura)
+  {
+    const seen = new Set(events.map(event => event.id))
+    let y = Number(from.slice(0, 4))
+    let mo = Number(from.slice(5, 7)) - 1
+    if (mo < 1) {
+      mo = 12
+      y--
+    }
+
+    while (`${y}-${String(mo).padStart(2, '0')}` <= to.slice(0, 7)) {
+      const invoiceMonth = `${y}-${String(mo).padStart(2, '0')}`
+
+      for (const card of sources.cards) {
+        const id = `invoice-due:${card.id}:${invoiceMonth}`
+        if (seen.has(id)) continue
+        const dueDate = getCardInvoiceDueDate(invoiceMonth, card.dueDay)
+        if (!inRange(dueDate)) continue
+        seen.add(id)
+        events.push({
+          id,
+          date: dueDate,
+          kind: 'invoice-due',
+          title: `Fatura ${card.name}`,
+          subtitle: 'Vencimento da fatura · sem compras',
+          amountCents: 0,
+          done: false,
+        })
+      }
+
+      mo++
+      if (mo > 12) {
+        mo = 1
+        y++
+      }
+    }
+  }
+
   let year = Number(from.slice(0, 4))
   let month = Number(from.slice(5, 7))
 
@@ -138,6 +180,21 @@ export function buildCalendarEvents(
       amountCents: occurrence.reminder.amountCents,
       done: occurrence.done,
       reminderId: occurrence.reminder.id,
+    })
+  }
+
+  // Boletos (transações da categoria Boletos), no dia do pagamento
+  for (const transaction of sources.transactions ?? []) {
+    if (!inRange(transaction.date) || !isBoletoCategory(transaction.category)) continue
+
+    events.push({
+      id: `boleto:${transaction.id}`,
+      date: transaction.date,
+      kind: 'boleto',
+      title: transaction.description,
+      subtitle: 'Boleto · data de pagamento',
+      amountCents: Math.round(transaction.amount * 100),
+      done: false,
     })
   }
 

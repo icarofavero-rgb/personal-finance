@@ -73,6 +73,7 @@ import {
 
 import { matchesSearch, summarize } from './services/transactionSearch'
 import { buildSpendingEntries } from './services/spending'
+import { BOLETO_CATEGORY, isBoletoCategory } from './services/categories'
 import CardSpendingChart from './components/CardSpendingChart'
 import { buildNextMonthProjection } from './services/nextMonthProjection'
 import { usePresence } from './hooks/usePresence'
@@ -995,6 +996,7 @@ useEffect(() => {
           reminders: getReminders(),
           forecasts: [],
           debts: [],
+          transactions: getTransactions(),
         })),
       }))
 
@@ -1215,7 +1217,7 @@ function closeTransactionModal() {
   purchase: number
 } | null>(null)
   const [paymentMethod, setPaymentMethod] = useState<
-  'cash' | 'credit'
+  'cash' | 'credit' | 'boleto'
 >('cash')
 
 useEffect(() => {
@@ -4134,7 +4136,9 @@ options={[
 
 
 <div className="form-group transaction-date-field">
-  <label htmlFor="date">Data</label>
+  <label htmlFor="date">
+    {paymentMethod === 'boleto' || isBoletoCategory(category) ? 'Data de pagamento' : 'Data'}
+  </label>
 
   <DatePicker
     id="date"
@@ -4176,9 +4180,11 @@ options={[
       <SelectField
   id="payment-method"
   value={paymentMethod}
-  onChange={value =>
-    setPaymentMethod(value as 'cash' | 'credit')
-  }
+  onChange={value => {
+    setPaymentMethod(value as 'cash' | 'credit' | 'boleto')
+    // Boleto: categoria própria (vai para o Calendário no dia do pagamento)
+    if (value === 'boleto' && !isBoletoCategory(category)) setCategory(BOLETO_CATEGORY)
+  }}
   options={[
     {
       value: 'cash',
@@ -4187,6 +4193,10 @@ options={[
     {
       value: 'credit',
       label: 'Cartão de crédito',
+    },
+    {
+      value: 'boleto',
+      label: 'Boleto',
     },
   ]}
   placeholder="Selecione a forma de pagamento"

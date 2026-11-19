@@ -66,8 +66,9 @@ export function planSystemNotices(
 
   const events = buildCalendarEvents(sources, from, dateKey(end)).filter(event => {
     if (event.done) return false
-    if (event.kind === 'invoice-due') return preferences.cardInvoices
-    if (event.kind === 'reminder') return preferences.paymentReminders
+    // Fatura sem compras (R$ 0) não gera aviso
+    if (event.kind === 'invoice-due') return preferences.cardInvoices && (event.amountCents ?? 0) > 0
+    if (event.kind === 'reminder' || event.kind === 'boleto') return preferences.paymentReminders
     return false
   })
 
@@ -82,7 +83,7 @@ export function planSystemNotices(
     if (before > now) {
       notices.push({
         id: stableNotificationId(`${event.id}:antes`),
-        title: event.kind === 'invoice-due' ? 'Fatura chegando' : 'Lembrete chegando',
+        title: event.kind === 'invoice-due' ? 'Fatura chegando' : event.kind === 'boleto' ? 'Boleto chegando' : 'Lembrete chegando',
         body:
           `${event.title}${value} vence em ${preferences.daysBeforeDue} ` +
           `${preferences.daysBeforeDue === 1 ? 'dia' : 'dias'}.`,
