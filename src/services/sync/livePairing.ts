@@ -55,26 +55,52 @@ export function getDeviceId(): string {
   return id
 }
 
-export function getPairing(): Pairing | null {
+const PAIRINGS_KEY = 'personal-finance-live-links-v2'
+
+/** Todos os aparelhos pareados (um canal e uma chave para cada um). */
+export function getPairings(): Pairing[] {
   try {
-    const parsed = JSON.parse(localStorage.getItem(PAIRING_KEY) ?? 'null') as Pairing | null
-    return parsed && typeof parsed.topic === 'string' && typeof parsed.key === 'string' ? parsed : null
+    const parsed = JSON.parse(localStorage.getItem(PAIRINGS_KEY) ?? 'null') as Pairing[] | null
+    if (Array.isArray(parsed)) return parsed.filter(item => item && typeof item.topic === 'string' && typeof item.key === 'string')
+
+    // Versão anterior: um único aparelho pareado
+    const old = JSON.parse(localStorage.getItem(PAIRING_KEY) ?? 'null') as Pairing | null
+    if (old && typeof old.topic === 'string') {
+      localStorage.setItem(PAIRINGS_KEY, JSON.stringify([old]))
+      localStorage.removeItem(PAIRING_KEY)
+      return [old]
+    }
   } catch {
-    return null
+    // lista ilegível: nenhum aparelho
   }
+  return []
+}
+
+function savePairings(list: Pairing[]): void {
+  localStorage.setItem(PAIRINGS_KEY, JSON.stringify(list))
+}
+
+export function getPairing(topic: string): Pairing | null {
+  return getPairings().find(item => item.topic === topic) ?? null
 }
 
 export function savePairing(pairing: Pairing): void {
-  localStorage.setItem(PAIRING_KEY, JSON.stringify(pairing))
+  const list = getPairings().filter(item => item.topic !== pairing.topic)
+  savePairings([...list, pairing])
 }
 
-export function updatePairing(changes: Partial<Pairing>): void {
-  const current = getPairing()
-  if (current) savePairing({ ...current, ...changes })
+export function updatePairing(topic: string, changes: Partial<Pairing>): void {
+  savePairings(getPairings().map(item => (item.topic === topic ? { ...item, ...changes } : item)))
 }
 
-export function clearPairing(): void {
-  localStorage.removeItem(PAIRING_KEY)
+export function removePairing(topic: string): void {
+  savePairings(getPairings().filter(item => item.topic !== topic))
+}
+
+/** Marca uma alteração deste aparelho para todos os pareados (menos o de `except`). */
+export function markLocalChange(except?: string): void {
+  const now = new Date().toISOString()
+  savePairings(getPairings().map(item => (item.topic === except ? item : { ...item, lastLocalChangeAt: now })))
 }
 
 /** Cria um novo convite (canal + chave) e devolve o texto do QR code. */

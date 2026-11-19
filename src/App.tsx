@@ -172,7 +172,7 @@ import AppBackdrop from './components/AppBackdrop'
 import Savings from './pages/Savings'
 import CalendarPage, { REMINDERS_CHANGED_EVENT } from './pages/CalendarPage'
 import { getReminders } from './services/remindersStorage'
-import { generateReminderNotifications } from './services/calendarEvents'
+import { generateReminderNotifications, generateBoletoNotifications } from './services/calendarEvents'
 import { syncSystemNotifications } from './services/systemNotifications'
 import AppNavigation, { getPageOrder } from './components/AppNavigation'
 import { useDeviceClass } from './hooks/useDeviceClass'
@@ -847,7 +847,15 @@ const notificationResult = useMemo(() => {
       console.error('Erro ao calcular avisos dos lembretes:', error)
     }
 
-    const notifications = [...invoiceNotifications, ...reminderNotifications].sort(
+    let boletoNotifications: ReturnType<typeof generateBoletoNotifications> = []
+
+    try {
+      boletoNotifications = generateBoletoNotifications(transactions, preferences, notificationToday)
+    } catch (error) {
+      console.error('Erro ao calcular avisos dos boletos:', error)
+    }
+
+    const notifications = [...invoiceNotifications, ...reminderNotifications, ...boletoNotifications].sort(
       (a, b) => (a.dueDate ?? '').localeCompare(b.dueDate ?? '')
     )
 
@@ -887,6 +895,7 @@ return {
   notificationPreferencesRevision,
   notificationReadRevision,
   remindersRevision,
+  transactions,
 ])
 
 // Conexão contínua: depois de sincronizar, todas as telas leem os dados de novo

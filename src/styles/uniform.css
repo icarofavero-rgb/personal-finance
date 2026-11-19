@@ -4413,3 +4413,58 @@
 :root .pf-typing-cursor {
   animation: none !important;
 }
+
+/* ---------- 38. Vários aparelhos conectados ---------- */
+
+.pf-live-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.pf-live-icon {
+  display: inline-grid;
+  place-items: center;
+}
+
+.pf-live-icon.is-on {
+  color: #22c55e;
+}
+
+.pf-live-icon.is-off {
+  color: var(--pf-text-secondary);
+  opacity: 0.65;
+}
+
+/* Com mais de um aparelho, o botão cresce para caber os ícones */
+@media (max-width: 650px) {
+  .pf-live-device:has(.pf-live-icon + .pf-live-icon) {
+    width: auto;
+    padding: 0 10px;
+  }
+}
+
+.pf-live-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pf-live-card-syncall {
+  align-self: flex-start;
+}
+
+.pf-live-card-more {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pf-text-secondary);
+}
+
+.pf-live-device:has(.pf-live-icon + .pf-live-icon) > .pf-live-dot {
+  display: none;
+}

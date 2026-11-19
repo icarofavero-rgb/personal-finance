@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Monitor, RefreshCw, Smartphone, Tablet } from 'lucide-react'
 
-import { liveLink, type LiveState } from '../services/sync/liveLink'
+import { liveLink, type LiveState, type PeerState } from '../services/sync/liveLink'
 
 export function useLiveLink(): LiveState {
   const [state, setState] = useState(() => liveLink.getState())
@@ -15,29 +15,33 @@ export function PeerIcon({ name, size = 18 }: { name: string; size?: number }) {
   return <Smartphone size={size} />
 }
 
+export function isPeerOnline(peer: PeerState): boolean {
+  return peer.status === 'connected' || peer.status === 'syncing'
+}
+
 type Props = {
   onOpenSync: () => void
   onMessage: (type: 'success' | 'error', message: string) => void
 }
 
 /**
- * No topo da tela: o aparelho pareado (verde = conectado) e, quando há
- * alterações, o botão "Sincronizar".
+ * No topo da tela: um ícone para cada aparelho pareado (verde =
+ * conectado) e, quando há alterações, o botão "Sincronizar".
  */
 export default function LiveSyncIndicator({ onOpenSync, onMessage }: Props) {
   const state = useLiveLink()
+  const peers = state.peers.filter(peer => peer.status !== 'waiting-scan')
 
-  if (state.status === 'unpaired') return null
+  if (peers.length === 0) return null
 
-  const connected = state.status === 'connected' || state.status === 'syncing'
+  const online = peers.filter(isPeerOnline)
   const label =
-    state.status === 'syncing'
-      ? 'Sincronizando…'
-      : connected
-        ? `${state.peerName} conectado`
-        : state.status === 'waiting-scan'
-          ? 'Aguardando leitura do QR'
-          : `Procurando ${state.peerName.toLowerCase()}…`
+    online.length === 0
+      ? 'Nenhum aparelho conectado agora'
+      : online.length === 1
+        ? `${online[0].peerName} conectado`
+        : `${online.length} aparelhos conectados`
+  const title = peers.map(peer => `${peer.peerName}: ${isPeerOnline(peer) ? 'conectado' : 'desconectado'}`).join(' · ')
 
   async function sync() {
     try {
@@ -50,29 +54,37 @@ export default function LiveSyncIndicator({ onOpenSync, onMessage }: Props) {
 
   return (
     <div className="pf-live">
-      {connected && (state.pending || state.status === 'syncing') && (
+      {online.length > 0 && (state.pending || state.syncing) && (
         <button
           type="button"
-          className={`pf-live-sync ${state.status === 'syncing' ? 'is-busy' : ''}`}
+          className={`pf-live-sync ${state.syncing ? 'is-busy' : ''}`}
           onClick={() => void sync()}
-          disabled={state.status === 'syncing'}
+          disabled={state.syncing}
           title="Enviar e receber as alterações"
         >
           <RefreshCw size={16} />
-          <span>{state.status === 'syncing' ? 'Sincronizando' : 'Sincronizar'}</span>
+          <span>{state.syncing ? 'Sincronizando' : 'Sincronizar'}</span>
         </button>
       )}
 
       <button
         type="button"
-        className={`pf-live-device ${connected ? 'is-on' : 'is-off'}`}
+        className={`pf-live-device ${online.length > 0 ? 'is-on' : 'is-off'}`}
         onClick={onOpenSync}
-        title={label}
+        title={title}
         aria-label={label}
       >
-        <PeerIcon name={state.peerName} size={18} />
+        <span className="pf-live-icons">
+          {peers.map(peer => (
+            <span key={peer.topic} className={`pf-live-icon ${isPeerOnline(peer) ? 'is-on' : 'is-off'}`}>
+              <PeerIcon name={peer.peerName} size={17} />
+            </span>
+          ))}
+        </span>
         <span className="pf-live-dot" aria-hidden="true" />
-        <span className="pf-live-label">{connected ? 'Conectado' : 'Desconectado'}</span>
+        <span className="pf-live-label">
+          {online.length === 0 ? 'Desconectado' : peers.length > 1 ? `${online.length}/${peers.length} conectados` : 'Conectado'}
+        </span>
       </button>
     </div>
   )

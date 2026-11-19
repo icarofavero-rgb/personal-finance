@@ -292,3 +292,36 @@ export function generateReminderNotifications(
       }
     })
 }
+
+/**
+ * Avisos dos boletos lançados como transação (categoria Boletos): de hoje
+ * até a antecedência escolhida nas preferências.
+ */
+export function generateBoletoNotifications(
+  transactions: NonNullable<CalendarSources['transactions']>,
+  preferences: NotificationPreferences,
+  today: string
+): FinancialNotification[] {
+  if (!preferences.enabled || !preferences.paymentReminders) return []
+
+  const money = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+
+  return transactions
+    .filter(transaction => isBoletoCategory(transaction.category))
+    .map(transaction => ({ transaction, days: getDaysUntilDue(transaction.date, today) }))
+    .filter(({ days }) => days >= 0 && days <= preferences.daysBeforeDue)
+    .map(({ transaction, days }) => ({
+      id: `boleto:${transaction.id}:${transaction.date}`,
+      type: 'payment-reminder' as const,
+      title: days === 0 ? 'Boleto vence hoje' : 'Boleto chegando',
+      message:
+        days === 0
+          ? `Hoje é o dia de pagar “${transaction.description}” de ${money(transaction.amount)}.`
+          : `“${transaction.description}” de ${money(transaction.amount)} vence em ${days} ${days === 1 ? 'dia' : 'dias'}.`,
+      priority: days === 0 ? ('urgent' as const) : ('warning' as const),
+      createdAt: today,
+      dueDate: transaction.date,
+      referenceId: transaction.id,
+      read: false,
+    }))
+}
