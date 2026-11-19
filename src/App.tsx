@@ -196,6 +196,7 @@ import {
   applyAppTheme,
   applyVisualStyle,
   applyBackground,
+  applyFontSize,
   applyAnimationPreference,
 } from './services/appearanceStorage'
 
@@ -924,6 +925,7 @@ useEffect(() => {
     applyAppTheme(appearance.theme)
     applyVisualStyle(appearance.visualStyle)
     applyBackground(appearance.background)
+    applyFontSize(appearance.fontSize)
     applyAnimationPreference(appearance.animations)
 
     // Remonta a página aberta (Metas, Guardado, Calendário... leem de novo)
@@ -2163,6 +2165,7 @@ async function handleConfirmImportBackup() {
     applyAppTheme(appearance.theme)
     applyVisualStyle(appearance.visualStyle)
     applyBackground(appearance.background)
+    applyFontSize(appearance.fontSize)
     applyAnimationPreference(appearance.animations)
 
     await waitSpin()

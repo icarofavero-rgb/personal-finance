@@ -71,6 +71,16 @@ const TOPICS: Topic[] = [
         answer:
           'São comparações automáticas com o mês anterior: se você gastou mais ou menos, a categoria que mais subiu, a que mais caiu e quanto sobrou das suas entradas. No mês atual, a comparação vai até o mesmo dia do mês passado (dia 18 com dia 18), para ser justa.',
       },
+      {
+        question: "Para que serve o “Período” no Dashboard?",
+        answer:
+          "Ele escolhe o mês e o ano que o Dashboard inteiro mostra: entradas, saídas, resultado, gráficos e cartões. As saídas juntam todas as formas de pagamento (Pix, débito, dinheiro, boleto e cartão de crédito). Quando o mês vira, o app passa sozinho para o mês novo.",
+      },
+      {
+        question: "O que é o “Saldo projetado para o mês seguinte”?",
+        answer:
+          "É uma prévia do próximo mês: as faturas dos cartões, os boletos e as outras contas já agendadas para ele, descontados das entradas previstas. Toque no ícone do bloco para ver a lista do que entra na conta.",
+      },
     ],
   },
   {
@@ -80,12 +90,22 @@ const TOPICS: Topic[] = [
       {
         question: 'Como edito ou excluo uma transação?',
         answer:
-          'Na lista de transações, toque no lápis para editar ou na lixeira para excluir. Despesas ligadas a uma fatura paga ficam protegidas para não bagunçar o histórico do cartão.',
+          "Na lista de transações, toque no lápis para editar ou na lixeira para excluir. Compras no cartão de crédito aparecem na lista com a etiqueta 💳 e são editadas em Cartões (o botão do cartão leva até lá). Despesas ligadas a uma fatura paga ficam protegidas para não bagunçar o histórico do cartão.",
       },
       {
         question: 'Como procuro uma transação?',
         answer:
           'Em Transações, use a busca no topo da lista. Ela procura no nome, na categoria e no valor, sem se importar com acentos: “farmacia”, “uber” ou “45,90” funcionam. O app mostra quantos resultados encontrou e o total deles. Dá para combinar a busca com os filtros de mês, categoria e tipo.',
+      },
+      {
+        question: "Por que minhas compras no cartão aparecem no histórico?",
+        answer:
+          "Para você ver todas as saídas num lugar só. Cada parcela aparece no mês dela, com a etiqueta 💳 e o nome do cartão; os boletos ganham a etiqueta “Boleto”. Parcelas de meses futuros aparecem quando você filtra o mês delas. O pagamento da fatura não é somado de novo, para nada contar em dobro.",
+      },
+      {
+        question: "Como lanço um boleto?",
+        answer:
+          "Em “Nova transação”, escolha Saída e a forma de pagamento “Boleto”. A categoria vira “Boletos” e o campo de data vira “Data de pagamento”. O boleto aparece no Calendário nesse dia e o sininho avisa quando ele estiver chegando.",
       },
       {
         question: 'Como faço o salário ou o aluguel entrarem sozinhos todo mês?',
@@ -131,7 +151,32 @@ const TOPICS: Topic[] = [
       {
         question: 'Como pago uma fatura?',
         answer:
-          'No Dashboard, toque no cartão e em “Ver faturas”. Escolha o mês e use “Quitar fatura” ou “Pagar parcialmente”. O limite do cartão é liberado conforme você paga.',
+          "Em Cartões → Minhas faturas, escolha o mês, toque em “Registrar pagamento” na fatura e informe o valor e a data. Também dá para pagar pelo Dashboard: toque no cartão e em “Ver faturas”. O limite do cartão é liberado conforme você paga.",
+      },
+      {
+        question: "Qual fatura aparece no cartão do Dashboard?",
+        answer:
+          "A fatura “da vez”: a próxima que vai vencer, com a data de vencimento. Exemplo: um cartão que fecha dia 10 e vence dia 15 mostra a fatura de dezembro até 15/12; a partir do dia 16, passa a mostrar a de janeiro. Se você escolher outro mês em “Período”, aparece a fatura daquele mês. O gráfico “Despesas dos cartões” segue a mesma regra.",
+      },
+      {
+        question: "Em que fatura cai a minha compra e quando ela vence?",
+        answer:
+          "Compras feitas antes do dia do fechamento entram na fatura do mês; no dia do fechamento ou depois, vão para a do mês seguinte. Se o vencimento é depois do fechamento (fecha dia 10, vence dia 15), a fatura vence no próprio mês; se é antes (fecha dia 28, vence dia 5), vence no mês seguinte. Em Cartões, cada compra mostra em que fatura cai cada parcela.",
+      },
+      {
+        question: "Como vejo as compras e as faturas de um mês?",
+        answer:
+          "Em Cartões, use o seletor de mês em “Compras no cartão” ou em “Minhas faturas”: aparece só aquele mês, já aberto. Nas compras parceladas, a parcela do mês escolhido fica destacada.",
+      },
+      {
+        question: "O que mostra o gráfico “Despesas dos cartões”?",
+        answer:
+          "Em “Todos os cartões”, cada fatia é a fatura de um cartão. Escolhendo um cartão, o anel mostra quanto do limite a fatura usou, o centro mostra o valor da fatura e a lista mostra as categorias. Ele aparece no Dashboard, em Cartões e em Relatórios.",
+      },
+      {
+        question: "Emprestei meu cartão para alguém. Como registro?",
+        answer:
+          "Em Devedores, ao adicionar a dívida, escolha o seu cartão em “Usou o seu cartão de crédito?”. A compra entra na fatura do cartão (e no Dashboard) e a dívida mostra “💳 Usou seu cartão · Nx”. Enquanto existir essa dívida, o cartão não pode ser excluído.",
       },
     ],
   },
@@ -175,6 +220,11 @@ const TOPICS: Topic[] = [
         answer:
           'É o que restou de entradas menos saídas no mês. O app calcula quanto está disponível e você escolhe quanto guardar.',
       },
+      {
+        question: "Os depósitos das Metas aparecem no Guardado?",
+        answer:
+          "Sim. Tudo o que você deposita ou retira de uma meta entra sozinho no saldo do Guardado, no histórico (com a etiqueta “Meta”) e no gráfico de evolução. Para mudar esses valores, use a própria meta.",
+      },
     ],
   },
   {
@@ -185,6 +235,16 @@ const TOPICS: Topic[] = [
         question: 'Como crio um lembrete de boleto?',
         answer:
           'Em Calendário, toque em “Novo lembrete”, informe o título, o valor (opcional) e a data. Marque “Repetir todo mês” para contas fixas.',
+      },
+      {
+        question: "O que aparece no Calendário?",
+        answer:
+          "Os boletos lançados como transação (no dia do pagamento), os lembretes, as previsões, as dívidas dos devedores e o vencimento da fatura de todos os seus cartões, mês a mês.",
+      },
+      {
+        question: "Como marco um aviso como lido?",
+        answer:
+          "No sininho, toque em “Marcar como lido” no aviso ou em “Marcar todas como lidas”. Os avisos lidos somem da lista; toque em “Mostrar lidas” para vê-los de novo.",
       },
       {
         question: 'Quando recebo os avisos?',
@@ -213,6 +273,16 @@ const TOPICS: Topic[] = [
           'Não. Depois da primeira vez, os aparelhos ficam pareados e se reconectam sozinhos sempre que os dois estiverem com o app aberto e com internet. No topo da tela aparece o aparelho conectado em verde.',
       },
       {
+        question: "Posso conectar mais de um aparelho?",
+        answer:
+          "Pode. Em Sincronização, toque em “Conectar outro aparelho” e mostre um QR code novo para cada aparelho (por exemplo, o celular, o tablet e dois computadores). No topo da tela aparece um ícone para cada aparelho: computador, celular ou tablet, em verde quando estão conectados. O botão “Sincronizar” envia as alterações para todos.",
+      },
+      {
+        question: "O que significa a animação de ✓ ou ✗?",
+        answer:
+          "É o resultado da sincronização, igual ao do backup: o símbolo gira enquanto sincroniza, vira ✓ verde quando deu certo (com o resumo do que mudou) e ✗ vermelho quando a conexão falhou (com o motivo). Se falhar, confira se o outro aparelho está com o app aberto e com internet.",
+      },
+      {
         question: 'Para que serve o botão “Sincronizar” no topo da tela?',
         answer:
           'Ele aparece quando algo mudou em um dos aparelhos conectados. Ao tocar, os dois trocam e juntam as alterações, e as telas se atualizam na hora. Se o ícone do aparelho estiver cinza, a conexão caiu: abra o app no outro aparelho para ele se reconectar.',
@@ -220,7 +290,7 @@ const TOPICS: Topic[] = [
       {
         question: 'Como desconecto um aparelho?',
         answer:
-          'Em Sincronização, no quadro “Conexão contínua”, toque em “Desconectar”. Os dados continuam nos dois aparelhos; para conectar de novo, basta ler um QR code novo.',
+          "Em Sincronização, no quadro “Conexão contínua”, toque em “Desconectar” ao lado do aparelho. Só ele é desconectado; os outros continuam. Os dados continuam em todos os aparelhos; para conectar de novo, basta ler um QR code novo.",
       },
       {
         question: 'E se eu estiver sem internet?',
@@ -302,12 +372,22 @@ const TOPICS: Topic[] = [
       {
         question: 'Como mudo as cores e o estilo?',
         answer:
-          'Em Configurações → Aparência: escolha o estilo (Clássico, Liquid Glass, Neon ou Natal), o tema claro/escuro, a cor de destaque, a intensidade do neon e as animações.',
+          "Em Configurações → Aparência: escolha o estilo (Clássico, Liquid Glass, Neon ou Natal), o tema claro/escuro, a cor de destaque, o fundo da tela, o tamanho da letra, a intensidade do neon e as animações.",
+      },
+      {
+        question: "Como troco o fundo da tela?",
+        answer:
+          "Em Configurações → Aparência → Fundo da tela, escolha entre “Do estilo”, Aurora, Malha, Ondas, Geométrico, Linhas, Pontos, Anéis ou Liso. Todos ficam parados (não pesam no celular) e usam a sua cor de destaque.",
+      },
+      {
+        question: "Como aumento ou diminuo o tamanho da letra?",
+        answer:
+          "Em Configurações → Aparência → Tamanho da letra, escolha entre Pequena, Normal, Grande e Muito grande. A mudança vale para o app inteiro e aparece na hora, antes mesmo de salvar.",
       },
       {
         question: 'Como mudo a ordem do menu ou os botões da barra do celular?',
         answer:
-          'Em Configurações → Layout. Use as setas para mudar a ordem das seções do menu principal. Na “Barra inferior do celular”, toque em um dos espaços e escolha a página que deve aparecer nele. O “+” e o “Mais” ficam sempre no lugar.',
+          "Em Configurações → Layout. Segure e arraste a alça (⋮⋮) de cada seção para mudar a ordem do menu principal. Na “Barra inferior do celular”, toque em um dos espaços e escolha a página que deve aparecer nele. O “+” e o “Mais” ficam sempre no lugar.",
       },
       {
         question: 'Como coloco uma foto no meu perfil?',
@@ -316,7 +396,8 @@ const TOPICS: Topic[] = [
       },
       {
         question: 'O app está pesado no meu celular. O que faço?',
-        answer: 'Em Configurações → Aparência, deixe as animações em “Reduzido” ou use o estilo Clássico.',
+        answer:
+          "O app já desliga o vidro desfocado e as animações contínuas no celular. Se ainda estiver pesado, em Configurações → Aparência deixe as animações em “Reduzido” e use o estilo Clássico com o fundo Liso.",
       },
     ],
   },
@@ -333,6 +414,11 @@ const TOPICS: Topic[] = [
         question: 'Onde exatamente ficam os dados?',
         answer:
           'No app Android, dentro do próprio app (desinstalar ou “limpar dados” apaga tudo). No navegador, dentro daquele navegador (limpar os dados de navegação apaga tudo; cada navegador tem dados separados).',
+      },
+      {
+        question: "Como apago tudo e começo do zero?",
+        answer:
+          "Em Configurações → Dados e armazenamento, no fim da página, toque em “Apagar todos os dados” e digite APAGAR para confirmar. Isso não tem volta: faça um backup antes se quiser guardar alguma coisa.",
       },
     ],
   },
@@ -385,6 +471,16 @@ export default function HelpCenter() {
         })
       : topic.items,
   })).filter(topic => topic.items.length > 0)
+  // Duas colunas independentes: cada bloco ocupa só o tamanho do seu
+  // conteúdo (sem buracos). Cada tópico vai para a coluna mais baixa.
+  const helpColumns: { topic: Topic; topicIndex: number }[][] = [[], []]
+  const columnHeights = [0, 0]
+  visibleTopics.forEach((topic, topicIndex) => {
+    const target = columnHeights[0] <= columnHeights[1] ? 0 : 1
+    helpColumns[target].push({ topic, topicIndex })
+    columnHeights[target] += 2 + topic.items.length
+  })
+
   const [kind, setKind] = useState<FeedbackKind>('opiniao')
   const [message, setMessage] = useState('')
   const [copied, setCopied] = useState(false)
@@ -446,14 +542,17 @@ export default function HelpCenter() {
             </div>
           )}
 
-          {visibleTopics.map((topic, topicIndex) => {
+          <div className="pf-help-columns">
+          {helpColumns.map((column, columnIndex) => (
+          <div className="pf-help-column" key={columnIndex}>
+          {column.map(({ topic, topicIndex }) => {
             const Icon = topic.icon
 
             return (
               <div
                 key={topic.title}
                 className="panel pf-help-topic"
-                style={{ '--i': topicIndex } as React.CSSProperties}
+                style={{ '--i': topicIndex, order: topicIndex } as React.CSSProperties}
               >
                 <h3>
                   <span className="pf-help-topic-icon">
@@ -488,6 +587,9 @@ export default function HelpCenter() {
               </div>
             )
           })}
+          </div>
+          ))}
+          </div>
         </div>
 
         <aside className="pf-help-side">

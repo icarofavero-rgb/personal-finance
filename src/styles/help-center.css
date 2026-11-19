@@ -370,3 +370,35 @@
   height: 50px;
   min-height: 50px;
 }
+
+/* Blocos com a altura do próprio conteúdo: duas colunas independentes */
+.pf-help-columns {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.pf-help-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.pf-help-column > .pf-help-topic {
+  margin: 0;
+}
+
+/* Celular: uma coluna só, na ordem original dos tópicos */
+@media (max-width: 760px) {
+  .pf-help-columns {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pf-help-column {
+    display: contents;
+  }
+}

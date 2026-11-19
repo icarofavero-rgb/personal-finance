@@ -37,6 +37,15 @@ export type BackgroundPattern =
 
 export const BACKGROUND_PATTERNS: BackgroundPattern[] = ['style', 'aurora', 'mesh', 'waves', 'geometric', 'lines', 'dots', 'rings', 'plain']
 
+export type FontSize = 'small' | 'normal' | 'large' | 'xlarge'
+
+export const FONT_SIZES: { id: FontSize; label: string; scale: number }[] = [
+  { id: 'small', label: 'Pequena', scale: 0.92 },
+  { id: 'normal', label: 'Normal', scale: 1 },
+  { id: 'large', label: 'Grande', scale: 1.1 },
+  { id: 'xlarge', label: 'Muito grande', scale: 1.22 },
+]
+
 export type NeonIntensity =
   | 'off'
   | 'subtle'
@@ -49,6 +58,7 @@ export type AppearancePreferences = {
   neonIntensity: NeonIntensity
   animations: AnimationPreference
   background: BackgroundPattern
+  fontSize: FontSize
 }
 
 const STORAGE_KEY = 'personal-finance-appearance'
@@ -60,6 +70,7 @@ export const DEFAULT_APPEARANCE: AppearancePreferences = {
   neonIntensity: 'subtle',
   animations: 'normal',
   background: 'style',
+  fontSize: 'normal',
 }
 
 export function getAppearancePreferences(): AppearancePreferences {
@@ -140,6 +151,10 @@ visualStyle: validVisualStyles.includes(
       background: BACKGROUND_PATTERNS.includes(data.background as BackgroundPattern)
         ? (data.background as BackgroundPattern)
         : DEFAULT_APPEARANCE.background,
+
+      fontSize: FONT_SIZES.some(item => item.id === data.fontSize)
+        ? (data.fontSize as FontSize)
+        : DEFAULT_APPEARANCE.fontSize,
 
       neonIntensity: validNeon.includes(
         data.neonIntensity as NeonIntensity
@@ -288,4 +303,11 @@ export function applyAnimationPreference(
 /** Aplica o fundo escolhido (o desenho em si fica no AppBackdrop). */
 export function applyBackground(pattern: BackgroundPattern): void {
   document.documentElement.setAttribute('data-pf-bg', pattern)
+}
+
+/** Tamanho da letra do app inteiro (os estilos usam --pf-font-scale). */
+export function applyFontSize(size: FontSize): void {
+  const scale = FONT_SIZES.find(item => item.id === size)?.scale ?? 1
+  document.documentElement.style.setProperty('--pf-font-scale', String(scale))
+  document.documentElement.setAttribute('data-pf-font', size)
 }

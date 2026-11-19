@@ -46,6 +46,8 @@ import {
   applyAppTheme,
   applyVisualStyle,
   applyBackground,
+  applyFontSize,
+  FONT_SIZES,
   applyAnimationPreference,
   type AppearancePreferences,
 } from '../services/appearanceStorage'
@@ -333,6 +335,7 @@ function handleSaveAppearance() {
     applyAppTheme(appearance.theme)
     applyVisualStyle(appearance.visualStyle)
     applyBackground(appearance.background)
+    applyFontSize(appearance.fontSize)
     applyAnimationPreference(appearance.animations)
 
     setToast({
@@ -675,6 +678,31 @@ return (
     value={appearance.background}
     onChange={background => setAppearance(previous => ({ ...previous, background }))}
   />
+</div>
+
+<div className="settings-appearance-group">
+  <h3>Tamanho da letra</h3>
+  <p>Deixe os textos do app maiores ou menores. A mudança aparece na hora; toque em salvar para manter.</p>
+  <div className="settings-choice-grid pf-font-size-grid" role="radiogroup" aria-label="Tamanho da letra">
+    {FONT_SIZES.map(option => (
+      <button
+        key={option.id}
+        type="button"
+        role="radio"
+        aria-checked={appearance.fontSize === option.id}
+        className={`settings-choice pf-font-size-choice ${appearance.fontSize === option.id ? 'selected' : ''}`}
+        onClick={() => {
+          applyFontSize(option.id)
+          setAppearance(previous => ({ ...previous, fontSize: option.id }))
+        }}
+      >
+        <span className="pf-font-size-sample" style={{ fontSize: `${15 * option.scale}px` }}>
+          Aa
+        </span>
+        {option.label}
+      </button>
+    ))}
+  </div>
 </div>
 
     <div className="settings-appearance-group">

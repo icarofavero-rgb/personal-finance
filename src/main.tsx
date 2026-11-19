@@ -27,6 +27,7 @@ import {
   applyAppTheme,
   applyVisualStyle,
   applyBackground,
+  applyFontSize,
 } from './services/appearanceStorage'
 
 // Camada visual (fundo, vidro, navegação, transições). Deve vir por último.
@@ -65,6 +66,7 @@ applyAnimationPreference(initialAppearance.animations)
 applyAppTheme(initialAppearance.theme)
 applyVisualStyle(initialAppearance.visualStyle)
 applyBackground(initialAppearance.background)
+    applyFontSize(initialAppearance.fontSize)
 applyDeviceAttributes()
 
 function AppWithSplash() {

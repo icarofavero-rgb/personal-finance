@@ -53,7 +53,7 @@ const STEPS: Step[] = [
     color: '#22d3ee',
     eyebrow: 'Dashboard',
     title: 'Tudo do mês em uma tela',
-    text: 'Veja entradas, saídas, o resultado do mês e o saldo projetado. Troque o mês no seletor de Período.',
+    text: 'Entradas, saídas de todas as formas de pagamento (Pix, débito, boleto e cartão) e o saldo projetado do mês seguinte. O Período troca o mês do Dashboard inteiro.',
     tips: ['Toque no ícone de relógio para ver o histórico', 'Cadastre previsões para planejar o mês'],
   },
   {
@@ -62,7 +62,7 @@ const STEPS: Step[] = [
     color: '#22c55e',
     eyebrow: 'Transações',
     title: 'Registre entradas e saídas',
-    text: 'Use o botão “+” (Nova transação) para lançar um gasto ou um recebimento, com categoria e data.',
+    text: 'Use o botão “+” (Nova transação) para lançar um gasto ou um recebimento. Escolha Pix, dinheiro, boleto (vai para o Calendário no dia do pagamento) ou cartão de crédito.',
     tips: ['Gastos no crédito já entram parcelados na fatura', 'Filtre por mês, categoria e tipo'],
   },
   {
@@ -71,7 +71,7 @@ const STEPS: Step[] = [
     color: '#f472b6',
     eyebrow: 'Cartões',
     title: 'Faturas sob controle',
-    text: 'Cadastre seus cartões e acompanhe limite, faturas e parcelas. Pague faturas total ou parcialmente.',
+    text: 'Cada cartão mostra a fatura que vai vencer, com a data. Filtre compras e faturas por mês e veja quanto do limite já usou no gráfico dos cartões.',
     tips: ['O limite é liberado quando você paga a fatura', 'Você recebe avisos antes do vencimento'],
   },
   {
@@ -98,7 +98,7 @@ const STEPS: Step[] = [
     color: '#a78bfa',
     eyebrow: 'Do seu jeito',
     title: 'Personalize a aparência',
-    text: 'Escolha tema claro ou escuro, a cor de destaque e os estilos Liquid Glass (iPhone), Neon ou o tema de Natal.',
+    text: 'Escolha o tema, a cor de destaque, o estilo (Liquid Glass, Neon ou Natal), o fundo da tela e o tamanho da letra.',
     tips: ['Configurações → Aparência', 'Ajuste ou desligue as animações'],
   },
   {
@@ -107,7 +107,7 @@ const STEPS: Step[] = [
     color: '#38bdf8',
     eyebrow: 'Seus aparelhos',
     title: 'Sincronize e faça backup',
-    text: 'Leia um QR code uma única vez e o celular fica conectado ao computador: os dados vão direto de um para o outro. E guarde backups.',
+    text: 'Leia um QR code uma única vez e os aparelhos ficam conectados (dá para ligar vários: celular, tablet, computadores). Os dados vão direto de um para o outro. E guarde backups.',
     tips: ['Configurações → Dados e armazenamento', 'Sincronize apenas aparelhos seus'],
   },
 ]
