@@ -29,6 +29,7 @@ import LayoutSettings from '../components/LayoutSettings'
 import ProfilesSettings from '../components/ProfilesSettings'
 import NotificationPermissionCard from '../components/NotificationPermissionCard'
 import LockSettingsCard from '../components/LockSettingsCard'
+import DangerZone from '../components/DangerZone'
 
 import '../styles/settings.css'
 import { getStorageDiagnostics } from '../services/storageDiagnostics'
@@ -1175,6 +1176,8 @@ return (
         Atualizar informações
       </button>
     </div>
+
+    <DangerZone />
 
   </div>
 ) : (

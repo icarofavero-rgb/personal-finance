@@ -1,20 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Fundo preto com um brilho roxo bem suave no centro -->
   <defs>
-    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#a78bfa"/>
-      <stop offset="0.5" stop-color="#7c3aed"/>
-      <stop offset="1" stop-color="#4c1d95"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="0.22" cy="0.18" r="0.7">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.35"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="pink" cx="0.9" cy="0.95" r="0.6">
-      <stop offset="0" stop-color="#ec4899" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#ec4899" stop-opacity="0"/>
+    <radialGradient id="glow" cx="0.5" cy="0.52" r="0.62">
+      <stop offset="0" stop-color="#5b21b6" stop-opacity="0.42"/>
+      <stop offset="0.55" stop-color="#2e1065" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
     </radialGradient>
   </defs>
-  <rect width="1024" height="1024" fill="url(#base)"/>
-  <rect width="1024" height="1024" fill="url(#pink)"/>
+  <rect width="1024" height="1024" fill="#07060c"/>
   <rect width="1024" height="1024" fill="url(#glow)"/>
 </svg>

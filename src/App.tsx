@@ -72,6 +72,7 @@ import {
 } from './services/notificationReadStorage'
 
 import { matchesSearch, summarize } from './services/transactionSearch'
+import { usePresence } from './hooks/usePresence'
 import BackupReminderBanner from './components/BackupReminderBanner'
 import MonthInsights from './components/MonthInsights'
 import RecurringManager from './components/RecurringManager'
@@ -347,6 +348,8 @@ function closeInvoiceConfirmation() {
 }
 
 const [notificationsOpen, setNotificationsOpen] = useState(false)
+// Mantém o painel na tela durante a animação de saída
+const notificationPresence = usePresence(notificationsOpen, 200)
 
 const notificationWrapperRef = useRef<HTMLDivElement>(null)
 
@@ -356,9 +359,11 @@ useEffect(() => {
   function handlePointerDown(event: PointerEvent) {
     const target = event.target
 
+    // O painel fica num "portal" (fora do botão): tocar nele não conta como fora
     if (
-      target instanceof Node &&
-      !notificationWrapperRef.current?.contains(target)
+      target instanceof Element &&
+      !notificationWrapperRef.current?.contains(target) &&
+      !target.closest('.pf-notification-portal')
     ) {
       setNotificationsOpen(false)
     }
@@ -2211,9 +2216,9 @@ function handleDashboardInvoicePayment(
   </button>
 
 
-{notificationsOpen &&
+{notificationPresence.rendered &&
   createPortal(
-    <div id="notification-panel" className="pf-notification-portal">
+    <div id="notification-panel" className={`pf-notification-portal ${notificationPresence.closing ? 'is-closing' : ''}`}>
       <NotificationPanel
         notifications={notificationResult.notifications}
         error={notificationResult.error}
@@ -2329,6 +2334,8 @@ function handleDashboardInvoicePayment(
       </p>
     </div>
 
+{/* No Dashboard o botão fica só no menu ("+" / Nova transação) */}
+{activePage !== 'Dashboard' && (
 <button
   type="button"
   className="primary-button page-new-transaction-button"
@@ -2337,6 +2344,7 @@ function handleDashboardInvoicePayment(
       <Plus size={18} />
       Nova transação
     </button>
+)}
   </div>
 )}
 

@@ -3753,3 +3753,174 @@
     overflow: hidden;
   }
 }
+
+/* ---------- 32. Começar do zero ---------- */
+
+.pf-danger-zone {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+.pf-danger-zone h3 {
+  color: #f87171 !important;
+}
+
+.pf-danger-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.7);
+  background: rgba(248, 113, 113, 0.16);
+  color: #f87171;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s var(--pf-ease-spring, ease), background 0.2s ease;
+}
+
+.pf-danger-button:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.26);
+}
+
+.pf-danger-button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.pf-danger-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+:root .pf-danger-icon {
+  color: #f87171 !important;
+  background: rgba(248, 113, 113, 0.14) !important;
+  border-color: rgba(248, 113, 113, 0.35) !important;
+}
+
+.pf-danger-label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-danger-label b {
+  color: #f87171;
+}
+
+.pf-danger-label input {
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  background: var(--pf-control-bg, transparent);
+  color: var(--pf-text);
+  font: inherit;
+  font-size: 16px;
+  letter-spacing: 0.2em;
+}
+
+/* ---------- 33. Menu das Configurações fixo ao rolar ---------- */
+
+@media (min-width: 801px) {
+  .settings-layout {
+    align-items: start;
+  }
+
+  .settings-layout > .settings-sidebar {
+    position: sticky;
+    top: calc(var(--pf-safe-top, 0px) + 20px);
+    max-height: calc(100dvh - 40px);
+    overflow-y: auto;
+    z-index: 5;
+  }
+}
+
+/* Tablet em pé e celular: faixa de atalhos presa embaixo do topo */
+@media (max-width: 800px) {
+  .settings-layout > .settings-sidebar {
+    position: sticky;
+    top: 8px;
+    z-index: 30;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    gap: 6px;
+    padding: 8px !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    grid-template-columns: none !important;
+  }
+
+  .settings-layout > .settings-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-layout > .settings-sidebar .settings-nav-item {
+    flex: 0 0 auto;
+    min-width: max-content;
+    min-height: 40px;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 650px) {
+  .settings-layout > .settings-sidebar {
+    top: calc(var(--pf-safe-top, 0px) + 64px);
+  }
+}
+
+/* ---------- 34. Notificações: entrada, saída e lidas somem ---------- */
+
+.pf-notification-portal .notification-panel {
+  animation: pf-menu-in 0.24s var(--pf-ease-spring, ease) both;
+  transform-origin: top right;
+}
+
+.pf-notification-portal.is-closing .notification-panel {
+  animation: pf-menu-out 0.2s ease forwards;
+}
+
+.notification-item {
+  transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.26s ease, margin 0.26s ease, padding 0.26s ease;
+  max-height: 260px;
+}
+
+.notification-item.is-leaving {
+  opacity: 0;
+  transform: translateX(40px);
+  max-height: 0;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden;
+}
+
+.notification-show-read {
+  margin: 0 14px 8px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px dashed var(--pf-control-border, var(--pf-border));
+  background: transparent;
+  color: var(--pf-text-secondary);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.notification-show-read:hover {
+  color: var(--pf-accent-ink, var(--pf-accent));
+  border-color: rgba(var(--pf-accent-rgb), 0.5);
+}

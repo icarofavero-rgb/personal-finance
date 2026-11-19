@@ -1,3 +1,4 @@
+import { clampYear, MAX_YEAR, MIN_YEAR } from '../services/yearRange'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -23,7 +24,7 @@ export default function MonthPicker({
   id,
   clearable = false,
 }: MonthPickerProps) {
-  const initialYear = Number(value.slice(0, 4)) || new Date().getFullYear()
+  const initialYear = clampYear(Number(value.slice(0, 4)) || new Date().getFullYear())
   const [year, setYear] = useState(initialYear)
   const [yearAnimation, setYearAnimation] = useState(0)
   const [open, setOpen] = useState(false)
@@ -85,7 +86,7 @@ function toggleCalendar() {
   }
 
   updatePlacement()
-  setYear(Number(value.slice(0, 4)) || new Date().getFullYear())
+  setYear(clampYear(Number(value.slice(0, 4)) || new Date().getFullYear()))
   setClosing(false)
   setRenderPopup(true)
   setOpen(true)
@@ -137,7 +138,7 @@ useEffect(() => {
   const selectedMonth = Number(value.slice(5, 7)) - 1
 
 function changeYear(direction: number) {
-  setYear(previous => previous + direction)
+  setYear(previous => clampYear(previous + direction))
   setYearAnimation(previous => previous + 1)
 }
 
@@ -191,6 +192,7 @@ function changeYear(direction: number) {
             <button
               type="button"
               aria-label="Ano anterior"
+              disabled={year <= MIN_YEAR}
               onClick={() => changeYear(-1)}
             >
               <ChevronLeft size={18} />
@@ -201,6 +203,7 @@ function changeYear(direction: number) {
             <button
               type="button"
               aria-label="Próximo ano"
+              disabled={year >= MAX_YEAR}
               onClick={() => changeYear(1)}
             >
               <ChevronRight size={18} />

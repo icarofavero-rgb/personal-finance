@@ -1,4 +1,5 @@
 
+import { useState } from 'react'
 import {
   Bell,
   X,
@@ -35,6 +36,24 @@ export default function NotificationPanel({
   const unreadCount = notifications.filter(
     notification => !notification.read
   ).length
+  const readCount = notifications.length - unreadCount
+
+  // Lidas ficam escondidas (dá para ver de novo em "Mostrar lidas")
+  const [showRead, setShowRead] = useState(false)
+  // Aviso saindo da lista com animação antes de ser marcado
+  const [leaving, setLeaving] = useState<string[]>([])
+
+  function toggleRead(id: string, read: boolean) {
+    if (read) {
+      onToggleRead(id, read)
+      return
+    }
+    setLeaving(current => [...current, id])
+    window.setTimeout(() => {
+      onToggleRead(id, false)
+      setLeaving(current => current.filter(item => item !== id))
+    }, 260)
+  }
 
 const sortedNotifications = [...notifications].sort((a, b) => {
   // Notificações não lidas primeiro.
@@ -110,26 +129,27 @@ const sortedNotifications = [...notifications].sort((a, b) => {
             <strong>Não foi possível carregar</strong>
             <p>{error}</p>
           </div>
-        ) : notifications.length === 0 ? (
+        ) : notifications.length === 0 || (unreadCount === 0 && !showRead && leaving.length === 0) ? (
           <div className="notification-panel-empty">
             <Bell size={30} />
-            <strong>Nenhuma notificação por enquanto</strong>
+            <strong>{notifications.length === 0 ? 'Nenhuma notificação por enquanto' : 'Tudo lido por aqui!'}</strong>
             <p>
-              Seus avisos financeiros aparecerão aqui
-              quando estiverem disponíveis.
+              {notifications.length === 0
+                ? 'Seus avisos financeiros aparecerão aqui quando estiverem disponíveis.'
+                : 'Você não tem avisos novos.'}
             </p>
           </div>
         ) : (
           <div className="notification-list">
             
-{sortedNotifications.map(notification => (
+{sortedNotifications.filter(notification => showRead || !notification.read || leaving.includes(notification.id)).map(notification => (
 
               <div
                 key={notification.id}
                 
 className={`notification-item notification-item--${notification.priority}${
   notification.read ? ' notification-item--read' : ''
-}`}
+}${leaving.includes(notification.id) ? ' is-leaving' : ''}`}
 
               >
                 <div className="notification-item-icon">
@@ -149,7 +169,7 @@ className={`notification-item notification-item--${notification.priority}${
   type="button"
   className="notification-read-button"
   onClick={() =>
-    onToggleRead(notification.id, notification.read)
+    toggleRead(notification.id, notification.read)
   }
 >
   {notification.read
@@ -163,6 +183,12 @@ className={`notification-item notification-item--${notification.priority}${
           </div>
         )}
       </div>
+
+      {!error && readCount > 0 && (
+        <button type="button" className="notification-show-read" onClick={() => setShowRead(value => !value)}>
+          {showRead ? 'Esconder lidas' : `Mostrar lidas (${readCount})`}
+        </button>
+      )}
 
       <div className="notification-panel-footer">
         <CheckCheck size={16} />

@@ -1,3 +1,4 @@
+import { YEAR_OPTIONS } from '../services/yearRange'
 
 import { useEffect, useRef, useState } from 'react'
 import { CalendarDays, Check, ChevronDown } from 'lucide-react'
@@ -22,12 +23,8 @@ export default function DashboardMonthSelector({
   onChange,
 }: DashboardMonthSelectorProps) {
   const [year, month] = value.split('-')
-  const currentYear = new Date().getFullYear()
-
-  const years = Array.from(
-    { length: 11 },
-    (_, index) => currentYear - 5 + index
-  )
+  // Só de 2026 até 2040
+  const years = YEAR_OPTIONS
 
   const [openMenu, setOpenMenu] = useState<MenuType | null>(null)
   const [closingMenu, setClosingMenu] = useState<MenuType | null>(null)
