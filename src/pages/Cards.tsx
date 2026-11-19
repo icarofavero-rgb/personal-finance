@@ -3,6 +3,7 @@ import { getDebtorsData } from '../services/debtors/debtorsStorage'
 import ConfirmDialog from '../components/ConfirmDialog'
 import MonthPicker from '../components/MonthPicker'
 import CardSpendingChart from '../components/CardSpendingChart'
+import { getCardInvoiceDueDate } from '../services/cardInvoiceDueDate'
 import {
   Palette,
   X,
@@ -698,6 +699,17 @@ function toggleInvoiceMonth(month: string) {
   )
 }
 
+function formatDay(date: string) {
+  return new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+function shortMonth(month: string) {
+  return new Date(`${month}-01T12:00:00`)
+    .toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' })
+    .replace('.', '')
+    .replace(' de ', '/')
+}
+
 function formatMonth(month: string) {
   const date = new Date(`${month}-01T12:00:00`)
 
@@ -892,9 +904,9 @@ return (
               </span>
 
               <span>
-                {monthPurchases.length} compras
+                {monthPurchases.length} {monthPurchases.length === 1 ? 'compra' : 'compras'} · {formatMoney(monthPurchases.reduce((sum, item) => sum + item.amount, 0))}
                 {' '}
-                {expanded ? '−' : '+'}
+                
               </span>
             </button>
 
@@ -910,44 +922,37 @@ return (
                       className="purchase-item"
                       key={purchase.id}
                     >
-                      <h3>{purchase.description}</h3>
+                      <div className="pf-purchase-top">
+                        <h3>{purchase.description}</h3>
+                        <strong>{formatMoney(purchase.amount)}</strong>
+                      </div>
 
-                      <p>
-                        Cartão: {card?.name ?? 'Cartão não encontrado'}
+                      <p className="pf-purchase-meta">
+                        <span className="pf-purchase-card" style={{ '--chip-color': card?.color ?? DEFAULT_CARD_COLOR } as React.CSSProperties}>
+                          {card?.name ?? 'Cartão não encontrado'}
+                        </span>
+                        <span>{purchase.category}</span>
+                        <span>{formatDay(purchase.date)}</span>
+                        <span>{purchase.installments}x</span>
                       </p>
 
-                      <p>
-                        Valor total: {formatMoney(purchase.amount)}
-                      </p>
-
-                      <p>Categoria: {purchase.category}</p>
-                      <p>Data: {purchase.date}</p>
-                      <p>Parcelamento: {purchase.installments}x</p>
-
-                      {card && (
-                        <div className="purchase-installments">
-                          <h4>Parcelas por fatura</h4>
-
-                          {calculateInstallments(purchase, card).map(
-                            installment => (
-                              <div
-                                className="purchase-installment-row"
-                                key={`${installment.purchaseId}-${installment.installmentNumber}`}
-                              >
-                                <span>
-                                  {installment.invoiceMonth}
-                                  {' — '}
-                                  Parcela {installment.installmentNumber}/
-                                  {installment.totalInstallments}
-                                </span>
-
-                                <strong>
-                                  {formatMoney(installment.amount)}
-                                </strong>
-                              </div>
-                            )
-                          )}
+                      {card && purchase.installments > 1 && (
+                        <div className="pf-purchase-parcels">
+                          {calculateInstallments(purchase, card).map(installment => (
+                            <span
+                              className={`pf-purchase-parcel ${installment.invoiceMonth === cardsMonth ? 'is-current' : ''}`}
+                              key={`${installment.purchaseId}-${installment.installmentNumber}`}
+                              title={`Fatura de ${formatMonth(installment.invoiceMonth)}`}
+                            >
+                              {installment.installmentNumber}/{installment.totalInstallments} · {shortMonth(installment.invoiceMonth)} · {formatMoney(installment.amount)}
+                            </span>
+                          ))}
                         </div>
+                      )}
+                      {card && purchase.installments === 1 && (
+                        <p className="pf-purchase-once">
+                          À vista · fatura de {formatMonth(calculateInstallments(purchase, card)[0].invoiceMonth)}
+                        </p>
                       )}
                     </div>
                   )
@@ -988,9 +993,9 @@ return (
               <span>{formatMonth(month)}</span>
 
               <span>
-                {monthInvoices.length} faturas
+                {monthInvoices.length} {monthInvoices.length === 1 ? 'fatura' : 'faturas'}
                 {' '}
-                {expanded ? '−' : '+'}
+                
               </span>
             </button>
 
@@ -1044,9 +1049,8 @@ return (
                         ))}
                       </div>
 
-                      <div className="invoice-payment-summary">
-                        <p>
-                          <strong>Situação: </strong>
+                      <div className="pf-invoice-status">
+                        <span className={`pf-invoice-badge is-${paymentSummary.status}`}>
                           {paymentSummary.status === 'unpaid'
                             ? 'Não paga'
                             : paymentSummary.status === 'partial'
@@ -1054,27 +1058,16 @@ return (
                               : paymentSummary.status === 'paid'
                                 ? 'Paga'
                                 : 'Pagamento excedente'}
-                        </p>
-
-                        <p>
-                          <strong>Total pago: </strong>
-                          {formatMoney(paymentSummary.totalPaid)}
-                        </p>
-
-                        <p>
-                          <strong>Saldo pendente: </strong>
-                          {formatMoney(paymentSummary.remaining)}
-                        </p>
-
-                        <p>
-                          <strong>Crédito excedente: </strong>
-                          {formatMoney(paymentSummary.overpayment)}
-                        </p>
+                        </span>
+                        {card && <span>Vence {formatDay(getCardInvoiceDueDate(invoice.invoiceMonth, card.dueDay, card.closingDay))}</span>}
+                        <span>Pago {formatMoney(paymentSummary.totalPaid)}</span>
+                        {paymentSummary.remaining > 0 && <span>Falta {formatMoney(paymentSummary.remaining)}</span>}
+                        {paymentSummary.overpayment > 0 && <span>Crédito {formatMoney(paymentSummary.overpayment)}</span>}
                       </div>
 
                       {paymentSummary.remaining > 0 && (
-                        <div className="invoice-payment-form">
-                          <h4>Registrar pagamento</h4>
+                        <details className="pf-invoice-pay">
+                          <summary>Registrar pagamento</summary>
 
                           <CardPaymentForm
                             remaining={paymentSummary.remaining}
@@ -1087,7 +1080,7 @@ return (
                               )
                             }}
                           />
-                        </div>
+                        </details>
                       )}
                     </article>
                   )

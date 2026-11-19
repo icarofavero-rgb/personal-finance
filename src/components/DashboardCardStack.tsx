@@ -7,26 +7,29 @@ type StackCard = {
   bank: string
   color?: string
   image?: string
-  /** fatura do mês escolhido em "Período" */
+  /** fatura "da vez" (a que ainda vai vencer) */
+  invoiceMonth?: string
+  invoiceDueDate?: string
   monthInvoice?: number
   monthPaid?: number
 }
 
 type DashboardCardStackProps = {
   cards: StackCard[]
-  /** nome do mês escolhido (ex.: "novembro") */
-  monthLabel?: string
   onOpenCard: (cardId: string) => void
 }
 
 const money = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+
+const monthName = (month: string) => new Date(`${month}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+const formatDay = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
 
 /**
  * Cartões no Dashboard: um por vez, com setas, pontinhos e arrastar
  * (funciona com qualquer quantidade de cartões). Mesmo visual da página
  * Cartões: fundo preto com borda, ícone e textos na cor do cartão.
  */
-export default function DashboardCardStack({ cards, monthLabel, onOpenCard }: DashboardCardStackProps) {
+export default function DashboardCardStack({ cards, onOpenCard }: DashboardCardStackProps) {
   const [index, setIndex] = useState(0)
   const [direction, setDirection] = useState<'next' | 'prev'>('next')
   const touchStart = useRef<number | null>(null)
@@ -118,9 +121,9 @@ export default function DashboardCardStack({ cards, monthLabel, onOpenCard }: Da
       )}
 
       <div className="pf-dash-card-invoice" style={{ '--credit-card-color': card.color || '#6d5dfc' } as React.CSSProperties}>
-        <span>Fatura de {monthLabel ?? 'este mês'}</span>
+        <span>Fatura de {card.invoiceMonth ? monthName(card.invoiceMonth) : 'este mês'}</span>
         <strong>{money(invoice)}</strong>
-        <small>{invoice <= 0 ? 'Sem compras nesta fatura' : paid >= invoice ? 'Paga' : paid > 0 ? `Falta ${money(invoice - paid)}` : 'Em aberto'}</small>
+        <small>{card.invoiceDueDate && <>Vence em {formatDay(card.invoiceDueDate)} · </>}{invoice <= 0 ? 'Sem compras nesta fatura' : paid >= invoice ? 'Paga' : paid > 0 ? `Falta ${money(invoice - paid)}` : 'Em aberto'}</small>
       </div>
 
       <p className="dashboard-card-stack-hint">Toque no cartão para ver os detalhes e pagar a fatura.</p>

@@ -1,4 +1,6 @@
 
+import { appAlert, appConfirm } from './services/appDialog'
+import { getCardInvoiceDueDate, getCurrentInvoiceMonth } from './services/cardInvoiceDueDate'
 import {
   CATEGORY_GROUPS,
   SUBCATEGORY_ICONS,
@@ -72,7 +74,7 @@ import {
 } from './services/notificationReadStorage'
 
 import { matchesSearch, summarize } from './services/transactionSearch'
-import { buildSpendingEntries } from './services/spending'
+import { buildSpendingEntries, type SpendingEntry } from './services/spending'
 import { BOLETO_CATEGORY, isBoletoCategory } from './services/categories'
 import CardSpendingChart from './components/CardSpendingChart'
 import { buildNextMonthProjection } from './services/nextMonthProjection'
@@ -127,7 +129,7 @@ import {
 import { getCardPurchases } from './services/cardPurchasesStorage'
 import { getCardPayments } from './services/cardPaymentsStorage'
 import { getCardInvoices } from './services/cardInvoices'
-import { History } from 'lucide-react'
+import { History, CreditCard as CardPaymentIcon } from 'lucide-react'
 import { addCardPurchase } from './services/cardPurchasesStorage'
 import { calculateInstallments } from './services/cardInvoices'
 import { calculateInvoicePayment } from './services/cardPaymentsCalculations'
@@ -277,7 +279,7 @@ function formatDate(date: string) {
   return `${day}/${month}/${year}`
 }
 
-function handleRecoverBackup() {
+async function handleRecoverBackup() {
   try {
     const pending = getBackupRestoreSnapshotJournal()
 
@@ -286,16 +288,17 @@ function handleRecoverBackup() {
       return
     }
 
-    const confirmed = window.confirm(
+    const confirmed = await appConfirm(
       'Foi encontrada uma restauração interrompida.\n\n' +
-      'Deseja recuperar os dados anteriores à importação?'
+      'Deseja recuperar os dados anteriores à importação?',
+      { title: 'Recuperar dados?', confirmLabel: 'Recuperar' }
     )
 
     if (!confirmed) return
 
     recoverBackupRestoreSnapshot()
 
-    alert(
+    await appAlert(
       'Dados anteriores recuperados! ' +
       'O aplicativo será atualizado.'
     )
@@ -1598,6 +1601,7 @@ const financialProjection = useMemo(() => {
     invoices,
     payments,
     referenceDate: new Date(year, month - 1, 1),
+    months: 8,
   })
 }, [transactions, cardsRevision, dashboardMonth])
 
@@ -1695,24 +1699,31 @@ const dashboardCards = useMemo(() => {
   const cards = getCards()
   const purchases = getCardPurchases()
   const payments = getCardPayments()
+  const invoices = getCardInvoices(purchases, cards)
 
-  // Fatura de cada cartão no mês escolhido em "Período"
-  const invoices = getCardInvoices(purchases, cards).filter(invoice => invoice.invoiceMonth === dashboardMonth)
+  // No mês atual, cada cartão mostra a fatura "da vez" (a que ainda vai
+  // vencer). Em outro mês escolhido em "Período", a fatura daquele mês.
+  const isCurrentMonth = dashboardMonth === notificationToday.slice(0, 7)
 
-  return cards.map(card => ({
-    ...card,
-    color: card.color ?? DEFAULT_CARD_COLOR,
-    financial: calculateCardDashboard(
-      card,
-      purchases,
-      payments
-    ),
-    monthInvoice: invoices.find(invoice => invoice.cardId === card.id)?.total ?? 0,
-    monthPaid: payments
-      .filter(payment => payment.cardId === card.id && payment.invoiceMonth === dashboardMonth)
-      .reduce((sum, payment) => sum + payment.amount, 0),
-  }))
-}, [cardsRevision, dashboardMonth])
+  return cards.map(card => {
+    const invoiceMonth = isCurrentMonth ? getCurrentInvoiceMonth(card, notificationToday) : dashboardMonth
+    return {
+      ...card,
+      color: card.color ?? DEFAULT_CARD_COLOR,
+      financial: calculateCardDashboard(
+        card,
+        purchases,
+        payments
+      ),
+      invoiceMonth,
+      invoiceDueDate: getCardInvoiceDueDate(invoiceMonth, card.dueDay, card.closingDay),
+      monthInvoice: invoices.find(invoice => invoice.cardId === card.id && invoice.invoiceMonth === invoiceMonth)?.total ?? 0,
+      monthPaid: payments
+        .filter(payment => payment.cardId === card.id && payment.invoiceMonth === invoiceMonth)
+        .reduce((sum, payment) => sum + payment.amount, 0),
+    }
+  })
+}, [cardsRevision, dashboardMonth, notificationToday])
 
 const dashboardCardsSummary = useMemo(() => {
   const totals = dashboardCards.reduce(
@@ -1812,7 +1823,17 @@ const availableInvoiceMonths = selectedCardInvoices
   .filter(invoice => invoice.invoiceMonth.startsWith(`${selectedYear}-`))
   .map(invoice => invoice.invoiceMonth.slice(5, 7))
 
-  const sortedTransactions = [...transactions].sort(
+  // Histórico: transações + compras no cartão (parcela por parcela).
+  // Parcelas futuras só aparecem quando o mês delas é filtrado.
+  const historyToday = new Date().toLocaleDateString('en-CA')
+  const historyCardEntries = spendingEntries.filter(
+    entry => entry.source === 'card' && (filterMonth ? true : entry.date <= historyToday)
+  )
+  const historyCardNames = new Map(getCards().map(card => [card.id, card.name]))
+  const sortedTransactions: SpendingEntry[] = [
+    ...transactions.map(transaction => ({ ...transaction, source: 'transaction' as const })),
+    ...historyCardEntries,
+  ].sort(
     (a, b) => b.date.localeCompare(a.date)
   )
   const filteredTransactions = sortedTransactions.filter(item =>{
@@ -1836,7 +1857,9 @@ const availableInvoiceMonths = selectedCardInvoices
 
 const hasActiveFilters =
   searchText.trim() !== '' || filterMonth !== '' || filterCategory !== 'Todas' || filterType !== 'Todos'
-const filteredSummary = summarize(filteredTransactions)
+// Pagamento de fatura não conta de novo (as compras do cartão já contam)
+const invoicePaymentIds = new Set(getCardPayments().map(payment => payment.transactionId).filter(Boolean))
+const filteredSummary = summarize(filteredTransactions.filter(item => !invoicePaymentIds.has(item.id)))
 
 // Abre o formulário sempre limpo (evita herdar dados de uma edição cancelada).
 function openNewTransaction() {
@@ -2320,7 +2343,7 @@ function handleDashboardInvoicePayment(
 ) !== null && (
   <button
     type="button"
-    onClick={handleRecoverBackup}
+    onClick={() => void handleRecoverBackup()}
   >
     Recuperar dados anteriores
   </button>
@@ -2852,7 +2875,6 @@ function handleDashboardInvoicePayment(
 
 <DashboardCardStack
   cards={dashboardCards}
-  monthLabel={new Date(`${dashboardMonth}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long' })}
   onOpenCard={cardId => {
     setDashboardCardDetailsId(cardId)
   }}
@@ -3672,7 +3694,14 @@ background:
 
                           <div className="transaction-info">
                             <strong>{item.description}</strong>
-                            <small>{item.category}</small>
+                            <small>
+                              {item.category}
+                              {item.source === 'card' && (
+                                <span className="pf-tx-tag is-card">💳 {historyCardNames.get(item.cardId ?? "") ?? "Cartão"}</span>
+                              )}
+                              {item.source !== 'card' && isBoletoCategory(item.category) && <span className="pf-tx-tag is-boleto">Boleto</span>}
+                              {invoicePaymentIds.has(item.id) && <span className="pf-tx-tag">Pagamento de fatura</span>}
+                            </small>
                           </div>
 
                           <div className="transaction-value">
@@ -3684,6 +3713,19 @@ background:
                           </div>
 
 
+{item.source === 'card' ? (
+<div className="transaction-actions">
+  <button
+    type="button"
+    className="edit-button"
+    aria-label={`Ver ${item.description} em Cartões`}
+    title="Compra no cartão: edite em Cartões"
+    onClick={() => navigate('Cartões')}
+  >
+    <CardPaymentIcon size={16} strokeWidth={1.8} />
+  </button>
+</div>
+) : (
 <div className="transaction-actions">
   <ReceiptButton transactionId={item.id} description={item.description} onMessage={showToast} />
 
@@ -3707,6 +3749,7 @@ background:
     <Trash2 size={16} strokeWidth={1.8} />
   </button>
 </div>
+)}
 
 </div>
                       ))

@@ -15,7 +15,8 @@ import type { CreditCard } from './cardsStorage'
  */
 export function getCardInvoiceDueDate(
   invoiceMonth: string,
-  dueDay: CreditCard['dueDay']
+  dueDay: CreditCard['dueDay'],
+  closingDay?: CreditCard['closingDay']
 ): string {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(invoiceMonth)) {
     throw new Error('Mês da fatura inválido.')
@@ -36,8 +37,12 @@ export function getCardInvoiceDueDate(
   }
 
   // Primeiro dia do mês seguinte, em UTC.
+  // Com o fechamento informado: se o vencimento é depois do fechamento,
+  // a fatura vence no próprio mês (fecha dia 10, vence dia 20);
+  // senão, no mês seguinte (fecha dia 28, vence dia 5).
+  const sameMonth = closingDay !== undefined && dueDay > closingDay
   const nextMonth = new Date(
-    Date.UTC(year, month, 1)
+    Date.UTC(year, sameMonth ? month - 1 : month, 1)
   )
 
   // Último dia do mês seguinte.
@@ -100,4 +105,24 @@ export function getDaysUntilDue(
   const difference = parseDate(dueDate) - parseDate(today)
 
   return Math.round(difference / 86_400_000)
+}
+
+/**
+ * Fatura "da vez" de um cartão: a primeira que ainda não venceu.
+ * Ex.: fecha dia 10 e vence dia 20 — até 20/12 mostra a fatura de
+ * dezembro; a partir de 21/12, a de janeiro.
+ */
+export function getCurrentInvoiceMonth(
+  card: Pick<CreditCard, 'dueDay' | 'closingDay'>,
+  today: string
+): string {
+  const [year, month] = today.split('-').map(Number)
+
+  for (let offset = -1; offset <= 3; offset++) {
+    const date = new Date(Date.UTC(year, month - 1 + offset, 1))
+    const invoiceMonth = date.toISOString().slice(0, 7)
+    if (getCardInvoiceDueDate(invoiceMonth, card.dueDay, card.closingDay) >= today) return invoiceMonth
+  }
+
+  return today.slice(0, 7)
 }

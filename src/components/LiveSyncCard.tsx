@@ -63,10 +63,10 @@ export default function LiveSyncCard({ onMessage }: Props) {
 
   async function syncNow() {
     try {
-      const summary = await liveLink.syncNow()
-      onMessage('success', summary.length > 0 ? `Sincronizado! ${summary.join(' · ')}` : 'Tudo sincronizado!')
-    } catch (error) {
-      onMessage('error', error instanceof Error ? error.message : 'Não foi possível sincronizar.')
+      // A animação de ✓ / ✗ mostra o resultado
+      await liveLink.syncNow()
+    } catch {
+      // erro já mostrado na animação
     }
   }
 

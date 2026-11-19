@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getCardInvoiceDueDate,
   getDaysUntilDue,
+  getCurrentInvoiceMonth,
 } from './cardInvoiceDueDate'
 
 describe('Datas de vencimento das faturas', () => {
@@ -54,4 +55,18 @@ describe('Datas de vencimento das faturas', () => {
       getDaysUntilDue('2026-12-20', '2026-12-22')
     ).toBe(-2)
   })
+})
+
+it('com o fechamento: vence no próprio mês quando o vencimento é depois do fechamento', () => {
+  expect(getCardInvoiceDueDate('2026-12', 20, 10)).toBe('2026-12-20')
+  expect(getCardInvoiceDueDate('2026-11', 5, 28)).toBe('2026-12-05')
+})
+
+it('fatura da vez: muda depois do vencimento', () => {
+  const card = { closingDay: 10, dueDay: 20 }
+  expect(getCurrentInvoiceMonth(card, '2026-11-18')).toBe('2026-11')
+  expect(getCurrentInvoiceMonth(card, '2026-11-20')).toBe('2026-11')
+  expect(getCurrentInvoiceMonth(card, '2026-11-21')).toBe('2026-12')
+  expect(getCurrentInvoiceMonth({ closingDay: 28, dueDay: 5 }, '2026-11-18')).toBe('2026-11')
+  expect(getCurrentInvoiceMonth({ closingDay: 28, dueDay: 5 }, '2026-12-06')).toBe('2026-12')
 })

@@ -139,7 +139,8 @@ export function generateCardInvoiceNotifications(
 
     const dueDate = getCardInvoiceDueDate(
       invoice.invoiceMonth,
-      card.dueDay
+      card.dueDay,
+      card.closingDay
     )
 
     const daysUntilDue = getDaysUntilDue(

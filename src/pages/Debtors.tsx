@@ -704,6 +704,7 @@ const filteredDebtors = debtors
     </p>
   </div>
 
+<div className="pf-debtor-head-actions">
 <button
   type="button"
   className="debtor-expand-button"
@@ -729,6 +730,7 @@ const filteredDebtors = debtors
       ? 'Recolher'
       : 'Ver detalhes'}
   </button>
+</div>
 </div>
 
 <div className="debtor-compact-balance">
@@ -782,6 +784,7 @@ const filteredDebtors = debtors
       })()}
     </div>
 
+    <div className="pf-debt-head-side">
     <span
       className={`debtor-debt-status status-${summary.status}`}
     >
@@ -814,6 +817,7 @@ const filteredDebtors = debtors
   <Pencil size={14} />
   Editar dívida
 </button>
+    </div>
 
   </div>
 
@@ -937,16 +941,6 @@ const filteredDebtors = debtors
 </div>
 
                 <div className="debtor-actions">
-  <strong>
-    {formatCents(
-      debts
-        .filter(debt => debt.debtorId === debtor.id)
-        .reduce((total, debt) => {
-          const summary = calculateDebtSummary(debt, payments)
-          return total + summary.remainingCents
-        }, 0)
-    )}
-  </strong>
 
   <button
     type="button"

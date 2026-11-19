@@ -86,7 +86,7 @@ export function buildCalendarEvents(
     const card = sources.cards.find(item => item.id === invoice.cardId)
     if (!card) continue
 
-    const dueDate = getCardInvoiceDueDate(invoice.invoiceMonth, card.dueDay)
+    const dueDate = getCardInvoiceDueDate(invoice.invoiceMonth, card.dueDay, card.closingDay)
     if (!inRange(dueDate)) continue
 
     const totalCents = Math.round(invoice.total * 100)
@@ -119,7 +119,7 @@ export function buildCalendarEvents(
       for (const card of sources.cards) {
         const id = `invoice-due:${card.id}:${invoiceMonth}`
         if (seen.has(id)) continue
-        const dueDate = getCardInvoiceDueDate(invoiceMonth, card.dueDay)
+        const dueDate = getCardInvoiceDueDate(invoiceMonth, card.dueDay, card.closingDay)
         if (!inRange(dueDate)) continue
         seen.add(id)
         events.push({

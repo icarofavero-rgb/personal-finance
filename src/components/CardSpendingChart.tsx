@@ -9,6 +9,7 @@ import { getCardPurchases } from '../services/cardPurchasesStorage'
 import { getCardPayments } from '../services/cardPaymentsStorage'
 import { getCardInvoices } from '../services/cardInvoices'
 import { getMainCategory } from '../services/categories'
+import { getCurrentInvoiceMonth } from '../services/cardInvoiceDueDate'
 
 const money = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 const DEFAULT_COLOR = '#8b5cf6'
@@ -40,15 +41,22 @@ export default function CardSpendingChart({ month, revision = 0, title = 'Despes
     const cards = getCards()
     const purchases = getCardPurchases()
     const payments = getCardPayments()
-    const invoices = getCardInvoices(purchases, cards).filter(invoice => invoice.invoiceMonth === month)
+    const invoices = getCardInvoices(purchases, cards)
+
+    // No mês atual: a fatura "da vez" de cada cartão (a que ainda vai
+    // vencer; depois do vencimento, passa para a seguinte)
+    const now = new Date()
+    const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-')
+    const followDue = month === today.slice(0, 7)
 
     const perCard = cards.map(card => {
-      const invoice = invoices.find(item => item.cardId === card.id)
-      const paid = payments.filter(item => item.cardId === card.id && item.invoiceMonth === month).reduce((sum, item) => sum + item.amount, 0)
-      return { card, total: invoice?.total ?? 0, paid, installments: invoice?.installments ?? [] }
+      const invoiceMonth = followDue ? getCurrentInvoiceMonth(card, today) : month
+      const invoice = invoices.find(item => item.cardId === card.id && item.invoiceMonth === invoiceMonth)
+      const paid = payments.filter(item => item.cardId === card.id && item.invoiceMonth === invoiceMonth).reduce((sum, item) => sum + item.amount, 0)
+      return { card, invoiceMonth, total: invoice?.total ?? 0, paid, installments: invoice?.installments ?? [] }
     })
 
-    return { cards, perCard, purchases }
+    return { cards, perCard, purchases, followDue }
   }, [month, revision])
 
   const current = data.perCard.find(item => item.card.id === selected) ?? null
@@ -84,7 +92,7 @@ export default function CardSpendingChart({ month, revision = 0, title = 'Despes
       <div className="pf-card-spending-heading">
         <div>
           <h3>{title}</h3>
-          <p>Faturas de {monthName(month)}</p>
+          <p>{current ? `Fatura de ${monthName(current.invoiceMonth)}` : data.followDue ? 'Faturas a vencer de cada cartão' : `Faturas de ${monthName(month)}`}</p>
         </div>
         {data.cards.length > 0 && (
           <div className="pf-card-spending-select">
@@ -119,7 +127,7 @@ export default function CardSpendingChart({ month, revision = 0, title = 'Despes
               center={
                 current ? (
                   <>
-                    <small>Fatura do mês</small>
+                    <small>{data.followDue ? 'Fatura a vencer' : 'Fatura do mês'}</small>
                     <strong>{money(current.total)}</strong>
                     <span>{formatPercent(usage)} do limite</span>
                   </>

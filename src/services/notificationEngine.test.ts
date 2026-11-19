@@ -26,7 +26,7 @@ const purchase: CardPurchase = {
   description: 'Compra de teste',
   amount: 200,
   category: 'Outros',
-  date: '2026-11-05',
+  date: '2026-11-15', // depois do fechamento (dia 10): fatura de dezembro, vence 20/12
   installments: 1,
 }
 
@@ -86,7 +86,7 @@ test('notificações de faturas: cinco cenários', () => {
   const partialPayment: CardPayment = {
     id: 'test-payment',
     cardId: 'test-card',
-    invoiceMonth: '2026-11',
+    invoiceMonth: '2026-12',
     amount: 50,
     date: '2026-12-15',
   }

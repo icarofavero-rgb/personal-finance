@@ -34,6 +34,19 @@ import {
 
 export const LOCAL_CHANGE_EVENT = 'personal-finance-local-change'
 export const DATA_SYNCED_EVENT = 'personal-finance-data-synced'
+/** Início / fim da sincronização (para a animação de ✓ ou ✗). */
+export const LIVE_FEEDBACK_EVENT = 'personal-finance-live-feedback'
+
+export type LiveFeedback = {
+  phase: 'start' | 'success' | 'error'
+  peerName?: string
+  summary?: string[]
+  message?: string
+}
+
+function feedback(detail: LiveFeedback) {
+  window.dispatchEvent(new CustomEvent<LiveFeedback>(LIVE_FEEDBACK_EVENT, { detail }))
+}
 
 export type PeerStatus = 'waiting-scan' | 'connecting' | 'connected' | 'syncing'
 
@@ -378,6 +391,23 @@ class LiveHub {
   /** link em sessão agora (gravações dele não marcam ele mesmo como pendente) */
   private sessionTopic: string | null = null
   private started = false
+  private feedbackDepth = 0
+
+  /** Envolve uma sincronização com a animação (só a de fora conta). */
+  private async withFeedback<T extends string[]>(peerName: string | undefined, run: () => Promise<T>): Promise<T> {
+    const outer = this.feedbackDepth++ === 0
+    if (outer) feedback({ phase: 'start', peerName })
+    try {
+      const result = await run()
+      if (outer) feedback({ phase: 'success', peerName, summary: result })
+      return result
+    } catch (error) {
+      if (outer) feedback({ phase: 'error', peerName, message: error instanceof Error ? error.message : 'A sincronização falhou.' })
+      throw error
+    } finally {
+      this.feedbackDepth--
+    }
+  }
 
   getState(): LiveState {
     return this.state
@@ -487,8 +517,15 @@ class LiveHub {
     }
 
     savePairing(pairing)
-    this.addLink(pairing, false)
+    const link = this.addLink(pairing, false)
     this.emit()
+
+    // Se não conectar em 1 minuto, avisa (com a animação de erro)
+    window.setTimeout(() => {
+      if (this.links.get(pairing.topic) === link && link.state.status === 'connecting' && !link.state.lastSyncAt) {
+        feedback({ phase: 'error', peerName: link.state.peerName, message: 'Não foi possível conectar. Confira se o outro aparelho está com o app aberto e com internet.' })
+      }
+    }, 60_000)
   }
 
   /** Desconecta UM aparelho (nos dois lados). */
@@ -513,14 +550,16 @@ class LiveHub {
   }
 
   async runSession(link: PeerLink): Promise<string[]> {
-    this.sessionTopic = link.topic
-    try {
-      const result = await link.session()
-      window.dispatchEvent(new CustomEvent(DATA_SYNCED_EVENT, { detail: result }))
-      return result.summary
-    } finally {
-      this.sessionTopic = null
-    }
+    return this.withFeedback(link.state.peerName, async () => {
+      this.sessionTopic = link.topic
+      try {
+        const result = await link.session()
+        window.dispatchEvent(new CustomEvent(DATA_SYNCED_EVENT, { detail: result }))
+        return result.summary
+      } finally {
+        this.sessionTopic = null
+      }
+    })
   }
 
   async syncWith(link: PeerLink): Promise<string[]> {
@@ -531,6 +570,10 @@ class LiveHub {
 
   /** Botão "Sincronizar": com todos os aparelhos conectados, um de cada vez. */
   async syncNow(): Promise<string[]> {
+    return this.withFeedback(undefined, () => this.syncAll())
+  }
+
+  private async syncAll(): Promise<string[]> {
     const connected = [...this.links.values()].filter(link => link.channel && !link.syncing)
     if (connected.length === 0) throw new Error('Nenhum aparelho conectado agora.')
 

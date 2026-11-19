@@ -20,6 +20,8 @@ type ProjectionInput = {
   invoices: CardInvoice[]
   payments: CardPayment[]
   referenceDate?: Date
+  /** quantos meses mostrar (padrão 6) */
+  months?: number
 }
 
 const MONTH_NAMES = [
@@ -33,6 +35,7 @@ export function calculateFinancialProjection({
   invoices,
   payments,
   referenceDate = new Date(),
+  months = 6,
 }: ProjectionInput): FinancialProjectionMonth[] {
   const linkedTransactionIds = new Set(
     payments
@@ -43,7 +46,7 @@ export function calculateFinancialProjection({
   const startYear = referenceDate.getFullYear()
   const startMonth = referenceDate.getMonth()
 
-  return Array.from({ length: 6 }, (_, index) => {
+  return Array.from({ length: months }, (_, index) => {
     const date = new Date(
       startYear,
       startMonth + index,

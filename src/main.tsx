@@ -1,5 +1,8 @@
 
 // Deve ser o primeiro import: garante crypto.randomUUID na rede local (HTTP).
+import AppDialogHost from './components/AppDialogHost'
+import LiveSyncFeedback from './components/LiveSyncFeedback'
+import { installAppAlert } from './services/appDialog'
 import './polyfills'
 import { StrictMode, useCallback, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -46,6 +49,9 @@ installProfileScope()
 // Registra quando cada dado foi criado/alterado/excluído (base da sincronização).
 // Não interfere nas gravações do app: só observa.
 installChangeTracking()
+
+// Avisos no estilo do app (no lugar do "Essa página diz...")
+installAppAlert()
 
 // Conexão contínua com o aparelho pareado (se houver)
 liveLink.start()
@@ -96,6 +102,8 @@ function AppWithSplash() {
     <>
       <App />
       <AppLockScreen />
+      <AppDialogHost />
+      <LiveSyncFeedback />
       {showSplash && (
         <AppSplash onComplete={finishSplash} />
       )}

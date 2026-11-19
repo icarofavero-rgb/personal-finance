@@ -28,7 +28,7 @@ type Props = {
  * No topo da tela: um ícone para cada aparelho pareado (verde =
  * conectado) e, quando há alterações, o botão "Sincronizar".
  */
-export default function LiveSyncIndicator({ onOpenSync, onMessage }: Props) {
+export default function LiveSyncIndicator({ onOpenSync }: Props) {
   const state = useLiveLink()
   const peers = state.peers.filter(peer => peer.status !== 'waiting-scan')
 
@@ -45,10 +45,10 @@ export default function LiveSyncIndicator({ onOpenSync, onMessage }: Props) {
 
   async function sync() {
     try {
-      const summary = await liveLink.syncNow()
-      onMessage('success', summary.length > 0 ? `Sincronizado! ${summary.join(' · ')}` : 'Tudo sincronizado!')
-    } catch (error) {
-      onMessage('error', error instanceof Error ? error.message : 'Não foi possível sincronizar.')
+      // A animação de ✓ / ✗ mostra o resultado
+      await liveLink.syncNow()
+    } catch {
+      // erro já mostrado na animação
     }
   }
 
