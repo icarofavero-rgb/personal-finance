@@ -105,6 +105,7 @@ class PeerLink {
   private lastOfferAt = 0
   private lastHelloAt = 0
   private lastSeen = 0
+  private connectedAt = 0
   private remotePending = false
   private helloTimer: number | undefined
   private retryDelay = HELLO_FIRST_RETRY
@@ -225,7 +226,10 @@ class PeerLink {
       case 'hello': {
         this.rememberPeer(message.name)
         if (this.state.status === 'connected' || this.state.status === 'syncing') {
-          if (Date.now() - this.lastSeen < 4_000) return
+          // Um "oi" enviado DEPOIS que conectamos quer dizer que o outro
+          // aparelho reabriu o app: a conexão antiga morreu, reconecta já.
+          // (Um "oi" antigo, de antes de conectar, é ignorado.)
+          if (message.ts < this.connectedAt + 1_000) return
           this.closePeer()
           this.set({ status: 'connecting' })
         }
@@ -315,6 +319,7 @@ class PeerLink {
     const channel = toTextChannel(peer, raw)
     this.channel = channel
     this.lastSeen = Date.now()
+    this.connectedAt = Date.now()
 
     channel.setMessageHandler(text => {
       this.lastSeen = Date.now()
