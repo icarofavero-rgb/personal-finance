@@ -4921,3 +4921,10 @@
 .pf-purchase-facts > span {
   white-space: nowrap;
 }
+
+/* "Receitas: … · Despesas: …" separados no card de resultado */
+.summary-balance-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}

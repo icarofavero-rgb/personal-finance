@@ -1,3 +1,4 @@
+import { getCurrentInvoiceMonth } from './cardInvoiceDueDate'
 import type { CreditCard } from './cardsStorage'
 import type { CardPurchase } from './cardPurchasesStorage'
 import type { CardPayment } from './cardPaymentsStorage'
@@ -71,7 +72,8 @@ export function calculateCardDashboard(
 ): CardDashboardInfo {
   const today = toDateKey(referenceDate)
 
-  const currentMonth = today.slice(0, 7)
+  // Fatura "da vez": a próxima que vai vencer (igual ao cartão do Dashboard)
+  const currentMonth = getCurrentInvoiceMonth(card, today)
 
   const cardPurchases = purchases.filter(
     purchase =>

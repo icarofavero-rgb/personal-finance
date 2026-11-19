@@ -1,7 +1,9 @@
 /**
  * "Saldo projetado para o mês seguinte".
  *
- * Parte do resultado do mês escolhido e desconta tudo o que já está
+ * Parte do saldo do mês escolhido pelo que SAI DO BOLSO (as compras no
+ * cartão entram pela fatura que vence no mês, e não de novo como compra)
+ * e desconta tudo o que já está
  * previsto para o mês seguinte: faturas em aberto, boletos e lembretes a
  * pagar, outras despesas agendadas, recorrentes e previsões manuais.
  * As entradas previstas para o mês seguinte também entram.
@@ -18,6 +20,7 @@ import { occurrenceDate } from './recurringStorage'
 import { getCardInvoices } from './cardInvoices'
 import type { SpendingEntry } from './spending'
 import { isBoletoCategory } from './categories'
+import { getCardInvoiceDueDate } from './cardInvoiceDueDate'
 
 export type ProjectionItem = {
   kind: 'invoice' | 'boleto' | 'expense' | 'income'
@@ -28,7 +31,7 @@ export type ProjectionItem = {
 
 export type NextMonthProjection = {
   month: string
-  /** resultado (entradas − saídas) do mês escolhido */
+  /** saldo do mês escolhido: entradas − saídas fora do cartão − faturas que vencem nele */
   base: number
   invoices: number
   boletos: number
@@ -59,27 +62,38 @@ export function buildNextMonthProjection(input: {
   const next = nextMonthKey(input.month)
   const items: ProjectionItem[] = []
 
-  // Resultado do mês escolhido
+  // Cada fatura entra no mês em que VENCE
+  const cardInvoices = getCardInvoices(input.purchases, input.cards).map(invoice => {
+    const card = input.cards.find(item => item.id === invoice.cardId)
+    const dueDate = card ? getCardInvoiceDueDate(invoice.invoiceMonth, card.dueDay, card.closingDay) : `${invoice.invoiceMonth}-01`
+    const paid = input.payments
+      .filter(payment => payment.cardId === invoice.cardId && payment.invoiceMonth === invoice.invoiceMonth)
+      .reduce((sum, payment) => sum + cents(payment.amount), 0)
+    return { invoice, card, dueDate, paid }
+  })
+
+  // Saldo do mês escolhido: entradas − saídas fora do cartão − faturas
+  // que vencem nele (as compras no cartão saem do bolso pela fatura;
+  // contar a compra E a fatura descontaria o mesmo gasto duas vezes)
   let baseCents = 0
   for (const entry of input.entries) {
-    if (!entry.date.startsWith(input.month)) continue
+    if (entry.source === 'card' || !entry.date.startsWith(input.month)) continue
     baseCents += entry.type === 'income' ? cents(entry.amount) : -cents(entry.amount)
   }
+  for (const item of cardInvoices) {
+    if (item.dueDate.startsWith(input.month)) baseCents -= cents(item.invoice.total)
+  }
 
-  // Faturas do mês seguinte ainda não pagas
-  for (const invoice of getCardInvoices(input.purchases, input.cards)) {
-    if (invoice.invoiceMonth !== next) continue
-    const card = input.cards.find(item => item.id === invoice.cardId)
-    const paid = input.payments
-      .filter(payment => payment.cardId === invoice.cardId && payment.invoiceMonth === next)
-      .reduce((sum, payment) => sum + cents(payment.amount), 0)
+  // Faturas que vencem no mês seguinte, no que ainda falta pagar
+  for (const { invoice, card, dueDate, paid } of cardInvoices) {
+    if (!dueDate.startsWith(next)) continue
     const pending = Math.max(0, cents(invoice.total) - paid)
     if (pending > 0) {
       items.push({
         kind: 'invoice',
         label: `Fatura ${card?.name ?? 'do cartão'}`,
         amount: pending / 100,
-        date: card ? `${next}-${String(Math.min(card.dueDay, 28)).padStart(2, '0')}` : undefined,
+        date: dueDate,
       })
     }
   }

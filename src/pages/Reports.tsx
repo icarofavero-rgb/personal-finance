@@ -51,6 +51,7 @@ export default function Reports({ transactions }: ReportsProps) {
       payments: getCardPayments(),
       referenceDate: new Date(year, month - 1, 1),
       months: 8,
+      cards,
     })
   }, [projectionStart, transactions])
 

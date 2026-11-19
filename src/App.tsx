@@ -1604,6 +1604,7 @@ const financialProjection = useMemo(() => {
     payments,
     referenceDate: new Date(year, month - 1, 1),
     months: 8,
+    cards,
   })
 }, [transactions, cardsRevision, dashboardMonth])
 
@@ -2450,7 +2451,7 @@ function handleDashboardInvoicePayment(
 )}
 
 {activePage === 'Orçamentos' && (
-  <Budgets transactions={transactions} />
+  <Budgets transactions={spendingEntries} />
 )}
 
 
@@ -3915,7 +3916,7 @@ background:
 
 {activePage === 'Devedores' && <Debtors />}
 
-{activePage === 'Guardado' && <Savings transactions={transactions} />}
+{activePage === 'Guardado' && <Savings transactions={spendingEntries} />}
 
 {activePage === 'Calendário' && <CalendarPage />}
 
@@ -4489,7 +4490,7 @@ options={[
 
     <div className="projection-breakdown">
       <div className="projection-history-row">
-        <span>Resultado de {monthLabelLong(dashboardMonth)}</span>
+        <span>Saldo de {monthLabelLong(dashboardMonth)} (cartão pela fatura que vence no mês)</span>
         <strong>{formatMoney(nextProjection.base)}</strong>
       </div>
       <div className="projection-history-row">

@@ -2,6 +2,8 @@
 import type { Transaction } from './storage'
 import type { CardInvoice } from './cardInvoices'
 import type { CardPayment } from './cardPaymentsStorage'
+import type { CreditCard } from './cardsStorage'
+import { getCardInvoiceDueDate } from './cardInvoiceDueDate'
 
 export type FinancialProjectionMonth = {
   key: string
@@ -22,6 +24,8 @@ type ProjectionInput = {
   referenceDate?: Date
   /** quantos meses mostrar (padrão 6) */
   months?: number
+  /** com os cartões, cada fatura entra no mês em que VENCE */
+  cards?: CreditCard[]
 }
 
 const MONTH_NAMES = [
@@ -36,12 +40,19 @@ export function calculateFinancialProjection({
   payments,
   referenceDate = new Date(),
   months = 6,
+  cards,
 }: ProjectionInput): FinancialProjectionMonth[] {
   const linkedTransactionIds = new Set(
     payments
       .map(payment => payment.transactionId)
       .filter((id): id is string => Boolean(id))
   )
+
+  // Mês em que a fatura vence (sem os cartões: o próprio mês da fatura)
+  const invoiceDueMonth = (invoice: CardInvoice) => {
+    const card = cards?.find(item => item.id === invoice.cardId)
+    return card ? getCardInvoiceDueDate(invoice.invoiceMonth, card.dueDay, card.closingDay).slice(0, 7) : invoice.invoiceMonth
+  }
 
   const startYear = referenceDate.getFullYear()
   const startMonth = referenceDate.getMonth()
@@ -76,7 +87,7 @@ export function calculateFinancialProjection({
       .reduce((sum, transaction) => sum + transaction.amount, 0)
 
    const monthInvoices = invoices.filter(
-  invoice => invoice.invoiceMonth === key
+  invoice => invoiceDueMonth(invoice) === key
 )
 
 const faturas = monthInvoices.reduce(
@@ -90,8 +101,8 @@ const invoiceCardIds = new Set(
 
 const totalPago = payments
   .filter(payment =>
-    payment.invoiceMonth === key &&
-    invoiceCardIds.has(payment.cardId)
+    invoiceCardIds.has(payment.cardId) &&
+    monthInvoices.some(invoice => invoice.cardId === payment.cardId && invoice.invoiceMonth === payment.invoiceMonth)
   )
   .reduce((sum, payment) => sum + payment.amount, 0)
 
