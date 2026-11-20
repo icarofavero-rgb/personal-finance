@@ -64,14 +64,11 @@ export function syncDebtPaymentTransactions(data: DebtorsData): boolean {
       continue
     }
     wantedById.delete(transaction.id)
-    const same =
-      transaction.description === target.description &&
-      transaction.amount === target.amount &&
-      transaction.date === target.date &&
-      transaction.category === target.category &&
-      transaction.type === target.type
+    // Valor e data vêm sempre do pagamento; nome, categoria e observação
+    // podem ter sido editados em Transações e são mantidos.
+    const same = transaction.amount === target.amount && transaction.date === target.date && transaction.type === target.type
     if (!same) changed = true
-    next.push(same ? transaction : { ...transaction, ...target })
+    next.push(same ? transaction : { ...transaction, amount: target.amount, date: target.date, type: target.type })
   }
 
   for (const missing of wantedById.values()) {

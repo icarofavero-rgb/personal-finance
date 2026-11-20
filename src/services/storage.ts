@@ -1,4 +1,5 @@
 import { checkTransactionProtection } from './cardPaymentTransactionProtection'
+import { getCardPayments } from './cardPaymentsStorage'
 
 export type Transaction = {
   id: string
@@ -61,13 +62,13 @@ export function saveTransactions(transactions: Transaction[]): void {
       )
     }
 
-    if (
-      updated.description !== existing.description ||
-      updated.amount !== existing.amount ||
-      updated.type !== existing.type ||
-      updated.category !== existing.category ||
-      updated.date !== existing.date
-    ) {
+    // Nome, categoria e observação podem mudar à vontade. Valor e data
+    // precisam continuar iguais aos do pagamento da fatura (editar pela
+    // tela muda os dois juntos: updateInvoicePaymentTransaction).
+    const linkedPayment = getCardPayments().find(payment => payment.transactionId === existing.id)
+    const amountOk = linkedPayment ? Math.round(updated.amount * 100) === Math.round(linkedPayment.amount * 100) : updated.amount === existing.amount
+    const dateOk = linkedPayment ? updated.date === linkedPayment.date : updated.date === existing.date
+    if (updated.type !== existing.type || !amountOk || !dateOk) {
       throw new Error(
         'Não é permitido modificar uma despesa vinculada a uma fatura.'
       )

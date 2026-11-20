@@ -1,4 +1,6 @@
 
+import { getLinkedKind, getPurchase, linkedEditHint, purchaseDebtLink, saveEditedTransaction } from './services/transactionEditing'
+import { updateCardPurchase } from './services/cardPurchasesStorage'
 import { findBrand } from './services/brandIcons'
 import BrandIcon from './components/BrandIcon'
 import { dismissNotifications, filterVisibleNotifications } from './services/notificationDismissStorage'
@@ -63,7 +65,6 @@ import {
   getTransactions,
   addTransaction,
   deleteTransaction,
-  updateTransaction,
   saveTransactions,
   type Transaction,
 } from './services/storage'
@@ -1368,6 +1369,8 @@ const [cardInstallments, setCardInstallments] = useState('1')
   }, [spendingEntries, transactionsEvolutionEnd, filterCategory])
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [description, setDescription] = useState('')
+  // Edição de compra no cartão (mesmo formulário, com cartão e parcelas)
+  const [editingPurchaseId, setEditingPurchaseId] = useState<string | null>(null)
   const [notes, setNotes] = useState('')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('Outros')
@@ -1542,7 +1545,7 @@ const previewInstallments = Number(cardInstallments)
 const previewAvailableLimit = previewCard
   ? calculateCardAvailableLimitCents(
       previewCard,
-      getCardPurchases(),
+      getCardPurchases().filter(purchase => purchase.id !== editingPurchaseId),
       getCardPayments()
     ) / 100
   : 0
@@ -1931,6 +1934,7 @@ async function toggleBoletoPaid(item: Transaction) {
 // Abre o formulário sempre limpo (evita herdar dados de uma edição cancelada).
 function openNewTransaction() {
   setEditingId(null)
+  setEditingPurchaseId(null)
   setRepeatMonthly(false)
   setType('expense')
   setCategory(lastExpenseCategory)
@@ -1946,17 +1950,31 @@ function openNewTransaction() {
   setShowModal(true)
 }
 
-function openEditTransaction(transaction: Transaction) {
-  const protection = checkTransactionProtection(transaction.id)
-
-  if (protection.protected) {
-    setAppAlert({
-      title: 'Transação protegida',
-      message: protection.message,
-    })
+function openEditPurchase(purchaseId: string | undefined) {
+  const purchase = purchaseId ? getPurchase(purchaseId) : null
+  if (!purchase) {
+    showToast('error', 'Compra não encontrada.')
     return
   }
+  setEditingId(purchase.id)
+  setEditingPurchaseId(purchase.id)
+  setType('expense')
+  setDescription(purchase.description)
+  setNotes(purchase.notes ?? '')
+  categoryChosenByUser.current = true
+  setCategorySuggestedBy(null)
+  setAmount(String(purchase.amount))
+  setCategory(purchase.category)
+  setDate(purchase.date)
+  setPaymentMethod('credit')
+  setSelectedCardId(purchase.cardId)
+  setCardInstallments(String(purchase.installments))
+  setRepeatMonthly(false)
+  setShowModal(true)
+}
 
+function openEditTransaction(transaction: Transaction) {
+  setEditingPurchaseId(null)
   setEditingId(transaction.id)
   setType(transaction.type)
   setDescription(transaction.description)
@@ -1984,7 +2002,47 @@ function openEditTransaction(transaction: Transaction) {
       return
     }
 
-   
+     // Editando uma compra no cartão: atualiza a compra (as faturas se recalculam)
+  if (editingPurchaseId) {
+    const original = getPurchase(editingPurchaseId)
+    const installments = Number(cardInstallments)
+    const amountCents = Math.round(numericAmount * 100)
+    if (!original) {
+      showToast('error', 'Compra não encontrada.')
+      return
+    }
+    if (!selectedCardId || !Number.isInteger(installments) || installments < 1 || installments > 120 || installments > amountCents) {
+      alert('Confira o cartão, o valor e a quantidade de parcelas.')
+      return
+    }
+    const debtLink = purchaseDebtLink(editingPurchaseId)
+    if (
+      debtLink &&
+      (Math.round(original.amount * 100) !== amountCents || original.installments !== installments || original.cardId !== selectedCardId)
+    ) {
+      alert(`Esta compra está ligada à dívida “${debtLink.description}” em Devedores. Para mudar o valor, as parcelas ou o cartão, edite a dívida por lá. Nome, categoria, data e observação podem ser mudados aqui.`)
+      return
+    }
+    try {
+      updateCardPurchase(editingPurchaseId, {
+        cardId: selectedCardId,
+        description: description.trim(),
+        amount: amountCents / 100,
+        category,
+        date,
+        installments,
+        ...(notes.trim() ? { notes: notes.trim() } : {}),
+      })
+      setCardsRevision(value => value + 1)
+      closeTransactionModal()
+      setEditingPurchaseId(null)
+      showToast('success', 'Compra atualizada! As faturas foram recalculadas.')
+    } catch (error) {
+      showToast('error', error instanceof Error ? error.message : 'Não foi possível atualizar a compra.')
+    }
+    return
+  }
+
   const transaction: Transaction = {
     id: editingId ?? crypto.randomUUID(),
     description: description.trim(),
@@ -2086,14 +2144,9 @@ return
 
 
 if (editingId) {
-  const protection = checkTransactionProtection(editingId)
-
-  if (protection.protected) {
-    showToast('error', protection.message)
-    return
-  }
-
-  updateTransaction(transaction)
+  // Pagamento de fatura / de dívida: valor e data mudam também no registro ligado
+  const original = transactions.find(item => item.id === editingId)
+  saveEditedTransaction({ ...transaction, ...(original?.paidAt ? { paidAt: original.paidAt } : {}) })
   showToast('success', 'Transação atualizada com sucesso!')
 } else {
   addTransaction(transaction)
@@ -3806,8 +3859,17 @@ background:
   <button
     type="button"
     className="edit-button"
+    aria-label={`Editar ${item.description}`}
+    title="Editar pagamento de dívida (muda também em Devedores)"
+    onClick={() => openEditTransaction(item)}
+  >
+    <Pencil size={16} strokeWidth={1.8} />
+  </button>
+  <button
+    type="button"
+    className="edit-button"
     aria-label={`Ver ${item.description} em Devedores`}
-    title="Pagamento de dívida: edite em Devedores → Eu devo"
+    title="Ver em Devedores"
     onClick={() => navigate('Devedores')}
   >
     <HandCoinsIcon size={16} strokeWidth={1.8} />
@@ -3818,8 +3880,17 @@ background:
   <button
     type="button"
     className="edit-button"
+    aria-label={`Editar a compra ${item.description}`}
+    title="Editar compra no cartão"
+    onClick={() => openEditPurchase(item.purchaseId)}
+  >
+    <Pencil size={16} strokeWidth={1.8} />
+  </button>
+  <button
+    type="button"
+    className="edit-button"
     aria-label={`Ver ${item.description} em Cartões`}
-    title="Compra no cartão: edite em Cartões"
+    title="Ver em Cartões"
     onClick={() => navigate('Cartões')}
   >
     <CardPaymentIcon size={16} strokeWidth={1.8} />
@@ -4123,15 +4194,19 @@ background:
 <div className="modal-header">
   <div>
     <h2 id="modal-title">
-      {editingId !== null
-        ? 'Editar transação'
-        : 'Nova transação'}
+      {editingPurchaseId !== null
+        ? 'Editar compra no cartão'
+        : editingId !== null
+          ? 'Editar transação'
+          : 'Nova transação'}
     </h2>
 
     <p>
-      {editingId !== null
-        ? 'Atualize os dados da movimentação'
-        : 'Registre uma movimentação financeira'}
+      {editingPurchaseId !== null
+        ? 'As faturas do cartão se recalculam com os novos dados'
+        : editingId !== null
+          ? linkedEditHint(getLinkedKind(editingId)) ?? 'Atualize os dados da movimentação'
+          : 'Registre uma movimentação financeira'}
     </p>
   </div>
 
@@ -4363,7 +4438,7 @@ options={[
   </label>
 )}
 
-{type === 'expense' && editingId === null && (
+{type === 'expense' && (editingId === null || editingPurchaseId !== null) && (
   <>
     <div className="form-group">
       <label htmlFor="payment-method">
@@ -4372,6 +4447,7 @@ options={[
 
       <SelectField
   id="payment-method"
+  disabled={editingPurchaseId !== null}
   value={paymentMethod}
   onChange={value => {
     setPaymentMethod(value as 'cash' | 'credit' | 'boleto')

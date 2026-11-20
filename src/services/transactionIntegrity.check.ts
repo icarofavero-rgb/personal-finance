@@ -106,12 +106,27 @@ expectBlocked(
     ])
 )
 
-// Teste 3: impedir alteração da descrição
+// Teste 3: nome e categoria PODEM mudar (valor e data continuam presos ao
+// pagamento da fatura — teste 2)
+saveTransactions([
+  { ...linked, description: 'Alterado', category: 'Finanças' },
+  normal,
+])
+
+assert(
+  'Alteração de nome/categoria da despesa vinculada permitida',
+  getTransactions().find(transaction => transaction.id === linked.id)?.description === 'Alterado'
+)
+
+// volta ao original para os próximos testes
+saveTransactions([linked, normal])
+
+// Teste 3b: mudar a data sem mudar o pagamento continua bloqueado
 expectBlocked(
-  'Alteração de descrição vinculada bloqueada',
+  'Alteração de data vinculada bloqueada',
   () =>
     saveTransactions([
-      { ...linked, description: 'Alterado' },
+      { ...linked, date: '2026-11-20' },
       normal,
     ])
 )

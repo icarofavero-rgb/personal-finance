@@ -90,7 +90,7 @@ const TOPICS: Topic[] = [
       {
         question: 'Como edito ou excluo uma transação?',
         answer:
-          "Na lista de transações, toque no lápis para editar ou na lixeira para excluir. Compras no cartão de crédito aparecem na lista com a etiqueta 💳 e são editadas em Cartões (o botão do cartão leva até lá). Despesas ligadas a uma fatura paga ficam protegidas para não bagunçar o histórico do cartão.",
+          "Na lista de transações, toque no lápis para editar ou na lixeira para excluir. Todas podem ser editadas: compras no cartão abrem com o cartão e as parcelas (as faturas se recalculam); pagamentos de fatura e de dívidas (Eu devo) mudam também o pagamento ligado a eles quando você troca o valor ou a data. Compras ligadas a uma dívida de Devedores têm o valor e as parcelas mudados pela própria dívida. Pagamentos de fatura não podem ser excluídos por aqui, para não bagunçar o histórico do cartão.",
       },
       {
         question: 'Como procuro uma transação?',

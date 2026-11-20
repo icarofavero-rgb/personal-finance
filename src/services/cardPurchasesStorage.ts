@@ -82,3 +82,24 @@ export function deleteCardPurchase(id: string): void {
     purchases.filter(purchase => purchase.id !== id)
   )
 }
+
+/** Atualiza uma compra no cartão (as faturas se recalculam a partir dela). */
+export function updateCardPurchase(id: string, changes: Omit<CardPurchase, 'id'>): void {
+  if (
+    !changes.cardId ||
+    !changes.description.trim() ||
+    !Number.isFinite(changes.amount) ||
+    changes.amount <= 0 ||
+    !Number.isInteger(changes.installments) ||
+    changes.installments < 1 ||
+    changes.installments > 120 ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(changes.date)
+  ) {
+    throw new Error('Dados da compra inválidos.')
+  }
+
+  const purchases = getCardPurchases()
+  if (!purchases.some(item => item.id === id)) throw new Error('Compra não encontrada.')
+
+  saveCardPurchases(purchases.map(item => (item.id === id ? { ...changes, id } : item)))
+}
