@@ -69,11 +69,11 @@ export default function Reports({ transactions }: ReportsProps) {
 
   const income = filteredTransactions
     .filter(item => item.type === 'income')
-    .reduce((sum, item) => sum + item.amount, 0)
+    .map(item => item.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
   const expenses = filteredTransactions
     .filter(item => item.type === 'expense')
-    .reduce((sum, item) => sum + item.amount, 0)
+    .map(item => item.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
   const balance = income - expenses
 

@@ -276,7 +276,7 @@ try {
           <div>
             <h3>Orçamentos cadastrados</h3>
             <p>
-              {monthlyBudgets.length} orçamento(s) neste mês.
+              {monthlyBudgets.length} {monthlyBudgets.length === 1 ? 'orçamento' : 'orçamentos'} neste mês.
             </p>
           </div>
         </div>

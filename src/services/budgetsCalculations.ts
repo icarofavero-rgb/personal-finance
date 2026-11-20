@@ -10,6 +10,17 @@ export type BudgetSummary = {
   exceeded: boolean
 }
 
+/**
+ * A transação entra no orçamento? O orçamento é de uma categoria inteira
+ * ("Alimentação" pega "Alimentação / Supermercado", "Alimentação / Delivery"…)
+ * ou de uma subcategoria ("Assinaturas" pega "Lazer / Assinaturas").
+ */
+export function matchesBudgetCategory(transactionCategory: string, budgetCategory: string): boolean {
+  if (transactionCategory === budgetCategory) return true
+  if (transactionCategory.startsWith(`${budgetCategory} /`)) return true
+  return transactionCategory.endsWith(`/ ${budgetCategory}`)
+}
+
 export function calculateBudgetSummary(
   budget: Budget,
   transactions: Transaction[]
@@ -17,7 +28,7 @@ export function calculateBudgetSummary(
   const spentCents = transactions
     .filter(transaction =>
       transaction.type === 'expense' &&
-      transaction.category === budget.category &&
+      matchesBudgetCategory(transaction.category, budget.category) &&
       transaction.date.startsWith(budget.month)
     )
     .reduce(

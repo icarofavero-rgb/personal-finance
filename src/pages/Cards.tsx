@@ -885,7 +885,7 @@ return (
         <div className="monthly-group-header">
           <span>{formatMonth(cardsMonth)}</span>
           <span>
-            {monthPurchaseRows.length} {monthPurchaseRows.length === 1 ? 'item' : 'itens'} · {formatMoney(monthPurchaseRows.reduce((sum, row) => sum + (row.installment?.amount ?? 0), 0))} nas faturas do mês
+            {monthPurchaseRows.length} {monthPurchaseRows.length === 1 ? 'item' : 'itens'} · compras do mês {formatMoney(monthPurchaseRows.filter(row => row.purchase.date.slice(0, 7) === cardsMonth).reduce((sum, row) => sum + Math.round(row.purchase.amount * 100), 0) / 100)} · nas faturas do mês {formatMoney(monthPurchaseRows.reduce((sum, row) => sum + Math.round((row.installment?.amount ?? 0) * 100), 0) / 100)}
           </span>
         </div>
 

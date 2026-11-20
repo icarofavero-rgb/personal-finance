@@ -362,7 +362,7 @@ export default function CalendarPage() {
                     cell.key === selected ? 'is-selected' : '',
                     pending.some(event => event.kind === 'invoice-due' || event.kind === 'reminder') ? 'has-due' : '',
                   ].join(' ')}
-                  aria-label={`${cell.day}${events.length ? `, ${events.length} evento(s)` : ''}`}
+                  aria-label={`${cell.day}${events.length ? `, ${events.length} ${events.length === 1 ? 'evento' : 'eventos'}` : ''}`}
                   aria-selected={cell.key === selected}
                   onClick={() => {
                     setSelected(cell.key)

@@ -80,11 +80,11 @@ export function calculateFinancialProjection({
 
     const entradas = monthTransactions
       .filter(transaction => transaction.type === 'income')
-      .reduce((sum, transaction) => sum + transaction.amount, 0)
+      .map(transaction => transaction.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
     const saidas = monthTransactions
       .filter(transaction => transaction.type === 'expense')
-      .reduce((sum, transaction) => sum + transaction.amount, 0)
+      .map(transaction => transaction.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
    const monthInvoices = invoices.filter(
   invoice => invoiceDueMonth(invoice) === key
@@ -104,7 +104,7 @@ const totalPago = payments
     invoiceCardIds.has(payment.cardId) &&
     monthInvoices.some(invoice => invoice.cardId === payment.cardId && invoice.invoiceMonth === payment.invoiceMonth)
   )
-  .reduce((sum, payment) => sum + payment.amount, 0)
+  .map(payment => payment.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
 const faturasPagas = Math.max(
   0,

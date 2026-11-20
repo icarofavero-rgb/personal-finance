@@ -104,11 +104,12 @@ export function createGoal(input: CreateGoalInput): Goal {
 
 
 export function calculateGoalSaved(goal: Goal): number {
-  return goal.movements.reduce((total, movement) => {
-    return movement.type === 'deposit'
-      ? total + movement.amount
-      : total - movement.amount
+  // Soma em centavos (evita resíduos como 0,1 + 0,2 = 0,30000000004)
+  const cents = goal.movements.reduce((total, movement) => {
+    const value = Math.round(movement.amount * 100)
+    return movement.type === 'deposit' ? total + value : total - value
   }, 0)
+  return cents / 100
 }
 
 export function calculateGoalProgress(goal: Goal): number {

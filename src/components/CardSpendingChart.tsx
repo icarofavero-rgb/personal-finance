@@ -60,7 +60,7 @@ export default function CardSpendingChart({ month, revision = 0, title = 'Despes
     const perCard = cards.map(card => {
       const invoiceMonth = followDue ? getCurrentInvoiceMonth(card, today) : month
       const invoice = invoices.find(item => item.cardId === card.id && item.invoiceMonth === invoiceMonth)
-      const paid = payments.filter(item => item.cardId === card.id && item.invoiceMonth === invoiceMonth).reduce((sum, item) => sum + item.amount, 0)
+      const paid = payments.filter(item => item.cardId === card.id && item.invoiceMonth === invoiceMonth).map(item => item.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
       return { card, invoiceMonth, total: invoice?.total ?? 0, paid, installments: invoice?.installments ?? [] }
     })
 
@@ -143,7 +143,7 @@ export default function CardSpendingChart({ month, revision = 0, title = 'Despes
                   <>
                     <small>Total das faturas</small>
                     <strong>{money(totalAll)}</strong>
-                    <span>{segments.length} cartão(ões)</span>
+                    <span>{segments.length} {segments.length === 1 ? 'cartão' : 'cartões'}</span>
                   </>
                 )
               }

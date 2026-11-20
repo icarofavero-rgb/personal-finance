@@ -713,7 +713,7 @@ const filteredDebtors = viewDebtors
 <p>
   {debtors.length === 0
     ? 'Nenhuma pessoa cadastrada.'
-    : `${filteredDebtors.length} de ${viewDebtors.length} pessoa(s) exibida(s).`}
+    : `${filteredDebtors.length} de ${viewDebtors.length} ${viewDebtors.length === 1 ? 'pessoa exibida' : 'pessoas exibidas'}.`}
 </p>
 
           </div>
@@ -791,7 +791,7 @@ const filteredDebtors = viewDebtors
     <strong>{debtor.name}</strong>
     <p>
       {debts.filter(debt => debt.debtorId === debtor.id).length}{' '}
-      dívida(s)
+      {debts.filter(debt => debt.debtorId === debtor.id).length === 1 ? 'dívida' : 'dívidas'}
     </p>
   </div>
 
@@ -862,7 +862,7 @@ const filteredDebtors = viewDebtors
     <div>
       <strong>{debt.description}</strong>
       <span>
-        {debt.installments} parcela(s) ·{' '}
+        {debt.installments} {debt.installments === 1 ? 'parcela' : 'parcelas'} ·{' '}
         {debt.date.split('-').reverse().join('/')}
       </span>
       {debt.cardPurchaseId && (() => {

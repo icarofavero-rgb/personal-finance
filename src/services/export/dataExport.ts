@@ -57,6 +57,8 @@ const LABELS: Record<string, string> = {
   status: 'Situação',
   color: 'Cor',
   icon: 'Ícone',
+  paidAt: 'Pago em',
+  kind: 'Tipo de pessoa',
 }
 
 const TYPE_LABELS: Record<string, string> = { income: 'Entrada', expense: 'Saída' }

@@ -1773,7 +1773,7 @@ const dashboardCards = useMemo(() => {
       monthInvoice: invoices.find(invoice => invoice.cardId === card.id && invoice.invoiceMonth === invoiceMonth)?.total ?? 0,
       monthPaid: payments
         .filter(payment => payment.cardId === card.id && payment.invoiceMonth === invoiceMonth)
-        .reduce((sum, payment) => sum + payment.amount, 0),
+        .map(payment => payment.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100,
     }
   })
 }, [cardsRevision, dashboardMonth, notificationToday])

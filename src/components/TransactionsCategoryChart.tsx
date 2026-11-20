@@ -59,11 +59,11 @@ export default function TransactionsCategoryChart({ transactions, month, categor
       item => item.type === kind && (!month || item.date.startsWith(month))
     )
 
-    const total = base.reduce((sum, item) => sum + item.amount, 0)
+    const total = base.map(item => item.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
     if (category !== 'Todas') {
       const visual = getTransactionVisual(category.replace(CATEGORY_GROUP_FILTER, ''), kind)
-      const value = base.filter(item => matchesCategoryFilter(item.category, category)).reduce((sum, item) => sum + item.amount, 0)
+      const value = base.filter(item => matchesCategoryFilter(item.category, category)).map(item => item.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
       return {
         kind,
@@ -130,7 +130,7 @@ export default function TransactionsCategoryChart({ transactions, month, categor
                 <>
                   <small>Total de {kindLabel}</small>
                   <strong>{money(data.total)}</strong>
-                  <span>{data.segments.length} categoria(s)</span>
+                  <span>{data.segments.length} {data.segments.length === 1 ? 'categoria' : 'categorias'}</span>
                 </>
               )
             }

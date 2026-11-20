@@ -170,11 +170,11 @@ export default function FinancialComparisonCharts({
   const comparisonData = useMemo(() => {
     const income = transactions
       .filter(item => item.type === 'income')
-      .reduce((total, item) => total + item.amount, 0)
+      .map(item => item.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
     const expenses = transactions
       .filter(item => item.type === 'expense')
-      .reduce((total, item) => total + item.amount, 0)
+      .map(item => item.amount).reduce((total, value) => total + Math.round(value * 100), 0) / 100
 
     return [
       { name: 'Entradas', value: income, fill: '#64E6A5' },

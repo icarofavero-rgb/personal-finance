@@ -315,7 +315,7 @@ export default function Savings({ transactions }: SavingsProps) {
         <div className="pf-card-heading">
           <div>
             <h3>Histórico</h3>
-            <p>{history.length} movimentação(ões)</p>
+            <p>{history.length} {history.length === 1 ? 'movimentação' : 'movimentações'}</p>
           </div>
         </div>
 
