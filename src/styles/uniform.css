@@ -5234,3 +5234,25 @@
   color: #475569 !important;
   font-weight: 600;
 }
+
+/* Compras no cartão: botão excluir */
+.pf-purchase-delete {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  padding: 4px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  background: transparent;
+  color: #f87171;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pf-purchase-delete:hover {
+  background: rgba(248, 113, 113, 0.1);
+}

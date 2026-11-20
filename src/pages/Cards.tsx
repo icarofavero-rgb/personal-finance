@@ -1,3 +1,4 @@
+import { deleteAnyTransaction } from '../services/transactionEditing'
 import BrandIcon from '../components/BrandIcon'
 import { useEffect, useRef, useState } from 'react'
 import { getDebtorsData } from '../services/debtors/debtorsStorage'
@@ -10,6 +11,7 @@ import {
   Palette,
   X,
   Pencil,
+  Trash2,
   ChevronLeft,
   ChevronRight,
   CreditCard as CreditCardIcon,
@@ -101,6 +103,22 @@ const [, setExpandedInvoiceMonths] =
   useState<string[]>([])
 
   const [invoiceCardFilter, setInvoiceCardFilter] = useState('all')
+
+  // Excluir compra (lançada sem querer, duplicada…)
+  const [purchaseToDelete, setPurchaseToDelete] = useState<CardPurchase | null>(null)
+
+  function confirmDeletePurchase() {
+    const target = purchaseToDelete
+    setPurchaseToDelete(null)
+    if (!target) return
+    try {
+      deleteAnyTransaction({ id: `card-${target.id}`, purchaseId: target.id })
+      setPurchases(getCardPurchases())
+      window.dispatchEvent(new Event('personal-finance-cards-changed'))
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Não foi possível excluir a compra.')
+    }
+  }
 
   const [purchases, setPurchases] =
   useState<CardPurchase[]>(getCardPurchases)
@@ -909,6 +927,16 @@ return (
 
                 {purchase.notes && <p className="pf-tx-notes">{purchase.notes}</p>}
 
+                <button
+                  type="button"
+                  className="pf-purchase-delete"
+                  onClick={() => setPurchaseToDelete(purchase)}
+                  aria-label={`Excluir a compra ${purchase.description}`}
+                  title="Excluir compra"
+                >
+                  <Trash2 size={14} /> Excluir
+                </button>
+
                 <div className="pf-purchase-facts">
                   <span>
                     <small>Compra</small>
@@ -1510,6 +1538,15 @@ onClick={() => closeCardModal('customize')}
     </div>
   </div>
 )}
+<ConfirmDialog
+  open={purchaseToDelete !== null}
+  title="Excluir compra no cartão?"
+  message={`“${purchaseToDelete?.description ?? ''}” sai das faturas do cartão (todas as parcelas) e o limite é liberado. Isso não pode ser desfeito.`}
+  confirmLabel="Excluir compra"
+  onConfirm={confirmDeletePurchase}
+  onCancel={() => setPurchaseToDelete(null)}
+/>
+
 <ConfirmDialog
   open={cardToDelete !== null}
   title="Excluir cartão?"

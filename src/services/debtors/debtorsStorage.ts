@@ -366,3 +366,12 @@ export function deleteDebtorDebt(debtId: string): { cardPurchaseId?: string } {
 
   return { cardPurchaseId: debt.cardPurchaseId }
 }
+
+/** Exclui um pagamento/recebimento de uma dívida. */
+export function deleteDebtorPayment(paymentId: string): void {
+  const data = getDebtorsData()
+  if (!data.payments.some(payment => payment.id === paymentId)) {
+    throw new Error('Pagamento não encontrado.')
+  }
+  saveDebtorsData({ ...data, payments: data.payments.filter(payment => payment.id !== paymentId) })
+}

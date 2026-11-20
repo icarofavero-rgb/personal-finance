@@ -1,5 +1,5 @@
 
-import { getLinkedKind, getPurchase, linkedEditHint, purchaseDebtLink, saveEditedTransaction } from './services/transactionEditing'
+import { deleteAnyTransaction, describeDelete, getLinkedKind, getPurchase, linkedEditHint, purchaseDebtLink, saveEditedTransaction, type DeleteTarget } from './services/transactionEditing'
 import { updateCardPurchase } from './services/cardPurchasesStorage'
 import { findBrand } from './services/brandIcons'
 import BrandIcon from './components/BrandIcon'
@@ -64,7 +64,6 @@ import {
 import {
   getTransactions,
   addTransaction,
-  deleteTransaction,
   saveTransactions,
   type Transaction,
 } from './services/storage'
@@ -118,7 +117,6 @@ import Reports from './pages/Reports'
 
 import Cards from './pages/Cards'
 
-import { checkTransactionProtection } from './services/cardPaymentTransactionProtection'
 
 import { generateCardInvoiceNotifications } from './services/notificationEngine'
 import { getNotificationPreferences } from './services/notificationPreferencesStorage'
@@ -1302,7 +1300,7 @@ const [cardInstallments, setCardInstallments] = useState('1')
 
   const [editingId, setEditingId] = useState<string | null>(null)
   const [transactionToDelete, setTransactionToDelete] =
-  useState<string | null>(null)
+  useState<DeleteTarget | null>(null)
   const [filterMonth, setFilterMonth] = useState('')
   const [filterCategory, setFilterCategory] = useState('Todas')
   const [filterType, setFilterType] = useState('Todos')
@@ -2181,49 +2179,29 @@ setCategory(
 
  
 
-function handleDelete(id: string) {
-  const protection = checkTransactionProtection(id)
-
-  if (protection.protected) {
-    showToast('error', protection.message)
-    return
-  }
-
-  const transactionExists = transactions.some(
-    transaction => transaction.id === id
-  )
-
-  if (!transactionExists) {
+// Excluir QUALQUER linha (transação, compra no cartão, pagamento de fatura
+// ou de dívida), junto com o registro ligado a ela
+function handleDelete(id: string, purchaseId?: string) {
+  if (!purchaseId && !transactions.some(transaction => transaction.id === id)) {
     showToast('error', 'Transação não encontrada.')
     return
   }
-
-  setTransactionToDelete(id)
+  setTransactionToDelete({ id, purchaseId })
 }
 
 function handleConfirmDeleteTransaction() {
   if (!transactionToDelete) return
-
-  const id = transactionToDelete
-
-  // Verifica novamente antes da exclusão.
-  const protection = checkTransactionProtection(id)
-
-  if (protection.protected) {
-    setTransactionToDelete(null)
-    showToast('error', protection.message)
-    return
-  }
+  const target = transactionToDelete
 
   try {
-    deleteTransaction(id)
+    deleteAnyTransaction(target)
     setTransactions(getTransactions())
+    if (target.purchaseId) setCardsRevision(value => value + 1)
     setTransactionToDelete(null)
-
-    showToast('success', 'Transação excluída com sucesso!')
-  } catch {
+    showToast('success', target.purchaseId ? 'Compra excluída! As faturas foram recalculadas.' : 'Transação excluída com sucesso!')
+  } catch (error) {
     setTransactionToDelete(null)
-    showToast('error', 'Não foi possível excluir a transação.')
+    showToast('error', error instanceof Error ? error.message : 'Não foi possível excluir a transação.')
   }
 }
 
@@ -3125,9 +3103,9 @@ background:
 
 <ConfirmDialog
   open={transactionToDelete !== null}
-  title="Excluir transação?"
-  message="Deseja realmente excluir esta transação? Essa ação não poderá ser desfeita."
-  confirmLabel="Excluir transação"
+  title={transactionToDelete ? describeDelete(transactionToDelete).title : 'Excluir transação?'}
+  message={transactionToDelete ? describeDelete(transactionToDelete).message : ''}
+  confirmLabel="Excluir"
   onConfirm={handleConfirmDeleteTransaction}
   onCancel={() => setTransactionToDelete(null)}
 />
@@ -3874,6 +3852,15 @@ background:
   >
     <HandCoinsIcon size={16} strokeWidth={1.8} />
   </button>
+  <button
+    type="button"
+    className="delete-button"
+    aria-label={`Excluir ${item.description}`}
+    title="Excluir pagamento de dívida"
+    onClick={() => handleDelete(item.id)}
+  >
+    <Trash2 size={16} strokeWidth={1.8} />
+  </button>
 </div>
 ) : item.source === 'card' ? (
 <div className="transaction-actions">
@@ -3894,6 +3881,15 @@ background:
     onClick={() => navigate('Cartões')}
   >
     <CardPaymentIcon size={16} strokeWidth={1.8} />
+  </button>
+  <button
+    type="button"
+    className="delete-button"
+    aria-label={`Excluir a compra ${item.description}`}
+    title="Excluir compra no cartão"
+    onClick={() => handleDelete(item.id, item.purchaseId)}
+  >
+    <Trash2 size={16} strokeWidth={1.8} />
   </button>
 </div>
 ) : (

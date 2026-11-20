@@ -90,7 +90,7 @@ const TOPICS: Topic[] = [
       {
         question: 'Como edito ou excluo uma transação?',
         answer:
-          "Na lista de transações, toque no lápis para editar ou na lixeira para excluir. Todas podem ser editadas: compras no cartão abrem com o cartão e as parcelas (as faturas se recalculam); pagamentos de fatura e de dívidas (Eu devo) mudam também o pagamento ligado a eles quando você troca o valor ou a data. Compras ligadas a uma dívida de Devedores têm o valor e as parcelas mudados pela própria dívida. Pagamentos de fatura não podem ser excluídos por aqui, para não bagunçar o histórico do cartão.",
+          "Na lista de transações, toque no lápis para editar ou na lixeira para excluir. Todas podem ser editadas: compras no cartão abrem com o cartão e as parcelas (as faturas se recalculam); pagamentos de fatura e de dívidas (Eu devo) mudam também o pagamento ligado a eles quando você troca o valor ou a data. Compras ligadas a uma dívida de Devedores têm o valor e as parcelas mudados pela própria dívida. Todas também podem ser excluídas (por exemplo, quando algo foi lançado duas vezes sem querer): a compra no cartão sai das faturas, o pagamento de fatura é desfeito e o pagamento de dívida sai de Devedores. O app sempre pergunta antes e explica o que vai acontecer. Compras no cartão também têm o botão “Excluir” na página Cartões.",
       },
       {
         question: 'Como procuro uma transação?',

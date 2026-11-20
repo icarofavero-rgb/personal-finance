@@ -11,9 +11,9 @@
 
 import { getTransactions, saveTransactions, type Transaction } from './storage'
 import { getCardPayments, saveCardPayments } from './cardPaymentsStorage'
-import { getDebtorsData, updateDebtorPayment } from './debtors/debtorsStorage'
+import { deleteDebtorPayment, getDebtorsData, updateDebtorPayment } from './debtors/debtorsStorage'
 import { DEBT_PAYMENT_PREFIX, isDebtPaymentTransaction, syncDebtPaymentTransactions } from './debtors/debtPaymentTransactions'
-import { getCardPurchases } from './cardPurchasesStorage'
+import { deleteCardPurchase, getCardPurchases } from './cardPurchasesStorage'
 
 export type LinkedKind = 'invoice-payment' | 'debt-payment' | 'plain'
 
@@ -83,4 +83,70 @@ export function purchaseDebtLink(purchaseId: string): { description: string } | 
 
 export function getPurchase(purchaseId: string) {
   return getCardPurchases().find(item => item.id === purchaseId) ?? null
+}
+
+export type DeleteTarget = {
+  /** id da linha em Transações */
+  id: string
+  /** compra no cartão (linhas "card-…") */
+  purchaseId?: string
+}
+
+/** Texto do aviso de confirmação, conforme o tipo. */
+export function describeDelete(target: DeleteTarget): { title: string; message: string } {
+  if (target.purchaseId) {
+    return {
+      title: 'Excluir compra no cartão?',
+      message: 'A compra inteira (todas as parcelas) sai das faturas do cartão e o limite é liberado. Isso não pode ser desfeito.',
+    }
+  }
+  const kind = getLinkedKind(target.id)
+  if (kind === 'invoice-payment') {
+    return {
+      title: 'Excluir pagamento de fatura?',
+      message: 'O pagamento registrado na fatura também é desfeito: a fatura volta a ficar em aberto (ou com o valor que faltar). Isso não pode ser desfeito.',
+    }
+  }
+  if (kind === 'debt-payment') {
+    return {
+      title: 'Excluir pagamento de dívida?',
+      message: 'O pagamento também sai de Devedores → Eu devo, e o valor volta a constar como a pagar. Isso não pode ser desfeito.',
+    }
+  }
+  return { title: 'Excluir transação?', message: 'Deseja realmente excluir esta transação? Essa ação não poderá ser desfeita.' }
+}
+
+/** Exclui qualquer linha de Transações, junto com o registro ligado a ela. */
+export function deleteAnyTransaction(target: DeleteTarget): void {
+  if (target.purchaseId) {
+    const debt = purchaseDebtLink(target.purchaseId)
+    if (debt) {
+      throw new Error(`Esta compra está ligada à dívida “${debt.description}” em Devedores. Exclua a dívida por lá: a compra sai junto.`)
+    }
+    deleteCardPurchase(target.purchaseId)
+    return
+  }
+
+  const kind = getLinkedKind(target.id)
+
+  if (kind === 'invoice-payment') {
+    // primeiro desfaz o pagamento da fatura; depois a transação deixa de ser protegida
+    const payments = getCardPayments()
+    saveCardPayments(payments.filter(payment => payment.transactionId !== target.id))
+    try {
+      saveTransactions(getTransactions().filter(item => item.id !== target.id))
+    } catch (error) {
+      saveCardPayments(payments)
+      throw error
+    }
+    return
+  }
+
+  if (kind === 'debt-payment') {
+    deleteDebtorPayment(target.id.slice(DEBT_PAYMENT_PREFIX.length))
+    syncDebtPaymentTransactions(getDebtorsData())
+    return
+  }
+
+  saveTransactions(getTransactions().filter(item => item.id !== target.id))
 }
