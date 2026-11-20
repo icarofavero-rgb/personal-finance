@@ -1,4 +1,5 @@
 
+import { findBrand } from './services/brandIcons'
 import BrandIcon from './components/BrandIcon'
 import { dismissNotifications, filterVisibleNotifications } from './services/notificationDismissStorage'
 import { getBoletoStatus, setTransactionPaid } from './services/storage'
@@ -1377,7 +1378,27 @@ const [lastIncomeCategory, setLastIncomeCategory] =
 const [lastExpenseCategory, setLastExpenseCategory] =
   useState('Outros')
 
+// Categoria sugerida pelo serviço da descrição (Spotify → Lazer / Assinaturas)
+const [categorySuggestedBy, setCategorySuggestedBy] = useState<string | null>(null)
+const categoryChosenByUser = useRef(false)
+
+function changeDescription(value: string) {
+  setDescription(value)
+  if (type !== 'expense' || paymentMethod === 'boleto' || categoryChosenByUser.current) return
+  const brand = findBrand(value)
+  if (brand?.category) {
+    setCategory(brand.category)
+    setCategorySuggestedBy(brand.name)
+  } else if (categorySuggestedBy) {
+    // apagou o nome do serviço: volta para a categoria de antes
+    setCategory(lastExpenseCategory)
+    setCategorySuggestedBy(null)
+  }
+}
+
 function changeTransactionCategory(value: string) {
+  categoryChosenByUser.current = true
+  setCategorySuggestedBy(null)
   setCategory(value)
 
   if (type === 'income') {
@@ -1915,6 +1936,8 @@ function openNewTransaction() {
   setCategory(lastExpenseCategory)
   setDescription('')
   setNotes('')
+  categoryChosenByUser.current = false
+  setCategorySuggestedBy(null)
   setAmount('')
   setDate(new Date().toLocaleDateString('en-CA'))
   setPaymentMethod('cash')
@@ -1938,6 +1961,8 @@ function openEditTransaction(transaction: Transaction) {
   setType(transaction.type)
   setDescription(transaction.description)
   setNotes(transaction.notes ?? '')
+  categoryChosenByUser.current = true
+  setCategorySuggestedBy(null)
   setAmount(String(transaction.amount))
   setCategory(transaction.category)
   setDate(transaction.date)
@@ -4149,7 +4174,7 @@ background:
                   type="text"
                   placeholder="Ex.: Supermercado"
                   value={description}
-                  onChange={event => setDescription(event.target.value)}
+                  onChange={event => changeDescription(event.target.value)}
                   required
                 />
               </div>
@@ -4170,7 +4195,14 @@ background:
 
 <div className="form-row transaction-category-layout">
   <div className="form-group">
-    <label htmlFor="category">Categoria</label>
+    <label htmlFor="category" className="pf-category-label">
+      Categoria
+      {categorySuggestedBy && type === 'expense' && (
+        <small className="pf-category-suggested">
+          <BrandIcon description={categorySuggestedBy} size={14} /> sugerida pelo {categorySuggestedBy}
+        </small>
+      )}
+    </label>
 
 
 {type === 'expense' ? (

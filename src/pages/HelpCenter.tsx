@@ -125,7 +125,7 @@ const TOPICS: Topic[] = [
       {
         question: "Por que apareceu o símbolo do Uber, Spotify, Netflix…?",
         answer:
-          "Quando a descrição tem o nome de um serviço conhecido (Uber, iFood, YouTube, Spotify, Netflix, Disney+, PlayStation, bancos e outros), o app mostra o símbolo dele ao lado, já enquanto você digita. Funciona em Transações, nas compras e nas faturas do cartão.",
+          "Quando a descrição tem o nome de um serviço conhecido (Uber, iFood, YouTube, Spotify, Netflix, Disney+, PlayStation, bancos e outros), o app mostra o símbolo dele ao lado, já enquanto você digita, e sugere a categoria (Spotify → Lazer / Assinaturas, Uber → Transporte / Aplicativos de transporte, iFood → Alimentação / Delivery). Maiúsculas, minúsculas e pequenos erros de digitação não atrapalham: “spotfy”, “SPOTFY” ou “Netflx” também funcionam. Se você escolher a categoria antes, o app respeita a sua escolha. Funciona em Transações, nas compras e nas faturas do cartão.",
       },
       {
         question: 'Como faço o salário ou o aluguel entrarem sozinhos todo mês?',
