@@ -5434,3 +5434,129 @@
   font-weight: 700;
   color: var(--pf-text-secondary);
 }
+
+/* ---------- 49. Dashboard: "Eu devo" e "Me devem" separados ---------- */
+.pf-owed-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.pf-owed-grid.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pf-owed-grid > .pf-owed-card {
+  margin: 0;
+}
+
+.pf-owed-totals {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+.pf-owed-totals small {
+  text-transform: none;
+}
+
+.pf-owed-totals small::first-letter {
+  text-transform: uppercase;
+}
+
+.pf-owed-card.is-owes-me .pf-owed-icon {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.pf-owed-card.is-owes-me .pf-owed-totals strong.is-due {
+  color: #22c55e;
+}
+
+@media (max-width: 900px) {
+  .pf-owed-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .pf-owed-totals {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .pf-owed-totals > div:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Adiantar parcelas: escolha de quantas parcelas */
+.pf-advance-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pf-text);
+}
+
+.pf-advance-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.pf-advance-options > button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--pf-control-border, var(--pf-border));
+  background: var(--pf-control-bg, transparent);
+  color: var(--pf-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pf-advance-options > button strong {
+  font-size: 13.5px;
+}
+
+.pf-advance-options > button small {
+  font-size: 11.5px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-advance-options > button.is-active {
+  border-color: rgba(var(--pf-accent-rgb), 0.8);
+  background: rgba(var(--pf-accent-rgb), 0.14);
+}
+
+.pf-advance-options > button.is-active strong {
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+.pf-advance-hint {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-debt-advance {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.debtor-debt-footer {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.debtor-debt-footer > button {
+  flex: 1 1 180px;
+  justify-content: center;
+}

@@ -62,13 +62,13 @@ public class FinanceWidgetProvider extends AppWidgetProvider {
         views.setInt(R.id.widget_accent_bar, "setBackgroundColor", accent);
 
         if (hasData && !locked && stale) {
-            views.setTextViewText(R.id.widget_label, "Mês novo: toque para atualizar");
+            views.setTextViewText(R.id.widget_title, "Mês novo: toque para atualizar");
             views.setTextViewText(R.id.widget_balance, "—");
             views.setTextColor(R.id.widget_balance, Color.WHITE);
             views.setViewVisibility(R.id.widget_row, View.GONE);
         } else if (!hasData || locked) {
             // Sem dados ainda, ou app protegido por PIN: não mostra valores
-            views.setTextViewText(R.id.widget_label, locked ? "Protegido por PIN" : "Abra o app para começar");
+            views.setTextViewText(R.id.widget_title, locked ? "Protegido por PIN" : "Abra o app para começar");
             views.setTextViewText(R.id.widget_balance, locked ? "•••••" : "—");
             views.setTextColor(R.id.widget_balance, Color.WHITE);
             views.setViewVisibility(R.id.widget_row, View.GONE);

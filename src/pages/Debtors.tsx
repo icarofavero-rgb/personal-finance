@@ -16,6 +16,7 @@ import {
   X,
   Pencil,
   Trash2,
+  FastForward,
 } from 'lucide-react'
 
 import {
@@ -42,7 +43,7 @@ import {
 
 import DatePicker from '../components/DatePicker'
 import { syncDebtPaymentTransactions } from '../services/debtors/debtPaymentTransactions'
-import { getMonthInstallment, installmentDueDate } from '../services/debtors/debtInstallments'
+import { getMonthInstallment, getOpenInstallments, installmentDueDate } from '../services/debtors/debtInstallments'
 
 export default function Debtors() {
   const [debtors, setDebtors] = useState<Debtor[]>(() =>
@@ -142,6 +143,9 @@ const myCards = getCards()
 const [selectedPaymentDebtId, setSelectedPaymentDebtId] =
   useState<string | null>(null)
 
+// Adiantar parcelas: quantas parcelas pagar de uma vez
+const [advanceCount, setAdvanceCount] = useState<number | null>(null)
+
 // O pagamento aberto é de uma dívida MINHA (aba "Eu devo")?
 // (precisa vir DEPOIS do estado acima)
 const paymentDebtorId = debts.find(debt => debt.id === selectedPaymentDebtId)?.debtorId
@@ -216,6 +220,7 @@ if (mode === 'edit' && editingDebtorId === null) return
 
 } else {
   setSelectedPaymentDebtId(null)
+  setAdvanceCount(null)
   setEditingPaymentId(null)
   setPaymentAmount('')
   setPaymentNotes('')
@@ -536,6 +541,8 @@ if (amountCents > availableCents) {
     setPayments(updatedData.payments)
 
     setSelectedPaymentDebtId(null)
+
+    setAdvanceCount(null)
     setEditingPaymentId(null)
     setPaymentAmount('')
     setPaymentNotes('')
@@ -1073,12 +1080,31 @@ const filteredDebtors = viewDebtors
       setPaymentError('')
       setPaymentAmount('')
       setPaymentNotes('')
+      setAdvanceCount(null)
       setSelectedPaymentDebtId(debt.id)
     }}
   >
     <HandCoins size={16} />
     Registrar pagamento
   </button>
+
+  {debt.installments > 1 && getOpenInstallments(debt, payments).length > 0 && (
+    <button
+      type="button"
+      className="pf-ghost-button pf-debt-advance"
+      onClick={() => {
+        const open = getOpenInstallments(debt, payments)
+        setPaymentError('')
+        setPaymentNotes('Parcela adiantada')
+        setPaymentAmount((open[0].remainingCents / 100).toFixed(2))
+        setAdvanceCount(1)
+        setSelectedPaymentDebtId(debt.id)
+      }}
+    >
+      <FastForward size={16} />
+      Adiantar parcelas
+    </button>
+  )}
 </div>
 
 
@@ -1443,12 +1469,14 @@ onClick={() => closeDebtorModal('debt')}
         <div>
 
 <h2 id="payment-modal-title">
-  {editingPaymentId !== null
+  {advanceCount !== null && editingPaymentId === null
+    ? 'Adiantar parcelas'
+    : editingPaymentId !== null
     ? (paymentIsMine ? 'Editar pagamento' : 'Editar recebimento')
     : 'Registrar pagamento'}
 </h2>
 
-          <p>{paymentIsMine ? 'Informe quanto você pagou. O valor entra como saída em Transações e no Dashboard.' : 'Informe o valor recebido do devedor.'}</p>
+          <p>{advanceCount !== null && editingPaymentId === null ? (paymentIsMine ? 'Pague as próximas parcelas de uma vez. O valor entra como saída em Transações e no Dashboard.' : 'Registre as próximas parcelas recebidas de uma vez.') : paymentIsMine ? 'Informe quanto você pagou. O valor entra como saída em Transações e no Dashboard.' : 'Informe o valor recebido do devedor.'}</p>
         </div>
 
         <button
@@ -1463,6 +1491,45 @@ onClick={() => closeDebtorModal('debt')}
 
       <form onSubmit={handleSavePayment}>
         <div className="transaction-modal-content">
+          {advanceCount !== null && editingPaymentId === null && (() => {
+            const debt = debts.find(item => item.id === selectedPaymentDebtId)
+            const open = debt ? getOpenInstallments(debt, payments) : []
+            if (open.length === 0) return null
+            const day = (date: string) => date.split('-').reverse().join('/')
+            return (
+              <div className="form-group">
+                <span className="pf-advance-label">Quantas parcelas quer {paymentIsMine ? 'pagar' : 'receber'} agora?</span>
+                <div className="pf-advance-options" role="radiogroup" aria-label="Quantidade de parcelas">
+                  {open.map((item, index) => {
+                    const count = index + 1
+                    const cents = open.slice(0, count).reduce((sum, row) => sum + row.remainingCents, 0)
+                    return (
+                      <button
+                        key={item.number}
+                        type="button"
+                        role="radio"
+                        aria-checked={advanceCount === count}
+                        className={advanceCount === count ? 'is-active' : ''}
+                        onClick={() => {
+                          setAdvanceCount(count)
+                          setPaymentAmount((cents / 100).toFixed(2))
+                        }}
+                      >
+                        <strong>{count} {count === 1 ? 'parcela' : 'parcelas'}</strong>
+                        <small>
+                          {count === 1 ? `${item.number}ª` : `${open[0].number}ª a ${item.number}ª`} · {formatCents(cents)}
+                        </small>
+                      </button>
+                    )
+                  })}
+                </div>
+                <small className="pf-advance-hint">
+                  {open[0].dueDate < new Date().toLocaleDateString('en-CA') ? 'A próxima parcela venceu em' : 'A próxima parcela vence em'} {day(open[0].dueDate)}. O pagamento quita as parcelas em ordem.
+                </small>
+              </div>
+            )
+          })()}
+
           <div className="form-group">
             <label htmlFor="payment-amount">
               {paymentIsMine ? 'Valor pago (R$)' : 'Valor recebido (R$)'}

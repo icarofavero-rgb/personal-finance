@@ -85,3 +85,20 @@ export function getMonthInstallment(debt: DebtorDebt, payments: DebtorPayment[],
     overdueCents: Math.max(0, dueBefore - received),
   }
 }
+
+export type OpenInstallment = { number: number; total: number; remainingCents: number; dueDate: string }
+
+/** Parcelas que ainda faltam (em ordem): servem para adiantar pagamentos. */
+export function getOpenInstallments(debt: DebtorDebt, payments: DebtorPayment[]): OpenInstallment[] {
+  const total = Math.max(1, debt.installments)
+  const amounts = installmentAmounts(debt.amountCents, total)
+  let received = payments.filter(payment => payment.debtId === debt.id).reduce((sum, payment) => sum + payment.amountCents, 0)
+
+  const open: OpenInstallment[] = []
+  amounts.forEach((amount, index) => {
+    const paid = Math.min(amount, Math.max(0, received))
+    received -= paid
+    if (amount - paid > 0) open.push({ number: index + 1, total, remainingCents: amount - paid, dueDate: installmentDueDate(debt, index + 1) })
+  })
+  return open
+}

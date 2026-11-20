@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { getMonthInstallment, installmentAmounts, installmentDueDate } from './debtInstallments'
+import { getMonthInstallment, getOpenInstallments, installmentAmounts, installmentDueDate } from './debtInstallments'
 import type { DebtorDebt, DebtorPayment } from './debtorsTypes'
 
 const debt: DebtorDebt = {
@@ -39,5 +39,14 @@ describe('parcela do mês', () => {
   it('fora do período das parcelas não há parcela do mês', () => {
     expect(getMonthInstallment(debt, [], '2026-09')).toBeNull()
     expect(getMonthInstallment(debt, [], '2027-01')).toBeNull()
+  })
+})
+
+describe('adiantar parcelas', () => {
+  it('lista as parcelas que faltam, já descontando o que foi pago', () => {
+    expect(getOpenInstallments(debt, [pay(40000)]).map(item => [item.number, item.remainingCents])).toEqual([
+      [2, 33333 - (40000 - 33334)],
+      [3, 33333],
+    ])
   })
 })

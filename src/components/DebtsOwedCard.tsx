@@ -1,11 +1,28 @@
 import { useMemo } from 'react'
-import { ChevronRight, HandCoins } from 'lucide-react'
+import { ChevronRight, HandCoins, Wallet } from 'lucide-react'
 
 import { getDebtorsData } from '../services/debtors/debtorsStorage'
 import { calculateDebtSummary } from '../services/debtors/debtorsCalculations'
 import { getMonthInstallment } from '../services/debtors/debtInstallments'
+import type { DebtorKind } from '../services/debtors/debtorsTypes'
 
 const money = (cents: number) => (cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+function nextMonth(month: string): string {
+  const [year, number] = month.split('-').map(Number)
+  const date = new Date(year, number, 1)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+const monthName = (month: string) => new Date(`${month}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long' })
+
+type Side = {
+  kind: DebtorKind
+  rows: { id: string; label: string; detail: string }[]
+  total: number
+  thisMonth: number
+  nextMonth: number
+}
 
 type Props = {
   /** mês do "Período" do Dashboard (AAAA-MM) */
@@ -14,73 +31,101 @@ type Props = {
 }
 
 /**
- * Dashboard: o que você deve para outras pessoas (Devedores → Eu devo).
- * Mostra o saldo a pagar e as parcelas que vencem no mês.
+ * Dashboard: dívidas com outras pessoas (Devedores), em dois cartões:
+ * "Eu devo" (saldo a pagar) e "Me devem" (saldo a receber), cada um com o
+ * que vence no mês e no mês seguinte.
  */
 export default function DebtsOwedCard({ month, onOpen }: Props) {
-  const data = useMemo(() => {
+  const sides = useMemo<Side[]>(() => {
     try {
       const { debtors, debts, payments } = getDebtorsData()
-      const mine = new Map(debtors.filter(debtor => debtor.kind === 'i-owe').map(debtor => [debtor.id, debtor.name]))
-      const rows = debts
-        .filter(debt => mine.has(debt.debtorId))
-        .map(debt => {
-          const summary = calculateDebtSummary(debt, payments)
-          const installment = summary.remainingCents > 0 ? getMonthInstallment(debt, payments, month) : null
-          return { debt, person: mine.get(debt.debtorId) ?? '', remaining: summary.remainingCents, installment }
-        })
-        .filter(row => row.remaining > 0)
+      const following = nextMonth(month)
 
-      const totalRemaining = rows.reduce((sum, row) => sum + row.remaining, 0)
-      const dueThisMonth = rows.reduce((sum, row) => sum + (row.installment ? row.installment.remainingCents + row.installment.overdueCents : 0), 0)
-      return { rows, totalRemaining, dueThisMonth }
+      return (['i-owe', 'owes-me'] as const).map(kind => {
+        const people = new Map(debtors.filter(debtor => (debtor.kind ?? 'owes-me') === kind).map(debtor => [debtor.id, debtor.name]))
+        let total = 0
+        let thisMonth = 0
+        let nextMonthTotal = 0
+        const rows: Side['rows'] = []
+
+        for (const debt of debts) {
+          const person = people.get(debt.debtorId)
+          if (!person) continue
+          const remaining = calculateDebtSummary(debt, payments).remainingCents
+          if (remaining <= 0) continue
+          total += remaining
+
+          const current = getMonthInstallment(debt, payments, month)
+          const upcoming = getMonthInstallment(debt, payments, following)
+          if (current) thisMonth += current.remainingCents + current.overdueCents
+          if (upcoming) nextMonthTotal += upcoming.remainingCents
+
+          rows.push({
+            id: debt.id,
+            label: `${person} · ${debt.description}`,
+            detail: current
+              ? `${current.number}/${current.total} · ${current.status === 'paid' ? (kind === 'i-owe' ? 'paga' : 'recebida') : money(current.remainingCents)}`
+              : `falta ${money(remaining)}`,
+          })
+        }
+
+        return { kind, rows, total, thisMonth, nextMonth: nextMonthTotal }
+      })
     } catch {
-      return { rows: [], totalRemaining: 0, dueThisMonth: 0 }
+      return []
     }
   }, [month])
 
-  if (data.rows.length === 0) return null
+  const visible = sides.filter(side => side.rows.length > 0)
+  if (visible.length === 0) return null
 
-  const monthName = new Date(`${month}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long' })
+  const following = nextMonth(month)
 
   return (
-    <section className="panel pf-owed-card" aria-label="O que você deve">
-      <button type="button" className="pf-owed-head" onClick={onOpen}>
-        <span className="pf-owed-icon">
-          <HandCoins size={20} />
-        </span>
-        <span className="pf-owed-title">
-          <strong>Eu devo</strong>
-          <small>Dívidas com outras pessoas</small>
-        </span>
-        <ChevronRight size={18} />
-      </button>
+    <div className={`pf-owed-grid ${visible.length === 1 ? 'is-single' : ''}`}>
+      {visible.map(side => {
+        const mine = side.kind === 'i-owe'
+        return (
+          <section key={side.kind} className={`panel pf-owed-card is-${side.kind}`} aria-label={mine ? 'O que você deve' : 'O que te devem'}>
+            <button type="button" className="pf-owed-head" onClick={onOpen}>
+              <span className="pf-owed-icon">{mine ? <HandCoins size={20} /> : <Wallet size={20} />}</span>
+              <span className="pf-owed-title">
+                <strong>{mine ? 'Eu devo' : 'Me devem'}</strong>
+                <small>{mine ? 'Dívidas com outras pessoas' : 'Valores a receber de outras pessoas'}</small>
+              </span>
+              <ChevronRight size={18} />
+            </button>
 
-      <div className="pf-owed-totals">
-        <div>
-          <small>Saldo a pagar</small>
-          <strong>{money(data.totalRemaining)}</strong>
-        </div>
-        <div>
-          <small>A pagar em {monthName}</small>
-          <strong className={data.dueThisMonth > 0 ? 'is-due' : ''}>{money(data.dueThisMonth)}</strong>
-        </div>
-      </div>
+            <div className="pf-owed-totals">
+              <div>
+                <small>{mine ? 'Saldo a pagar' : 'Saldo a receber'}</small>
+                <strong>{money(side.total)}</strong>
+              </div>
+              <div>
+                <small>
+                  {mine ? 'A pagar' : 'A receber'} em {monthName(month)}
+                </small>
+                <strong className={side.thisMonth > 0 ? 'is-due' : ''}>{money(side.thisMonth)}</strong>
+              </div>
+              <div>
+                <small>
+                  {mine ? 'A pagar' : 'A receber'} em {monthName(following)}
+                </small>
+                <strong>{money(side.nextMonth)}</strong>
+              </div>
+            </div>
 
-      <ul className="pf-owed-list">
-        {data.rows.slice(0, 4).map(row => (
-          <li key={row.debt.id}>
-            <span className="pf-owed-name">
-              {row.person} · {row.debt.description}
-            </span>
-            <span className="pf-owed-detail">
-              {row.installment
-                ? `${row.installment.number}/${row.installment.total} · ${row.installment.status === 'paid' ? 'paga' : money(row.installment.remainingCents)}`
-                : `falta ${money(row.remaining)}`}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </section>
+            <ul className="pf-owed-list">
+              {side.rows.slice(0, 4).map(row => (
+                <li key={row.id}>
+                  <span className="pf-owed-name">{row.label}</span>
+                  <span className="pf-owed-detail">{row.detail}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      })}
+    </div>
   )
 }

@@ -211,7 +211,12 @@ const TOPICS: Topic[] = [
       {
         question: "Como acompanho as parcelas do que eu devo?",
         answer:
-          "Ao cadastrar a dívida, informe o número de parcelas e o vencimento da primeira. Em Devedores → Eu devo, cada dívida parcelada mostra a parcela do mês (ex.: “2 de 3 · R$ 200,00 · vence 15/11”) e se ela já foi paga; parcelas anteriores em atraso aparecem em vermelho. No Dashboard, o bloco “Eu devo” mostra o saldo a pagar e quanto vence no mês, e a parcela do mês seguinte entra no “Saldo projetado para o mês seguinte”.",
+          "Ao cadastrar a dívida, informe o número de parcelas e o vencimento da primeira. Em Devedores → Eu devo, cada dívida parcelada mostra a parcela do mês (ex.: “2 de 3 · R$ 200,00 · vence 15/11”) e se ela já foi paga; parcelas anteriores em atraso aparecem em vermelho. No Dashboard, os blocos “Eu devo” e “Me devem” mostram o saldo a pagar e a receber, quanto vence no mês e no mês seguinte, e a parcela do que você deve no mês seguinte entra no “Saldo projetado para o mês seguinte”. A parcela do mês aparece nas duas abas.",
+      },
+      {
+        question: "Como adianto parcelas?",
+        answer:
+          "Em Devedores, toque em “Ver detalhes” na pessoa e em “Adiantar parcelas” na dívida (funciona em “Eu devo” e em “Me devem”). Escolha quantas parcelas quer quitar: o valor já vem preenchido e o pagamento quita as parcelas em ordem. Em “Eu devo”, o valor entra como saída em Transações.",
       },
       {
         question: "Como excluo uma dívida?",
@@ -401,7 +406,7 @@ const TOPICS: Topic[] = [
       {
         question: 'Como coloco o saldo na tela inicial (widget)?',
         answer:
-          'Segure o dedo numa área vazia da tela inicial → Widgets → Personal Finance → arraste “Saldo do mês” para a tela. Ele mostra o saldo, as entradas e as saídas do mês do perfil aberto. Com o bloqueio por PIN ligado, os valores aparecem escondidos (•••••).',
+          'Segure o dedo numa área vazia da tela inicial → Widgets → Personal Finance → arraste “Saldo do mês” para a tela. Ele ocupa uma linha só: o saldo à esquerda e as entradas em cima das saídas à direita, do perfil aberto. Com o bloqueio por PIN ligado, os valores aparecem escondidos (•••••).',
       },
       {
         question: 'Como saio do app?',
