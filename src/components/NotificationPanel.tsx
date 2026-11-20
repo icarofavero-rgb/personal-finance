@@ -6,6 +6,7 @@ import {
   CheckCheck,
   AlertTriangle,
   CalendarClock,
+  Trash2,
 } from 'lucide-react'
 
 import type {
@@ -21,6 +22,8 @@ type NotificationPanelProps = {
   onClose: () => void
   onMarkAllRead: () => void
   onToggleRead: (id: string, read: boolean) => void
+  /** exclui avisos (somem da lista) */
+  onDelete: (ids: string[]) => void
 }
 
 
@@ -31,6 +34,7 @@ export default function NotificationPanel({
   onClose,
   onToggleRead,
   onMarkAllRead,
+  onDelete,
 }: NotificationPanelProps) {
 
   const unreadCount = notifications.filter(
@@ -42,6 +46,14 @@ export default function NotificationPanel({
   const [showRead, setShowRead] = useState(false)
   // Aviso saindo da lista com animação antes de ser marcado
   const [leaving, setLeaving] = useState<string[]>([])
+
+  function remove(ids: string[]) {
+    setLeaving(current => [...current, ...ids])
+    window.setTimeout(() => {
+      onDelete(ids)
+      setLeaving(current => current.filter(item => !ids.includes(item)))
+    }, 260)
+  }
 
   function toggleRead(id: string, read: boolean) {
     if (read) {
@@ -165,6 +177,7 @@ className={`notification-item notification-item--${notification.priority}${
                   <p>{notification.message}</p>
 
                   
+<div className="notification-item-actions">
 <button
   type="button"
   className="notification-read-button"
@@ -176,6 +189,16 @@ className={`notification-item notification-item--${notification.priority}${
     ? 'Marcar como não lida'
     : 'Marcar como lida'}
 </button>
+<button
+  type="button"
+  className="notification-delete-button"
+  onClick={() => remove([notification.id])}
+  aria-label={`Excluir o aviso ${notification.title}`}
+  title="Excluir aviso"
+>
+  <Trash2 size={14} /> Excluir
+</button>
+</div>
 
                 </div>
               </div>
@@ -185,9 +208,18 @@ className={`notification-item notification-item--${notification.priority}${
       </div>
 
       {!error && readCount > 0 && (
-        <button type="button" className="notification-show-read" onClick={() => setShowRead(value => !value)}>
-          {showRead ? 'Esconder lidas' : `Mostrar lidas (${readCount})`}
-        </button>
+        <div className="notification-read-tools">
+          <button type="button" className="notification-show-read" onClick={() => setShowRead(value => !value)}>
+            {showRead ? 'Esconder lidas' : `Mostrar lidas (${readCount})`}
+          </button>
+          <button
+            type="button"
+            className="notification-show-read is-danger"
+            onClick={() => remove(notifications.filter(item => item.read).map(item => item.id))}
+          >
+            <Trash2 size={13} /> Excluir lidas
+          </button>
+        </div>
       )}
 
       <div className="notification-panel-footer">

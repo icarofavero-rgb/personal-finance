@@ -108,6 +108,26 @@ const TOPICS: Topic[] = [
           "Em “Nova transação”, escolha Saída e a forma de pagamento “Boleto”. A categoria vira “Boletos” e o campo de data vira “Data de pagamento”. O boleto aparece no Calendário nesse dia e o sininho avisa quando ele estiver chegando.",
       },
       {
+        question: "Como marco um boleto como pago?",
+        answer:
+          "Em Transações, cada boleto mostra a situação: “a pagar”, “vencido” ou “pago em …”. Toque no botão de ✓ ao lado dele para registrar o pagamento (com a data de hoje). Boleto pago some dos avisos e aparece como concluído no Calendário. Tocou sem querer? Toque de novo para desfazer.",
+      },
+      {
+        question: "Como filtro uma categoria inteira?",
+        answer:
+          "No filtro “Categoria” de Transações, escolha a opção “(todas)” da categoria, por exemplo “Alimentação (todas)”: aparecem Supermercado, Restaurante, Delivery… juntos. Abaixo dela dá para escolher uma subcategoria só. O filtro inclui as compras no cartão.",
+      },
+      {
+        question: "Para que serve a “Observação” na transação?",
+        answer:
+          "É um campo opcional para lembrar detalhes: “dividido com a Ana”, “presente da mãe”, “parcela 2 do curso”. Ela aparece embaixo do nome da transação ou da compra no cartão.",
+      },
+      {
+        question: "Por que apareceu o símbolo do Uber, Spotify, Netflix…?",
+        answer:
+          "Quando a descrição tem o nome de um serviço conhecido (Uber, iFood, YouTube, Spotify, Netflix, Disney+, PlayStation, bancos e outros), o app mostra o símbolo dele ao lado, já enquanto você digita. Funciona em Transações, nas compras e nas faturas do cartão.",
+      },
+      {
         question: 'Como faço o salário ou o aluguel entrarem sozinhos todo mês?',
         answer:
           'Ao cadastrar a transação, ligue o interruptor “Repetir todo mês”. A partir daí o app lança a mesma transação, no mesmo dia, todo mês (em meses mais curtos, no último dia). Se você ficar dias sem abrir o app, os meses que passaram são lançados assim que ele abrir.',
@@ -167,6 +187,11 @@ const TOPICS: Topic[] = [
         question: "Como vejo as compras e as faturas de um mês?",
         answer:
           "Em Cartões, use o seletor de mês em “Compras no cartão” ou em “Minhas faturas”: aparece só aquele mês, já aberto. Nas compras parceladas, a parcela do mês escolhido fica destacada.",
+      },
+      {
+        question: "Por que aparece fatura de cartão sem compras?",
+        answer:
+          "Em Minhas faturas aparecem todos os seus cartões, mesmo os que não tiveram compras no mês (com a etiqueta “Sem compras”). Use o filtro de cartão ao lado do mês para ver um só: o gráfico “Despesas dos cartões” acompanha a mesma escolha.",
       },
       {
         question: "O que mostra o gráfico “Despesas dos cartões”?",
@@ -255,6 +280,11 @@ const TOPICS: Topic[] = [
         question: "Como marco um aviso como lido?",
         answer:
           "No sininho, toque em “Marcar como lido” no aviso ou em “Marcar todas como lidas”. Os avisos lidos somem da lista; toque em “Mostrar lidas” para vê-los de novo.",
+      },
+      {
+        question: "Como excluo avisos do sino?",
+        answer:
+          "No sino, toque em “Excluir” no aviso, ou em “Excluir lidas” para tirar todos os já lidos de uma vez. Em Configurações → Notificações → “Apagar avisos antigos”, escolha depois de quantos dias os avisos já vencidos somem sozinhos (3, 7 ou 30 dias, ou nunca).",
       },
       {
         question: 'Quando recebo os avisos?',

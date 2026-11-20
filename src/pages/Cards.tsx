@@ -1,7 +1,9 @@
+import BrandIcon from '../components/BrandIcon'
 import { useEffect, useRef, useState } from 'react'
 import { getDebtorsData } from '../services/debtors/debtorsStorage'
 import ConfirmDialog from '../components/ConfirmDialog'
 import MonthPicker from '../components/MonthPicker'
+import SelectField from '../components/SelectField'
 import CardSpendingChart from '../components/CardSpendingChart'
 import { getCardInvoiceDueDate } from '../services/cardInvoiceDueDate'
 import {
@@ -98,6 +100,8 @@ const cardModalTimer = useRef<
 const [, setExpandedInvoiceMonths] =
   useState<string[]>([])
 
+  const [invoiceCardFilter, setInvoiceCardFilter] = useState('all')
+
   const [purchases, setPurchases] =
   useState<CardPurchase[]>(getCardPurchases)
 
@@ -120,22 +124,21 @@ const monthPurchaseRows = purchases
   .filter(row => row.installment || row.purchase.date.slice(0, 7) === cardsMonth)
   .sort((a, b) => b.purchase.date.localeCompare(a.purchase.date))
 
-const invoicesByMonth = Object.entries(
-  invoices.reduce<Record<string, typeof invoices>>(
-    (groups, invoice) => {
-      const month = invoice.invoiceMonth
-
-      if (!groups[month]) {
-        groups[month] = []
+// Minhas faturas: a fatura do mês de TODOS os cartões (mesmo sem compras),
+// com filtro de cartão compartilhado com o gráfico "Despesas dos cartões"
+const monthInvoiceList = cards
+  .filter(card => invoiceCardFilter === 'all' || card.id === invoiceCardFilter)
+  .map(
+    card =>
+      invoices.find(invoice => invoice.cardId === card.id && invoice.invoiceMonth === cardsMonth) ?? {
+        cardId: card.id,
+        invoiceMonth: cardsMonth,
+        total: 0,
+        installments: [],
       }
-
-      groups[month].push(invoice)
-
-      return groups
-    },
-    {}
   )
-).sort(([a], [b]) => a.localeCompare(b))
+  .sort((a, b) => b.total - a.total)
+
 
   const [payments, setPayments] = useState(getCardPayments)
 
@@ -893,7 +896,7 @@ return (
             return (
               <div className="purchase-item" key={purchase.id}>
                 <div className="pf-purchase-top">
-                  <h3>{purchase.description}</h3>
+                  <h3 className="pf-tx-title"><BrandIcon description={purchase.description} />{purchase.description}</h3>
                   <strong>{formatMoney(installment?.amount ?? purchase.amount)}</strong>
                 </div>
 
@@ -903,6 +906,8 @@ return (
                   </span>
                   <span>{purchase.category}</span>
                 </p>
+
+                {purchase.notes && <p className="pf-tx-notes">{purchase.notes}</p>}
 
                 <div className="pf-purchase-facts">
                   <span>
@@ -959,16 +964,29 @@ return (
 <section className="panel cards-invoices-section">
   <div className="pf-cards-section-heading">
     <h3>Minhas faturas</h3>
-    <div className="pf-cards-month">
-      <MonthPicker id="cards-invoices-month" value={cardsMonth} onChange={value => value && setCardsMonth(value)} />
+    <div className="pf-cards-filters">
+      {cards.length > 1 && (
+        <div className="pf-cards-card-filter">
+          <SelectField
+            id="cards-invoices-card"
+            value={invoiceCardFilter}
+            onChange={setInvoiceCardFilter}
+            options={[{ value: 'all', label: 'Todos os cartões' }, ...cards.map(card => ({ value: card.id, label: card.name }))]}
+            placeholder="Cartão"
+          />
+        </div>
+      )}
+      <div className="pf-cards-month">
+        <MonthPicker id="cards-invoices-month" value={cardsMonth} onChange={value => value && setCardsMonth(value)} />
+      </div>
     </div>
   </div>
 
-  {invoicesByMonth.every(([month]) => month !== cardsMonth) ? (
-    <p className="pf-cards-empty">Nenhuma fatura em {formatMonth(cardsMonth)}.</p>
+  {monthInvoiceList.length === 0 ? (
+    <p className="pf-cards-empty">Cadastre um cartão para ver as faturas.</p>
   ) : (
     <div className="monthly-groups">
-      {invoicesByMonth.filter(([month]) => month === cardsMonth).map(([month, monthInvoices]) => {
+      {([[cardsMonth, monthInvoiceList]] as const).map(([month, monthInvoices]) => {
         const expanded = true
 
         return (
@@ -1024,7 +1042,7 @@ return (
                             key={`${installment.purchaseId}-${installment.installmentNumber}`}
                           >
                             <span>
-                              {installment.description}
+                              <BrandIcon description={installment.description} size={16} />{installment.description}
                               {' ('}
                               {installment.installmentNumber}/
                               {installment.totalInstallments}
@@ -1039,8 +1057,10 @@ return (
                       </div>
 
                       <div className="pf-invoice-status">
-                        <span className={`pf-invoice-badge is-${paymentSummary.status}`}>
-                          {paymentSummary.status === 'unpaid'
+                        <span className={`pf-invoice-badge is-${invoice.total === 0 ? 'empty' : paymentSummary.status}`}>
+                          {invoice.total === 0
+                            ? 'Sem compras'
+                            : paymentSummary.status === 'unpaid'
                             ? 'Não paga'
                             : paymentSummary.status === 'partial'
                               ? 'Parcialmente paga'
@@ -1083,7 +1103,12 @@ return (
   )}
 </section>
 
-<CardSpendingChart month={cardsMonth} revision={purchases.length * 1000 + payments.length + cards.length} />
+<CardSpendingChart
+  month={cardsMonth}
+  revision={purchases.length * 1000 + payments.length + cards.length}
+  selectedCardId={invoiceCardFilter}
+  onSelectCard={setInvoiceCardFilter}
+/>
 </div>
 
       <section className="cards-list cards-owned-section">

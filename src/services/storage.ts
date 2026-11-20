@@ -7,6 +7,10 @@ export type Transaction = {
   type: 'income' | 'expense'
   category: string
   date: string
+  /** observação opcional */
+  notes?: string
+  /** boleto: data em que foi pago (sem o campo: ainda a pagar) */
+  paidAt?: string
 }
 
 const STORAGE_KEY = 'personal-finance-transactions'
@@ -126,3 +130,23 @@ export function updateTransaction(
   saveTransactions(updated)
 }
 
+
+export type BoletoStatus = 'paid' | 'pending' | 'overdue'
+
+/** Situação de um boleto: pago, a pagar ou vencido (data já passou). */
+export function getBoletoStatus(transaction: Pick<Transaction, 'date' | 'paidAt'>, today = new Date().toLocaleDateString('en-CA')): BoletoStatus {
+  if (transaction.paidAt) return 'paid'
+  return transaction.date < today ? 'overdue' : 'pending'
+}
+
+/** Marca (ou desmarca, com paidAt = null) o pagamento de um boleto. */
+export function setTransactionPaid(id: string, paidAt: string | null): void {
+  const list = getTransactions()
+  const next = list.map(item => {
+    if (item.id !== id) return item
+    const { paidAt: _old, ...rest } = item
+    void _old
+    return paidAt ? { ...rest, paidAt } : rest
+  })
+  saveTransactions(next)
+}

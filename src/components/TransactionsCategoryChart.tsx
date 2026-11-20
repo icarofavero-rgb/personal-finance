@@ -1,3 +1,4 @@
+import { CATEGORY_GROUP_FILTER, matchesCategoryFilter } from '../services/categories'
 import { useMemo } from 'react'
 import { PieChart } from 'lucide-react'
 
@@ -49,7 +50,7 @@ export default function TransactionsCategoryChart({ transactions, month, categor
     // Com uma categoria escolhida, o tipo vem dela (uma categoria de
     // entrada compara com as entradas; de saída, com as saídas).
     const categoryType =
-      category !== 'Todas' ? transactions.find(item => item.category === category)?.type : undefined
+      category !== 'Todas' ? transactions.find(item => matchesCategoryFilter(item.category, category))?.type : undefined
 
     const kind: 'income' | 'expense' =
       type === 'income' || type === 'expense' ? type : categoryType ?? 'expense'
@@ -61,8 +62,8 @@ export default function TransactionsCategoryChart({ transactions, month, categor
     const total = base.reduce((sum, item) => sum + item.amount, 0)
 
     if (category !== 'Todas') {
-      const visual = getTransactionVisual(category, kind)
-      const value = base.filter(item => item.category === category).reduce((sum, item) => sum + item.amount, 0)
+      const visual = getTransactionVisual(category.replace(CATEGORY_GROUP_FILTER, ''), kind)
+      const value = base.filter(item => matchesCategoryFilter(item.category, category)).reduce((sum, item) => sum + item.amount, 0)
 
       return {
         kind,

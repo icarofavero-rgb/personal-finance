@@ -7,6 +7,8 @@ export type CardPurchase = {
   category: string
   date: string
   installments: number
+  /** observação opcional */
+  notes?: string
 }
 
 const STORAGE_KEY = 'personal-finance-card-purchases'
@@ -59,8 +61,19 @@ export function addCardPurchase(
     throw new Error('Esta compra já está cadastrada.')
   }
 
+  // Toque duplo em "Salvar": a mesma compra de novo em poucos segundos
+  // não é gravada duas vezes.
+  const key = [purchase.cardId, purchase.description.trim(), purchase.amount, purchase.date, purchase.installments].join('|')
+  if (lastAdded && lastAdded.key === key && Date.now() - lastAdded.at < DUPLICATE_WINDOW_MS && purchases.some(item => item.id === lastAdded?.id)) {
+    return
+  }
+
   saveCardPurchases([...purchases, purchase])
+  lastAdded = { key, id: purchase.id, at: Date.now() }
 }
+
+const DUPLICATE_WINDOW_MS = 5_000
+let lastAdded: { key: string; id: string; at: number } | null = null
 
 export function deleteCardPurchase(id: string): void {
   const purchases = getCardPurchases()

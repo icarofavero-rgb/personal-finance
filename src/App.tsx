@@ -1,4 +1,8 @@
 
+import BrandIcon from './components/BrandIcon'
+import { dismissNotifications, filterVisibleNotifications } from './services/notificationDismissStorage'
+import { getBoletoStatus, setTransactionPaid } from './services/storage'
+import { buildCategoryFilterOptions, matchesCategoryFilter } from './services/categories'
 import PageErrorBoundary from './components/PageErrorBoundary'
 import { isDebtPaymentTransaction, syncDebtPaymentTransactions } from './services/debtors/debtPaymentTransactions'
 import { getDebtorsData } from './services/debtors/debtorsStorage'
@@ -869,7 +873,7 @@ const notificationResult = useMemo(() => {
 
 const readIds = new Set(getReadNotificationIds())
 
-const notificationsWithReadState = notifications.map(
+const notificationsWithReadState = filterVisibleNotifications(notifications, notificationToday).map(
   notification => ({
     ...notification,
     read: readIds.has(notification.id),
@@ -1357,12 +1361,13 @@ const [cardInstallments, setCardInstallments] = useState('1')
       return (
         transactionMonth >= startMonth &&
         transactionMonth <= transactionsEvolutionEnd &&
-        (filterCategory === 'Todas' || transaction.category === filterCategory)
+        matchesCategoryFilter(transaction.category, filterCategory)
       )
     })
   }, [spendingEntries, transactionsEvolutionEnd, filterCategory])
   const [type, setType] = useState<'income' | 'expense'>('expense')
   const [description, setDescription] = useState('')
+  const [notes, setNotes] = useState('')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('Outros')
 
@@ -1865,8 +1870,7 @@ const availableInvoiceMonths = selectedCardInvoices
     !filterMonth || item.date.startsWith(filterMonth)
 
   const matchesCategory =
-    filterCategory === 'Todas' ||
-    item.category === filterCategory
+    matchesCategoryFilter(item.category, filterCategory)
 
   const matchesType =
     filterType === 'Todos' ||
@@ -1885,6 +1889,24 @@ const hasActiveFilters =
 const invoicePaymentIds = new Set(getCardPayments().map(payment => payment.transactionId).filter(Boolean))
 const filteredSummary = summarize(filteredTransactions.filter(item => !invoicePaymentIds.has(item.id)))
 
+// Boleto: registrar (ou desfazer) o pagamento
+async function toggleBoletoPaid(item: Transaction) {
+  try {
+    if (item.paidAt) {
+      const undo = await appConfirm(`Marcar “${item.description}” como não pago?`, { title: 'Desfazer pagamento', confirmLabel: 'Desfazer' })
+      if (!undo) return
+      setTransactionPaid(item.id, null)
+      showToast('success', 'Boleto voltou para “a pagar”.')
+    } else {
+      setTransactionPaid(item.id, new Date().toLocaleDateString('en-CA'))
+      showToast('success', `Boleto “${item.description}” pago!`)
+    }
+    setTransactions(getTransactions())
+  } catch (error) {
+    showToast('error', error instanceof Error ? error.message : 'Não foi possível registrar o pagamento.')
+  }
+}
+
 // Abre o formulário sempre limpo (evita herdar dados de uma edição cancelada).
 function openNewTransaction() {
   setEditingId(null)
@@ -1892,6 +1914,7 @@ function openNewTransaction() {
   setType('expense')
   setCategory(lastExpenseCategory)
   setDescription('')
+  setNotes('')
   setAmount('')
   setDate(new Date().toLocaleDateString('en-CA'))
   setPaymentMethod('cash')
@@ -1914,6 +1937,7 @@ function openEditTransaction(transaction: Transaction) {
   setEditingId(transaction.id)
   setType(transaction.type)
   setDescription(transaction.description)
+  setNotes(transaction.notes ?? '')
   setAmount(String(transaction.amount))
   setCategory(transaction.category)
   setDate(transaction.date)
@@ -1943,6 +1967,7 @@ function openEditTransaction(transaction: Transaction) {
     type,
     category,
     date,
+    ...(notes.trim() ? { notes: notes.trim() } : {}),
   }
 
   try {
@@ -2018,6 +2043,7 @@ if (amountCents > availableLimitCents) {
     category,
     date,
     installments,
+    ...(notes.trim() ? { notes: notes.trim() } : {}),
   })
 
 setCardsRevision(value => value + 1)
@@ -2348,6 +2374,10 @@ function handleDashboardInvoicePayment(
         onClose={() => setNotificationsOpen(false)}
         onToggleRead={handleToggleNotificationRead}
         onMarkAllRead={handleMarkAllNotificationsAsRead}
+        onDelete={ids => {
+          dismissNotifications(ids)
+          setNotificationReadRevision(previous => previous + 1)
+        }}
       />
     </div>,
     document.body
@@ -3631,14 +3661,7 @@ background:
   options={[
     { value: 'Todas', label: 'Todas' },
 
-...[...new Set(
-  transactions.map(transaction => transaction.category)
-)]
-  .sort((a, b) => a.localeCompare(b, 'pt-BR'))
-  .map(item => ({
-    value: item,
-    label: item,
-  })),
+...buildCategoryFilterOptions(sortedTransactions.map(transaction => transaction.category)),
 
   ]}
   placeholder="Todas as categorias"
@@ -3719,13 +3742,25 @@ background:
                           })()}
 
                           <div className="transaction-info">
-                            <strong>{item.description}</strong>
+                            <strong className="pf-tx-title"><BrandIcon description={item.description} />{item.description}</strong>
+                            {item.notes && <span className="pf-tx-notes">{item.notes}</span>}
                             <small>
                               {item.category}
                               {item.source === 'card' && (
                                 <span className="pf-tx-tag is-card">💳 {historyCardNames.get(item.cardId ?? "") ?? "Cartão"}</span>
                               )}
-                              {item.source !== 'card' && isBoletoCategory(item.category) && <span className="pf-tx-tag is-boleto">Boleto</span>}
+                              {item.source !== 'card' && isBoletoCategory(item.category) && (() => {
+                                const status = getBoletoStatus(item)
+                                return (
+                                  <span className={`pf-tx-tag is-boleto is-${status}`}>
+                                    {status === 'paid'
+                                      ? `Boleto pago${item.paidAt ? ` em ${formatDate(item.paidAt)}` : ''}`
+                                      : status === 'overdue'
+                                        ? 'Boleto vencido'
+                                        : 'Boleto a pagar'}
+                                  </span>
+                                )
+                              })()}
                               {invoicePaymentIds.has(item.id) && <span className="pf-tx-tag">Pagamento de fatura</span>}
                               {isDebtPaymentTransaction(item.id) && <span className="pf-tx-tag is-debt">Eu devo</span>}
                             </small>
@@ -3767,6 +3802,17 @@ background:
 </div>
 ) : (
 <div className="transaction-actions">
+  {isBoletoCategory(item.category) && (
+    <button
+      type="button"
+      className={`edit-button pf-boleto-pay ${item.paidAt ? 'is-paid' : ''}`}
+      aria-label={item.paidAt ? `Desfazer pagamento de ${item.description}` : `Registrar pagamento de ${item.description}`}
+      title={item.paidAt ? 'Pago — toque para desfazer' : 'Registrar pagamento do boleto'}
+      onClick={() => void toggleBoletoPaid(item)}
+    >
+      <CheckCircle2 size={16} strokeWidth={1.9} />
+    </button>
+  )}
   <ReceiptButton transactionId={item.id} description={item.description} onMessage={showToast} />
 
   <button
@@ -4097,7 +4143,7 @@ background:
               </div>
 
               <div className="form-group">
-                <label htmlFor="description">Descrição</label>
+                <label htmlFor="description" className="pf-description-label">Descrição <BrandIcon description={description} size={20} /></label>
                 <input
                   id="description"
                   type="text"
@@ -4252,6 +4298,18 @@ options={[
 </div>
 
 {/* Repetir todo mês (transação recorrente) */}
+<div className="form-group">
+  <label htmlFor="transaction-notes">Observação (opcional)</label>
+  <textarea
+    id="transaction-notes"
+    rows={2}
+    maxLength={300}
+    placeholder="Ex.: dividido com a Ana, parcela do presente…"
+    value={notes}
+    onChange={event => setNotes(event.target.value)}
+  />
+</div>
+
 {editingId === null && !(type === 'expense' && paymentMethod === 'credit') && (
   <label className="pf-repeat-toggle">
     <span className="pf-repeat-toggle-icon"><Repeat size={18} /></span>

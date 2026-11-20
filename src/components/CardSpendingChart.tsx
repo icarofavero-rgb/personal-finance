@@ -25,6 +25,9 @@ type Props = {
   /** muda quando cartões/compras mudam (para ler de novo) */
   revision?: number
   title?: string
+  /** cartão escolhido controlado por fora (ex.: filtro de Minhas faturas) */
+  selectedCardId?: string
+  onSelectCard?: (cardId: string) => void
 }
 
 /**
@@ -33,8 +36,13 @@ type Props = {
  * - Um cartão: o anel mostra quanto do limite a fatura usou e o centro
  *   mostra o valor da fatura; a lista mostra as categorias dela.
  */
-export default function CardSpendingChart({ month, revision = 0, title = 'Despesas dos cartões' }: Props) {
-  const [selected, setSelected] = useState('all')
+export default function CardSpendingChart({ month, revision = 0, title = 'Despesas dos cartões', selectedCardId, onSelectCard }: Props) {
+  const [ownSelected, setOwnSelected] = useState('all')
+  const selected = selectedCardId ?? ownSelected
+  const setSelected = (value: string) => {
+    setOwnSelected(value)
+    onSelectCard?.(value)
+  }
 
   const data = useMemo(() => {
     void revision

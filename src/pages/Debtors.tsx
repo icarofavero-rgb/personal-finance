@@ -662,7 +662,8 @@ const filteredDebtors = viewDebtors
   </button>
 </div>
 
-<div className="pf-debtors-tabs" role="tablist" aria-label="Quem deve">
+<div className="pf-debtors-tabs" role="tablist" aria-label="Quem deve" data-view={view}>
+  <span className="pf-debtors-tab-indicator" aria-hidden="true" />
   {([
     ['owes-me', 'Me devem'],
     ['i-owe', 'Eu devo'],
@@ -683,7 +684,7 @@ const filteredDebtors = viewDebtors
 
 
 
-<div className="debtors-summary">
+<div className="debtors-summary pf-debtors-slide" key={`summary-${view}`} data-view={view}>
   <div className="panel">
     <Wallet size={24} />
     <p>{iOwe ? 'Total que peguei' : 'Total emprestado'}</p>
@@ -766,13 +767,13 @@ const filteredDebtors = viewDebtors
         {debtors.length === 0 ? (
           <div className="empty-state">
             <UsersRound size={36} />
-            <strong>Nenhum devedor cadastrado</strong>
+            <strong>{iOwe ? 'Ninguém cadastrado ainda' : 'Nenhum devedor cadastrado'}</strong>
             <p>
               {iOwe ? 'Clique em Nova pessoa para registrar para quem você deve.' : 'Clique em Novo devedor para cadastrar uma pessoa.'}
             </p>
           </div>
         ) : (
-          <div className="debtors-list">
+          <div className="debtors-list pf-debtors-slide" key={`list-${view}`} data-view={view}>
             {filteredDebtors.length === 0 && (
   <div className="empty-state" role="status">
     <UsersRound size={30} />

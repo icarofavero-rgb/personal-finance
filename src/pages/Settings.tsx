@@ -1,4 +1,5 @@
 
+import { AUTO_CLEAN_OPTIONS, getAutoCleanDays, setAutoCleanDays } from '../services/notificationDismissStorage'
 import { useRef, useState } from 'react'
 import {
   UserRound,
@@ -149,6 +150,8 @@ export default function Settings({
   onOpenBackup,
   onOpenSync,
 }: SettingsProps) {
+  // Limpeza automática dos avisos do sino (vale na hora, sem precisar salvar)
+  const [autoCleanDays, setAutoCleanState] = useState(getAutoCleanDays)
 
   const [activeSection, setActiveSection] =
     useState<SettingsSection>(initialSection)
@@ -993,6 +996,31 @@ return (
             }
           >
             {days} {days === 1 ? 'dia' : 'dias'}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div className="settings-appearance-group">
+      <h3>Apagar avisos antigos</h3>
+      <p>
+        Os avisos cuja data já passou somem do sino sozinhos depois do
+        tempo escolhido. Dá para excluir um aviso na hora pelo próprio sino.
+      </p>
+
+      <div className="settings-choice-grid">
+        {AUTO_CLEAN_OPTIONS.map(option => (
+          <button
+            key={option.days}
+            type="button"
+            className={`settings-choice ${autoCleanDays === option.days ? 'selected' : ''}`}
+            aria-pressed={autoCleanDays === option.days}
+            onClick={() => {
+              setAutoCleanDays(option.days)
+              setAutoCleanState(option.days)
+            }}
+          >
+            {option.label}
           </button>
         ))}
       </div>

@@ -4973,3 +4973,194 @@
   color: #f59e0b;
   background: rgba(245, 158, 11, 0.14);
 }
+
+/* Observação da transação / compra */
+.pf-tx-notes {
+  display: block;
+  margin: 1px 0 2px;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--pf-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ---------- 44. Boleto: pago / a pagar / vencido ---------- */
+.pf-tx-tag.is-boleto.is-paid {
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.pf-tx-tag.is-boleto.is-pending {
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.pf-tx-tag.is-boleto.is-overdue {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.pf-boleto-pay {
+  color: #f59e0b !important;
+}
+
+.pf-boleto-pay.is-paid {
+  color: #22c55e !important;
+}
+
+/* ---------- 45. Devedores: barra "Me devem / Eu devo" deslizante ---------- */
+.pf-debtors-tabs {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  width: 100% !important;
+  gap: 0 !important;
+}
+
+.pf-debtors-tab {
+  position: relative;
+  z-index: 1;
+  justify-content: center;
+  min-height: 44px !important;
+  background: transparent !important;
+  transition: color 0.3s ease;
+}
+
+.pf-debtors-tab.is-active {
+  color: var(--pf-accent-contrast, #fff) !important;
+}
+
+.pf-debtors-tab-indicator {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  left: 5px;
+  width: calc(50% - 5px);
+  border-radius: 10px;
+  background: var(--pf-accent);
+  box-shadow: 0 6px 16px rgba(var(--pf-accent-rgb), 0.35);
+  transition: transform 0.38s cubic-bezier(0.34, 1.3, 0.5, 1);
+}
+
+.pf-debtors-tabs[data-view='i-owe'] .pf-debtors-tab-indicator {
+  transform: translateX(100%);
+}
+
+/* O conteúdo entra deslizando do lado da aba escolhida */
+.pf-debtors-slide[data-view='owes-me'] {
+  animation: pf-debtors-from-left 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pf-debtors-slide[data-view='i-owe'] {
+  animation: pf-debtors-from-right 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pf-debtors-from-left {
+  from { opacity: 0; transform: translateX(-28px); }
+}
+
+@keyframes pf-debtors-from-right {
+  from { opacity: 0; transform: translateX(28px); }
+}
+
+:root[data-pf-animations='off'] :is(.pf-debtors-slide, .pf-debtors-tab-indicator) {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* ---------- 46. Sino: excluir avisos ---------- */
+.notification-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+}
+
+.notification-delete-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f87171;
+  cursor: pointer;
+}
+
+.notification-read-tools {
+  display: flex;
+  gap: 8px;
+  padding: 0 14px;
+}
+
+.notification-read-tools .notification-show-read {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.notification-show-read.is-danger {
+  color: #f87171 !important;
+}
+
+/* Minhas faturas: filtro de cartão ao lado do mês */
+.pf-cards-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.pf-cards-card-filter {
+  min-width: 190px;
+}
+
+.pf-invoice-badge.is-empty {
+  color: var(--pf-text-secondary);
+  background: rgba(148, 163, 184, 0.14);
+}
+
+/* ---------- 47. Ícones de serviços (Uber, Spotify, Netflix…) ---------- */
+.pf-brand-icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  margin-right: 6px;
+  vertical-align: -3px;
+  border-radius: 6px;
+  background: var(--brand-color);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.pf-brand-letters {
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.pf-tx-title {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.pf-description-label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+}
+
+.pf-description-label .pf-brand-icon {
+  margin-right: 0;
+  animation: pf-menu-in 0.25s var(--pf-ease-spring, ease) both;
+}

@@ -392,3 +392,38 @@ export function isBoletoCategory(category: string): boolean {
 
 /** Pagamentos feitos em Devedores → Eu devo */
 export const DEBT_PAYMENT_CATEGORY = 'Finanças / Dívidas com pessoas'
+
+/** Prefixo do filtro que pega a categoria inteira (todas as subcategorias). */
+export const CATEGORY_GROUP_FILTER = 'grupo:'
+
+/**
+ * Filtro de categorias: "Todas", uma categoria inteira ("grupo:Alimentação",
+ * que pega Supermercado, Restaurante…) ou uma subcategoria exata.
+ */
+export function matchesCategoryFilter(category: string, filter: string): boolean {
+  if (!filter || filter === 'Todas') return true
+  if (filter.startsWith(CATEGORY_GROUP_FILTER)) {
+    const group = filter.slice(CATEGORY_GROUP_FILTER.length)
+    return category === group || category.startsWith(`${group} /`)
+  }
+  return category === filter
+}
+
+/** Opções do filtro: cada categoria (inteira) seguida das suas subcategorias usadas. */
+export function buildCategoryFilterOptions(categories: string[]): { value: string; label: string }[] {
+  const groups = new Map<string, Set<string>>()
+  for (const category of categories) {
+    const separator = category.indexOf(' / ')
+    const group = separator >= 0 ? category.slice(0, separator) : category
+    if (!groups.has(group)) groups.set(group, new Set())
+    if (separator >= 0) groups.get(group)?.add(category)
+  }
+
+  const options: { value: string; label: string }[] = []
+  for (const group of [...groups.keys()].sort((a, b) => a.localeCompare(b, 'pt-BR'))) {
+    const subs = [...(groups.get(group) ?? [])].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+    options.push({ value: `${CATEGORY_GROUP_FILTER}${group}`, label: subs.length > 0 ? `${group} (todas)` : group })
+    for (const sub of subs) options.push({ value: sub, label: `   ${sub.slice(sub.indexOf(' / ') + 3)}` })
+  }
+  return options
+}

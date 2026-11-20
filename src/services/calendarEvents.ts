@@ -51,7 +51,7 @@ export type CalendarSources = {
   /** owedByMe: dívida que EU tenho com outra pessoa (a pagar) */
   debts: (DebtorDebt & { owedByMe?: boolean })[]
   /** transações: só as da categoria Boletos entram no calendário */
-  transactions?: { id: string; description: string; amount: number; type: string; category: string; date: string }[]
+  transactions?: { id: string; description: string; amount: number; type: string; category: string; date: string; paidAt?: string }[]
 }
 
 export function monthBounds(month: string): { from: string; to: string } {
@@ -194,9 +194,9 @@ export function buildCalendarEvents(
       date: transaction.date,
       kind: 'boleto',
       title: transaction.description,
-      subtitle: 'Boleto · data de pagamento',
+      subtitle: transaction.paidAt ? 'Boleto · pago' : 'Boleto · data de pagamento',
       amountCents: Math.round(transaction.amount * 100),
-      done: false,
+      done: Boolean(transaction.paidAt),
     })
   }
 
@@ -309,7 +309,7 @@ export function generateBoletoNotifications(
   const money = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
   return transactions
-    .filter(transaction => isBoletoCategory(transaction.category))
+    .filter(transaction => isBoletoCategory(transaction.category) && !transaction.paidAt)
     .map(transaction => ({ transaction, days: getDaysUntilDue(transaction.date, today) }))
     .filter(({ days }) => days >= 0 && days <= preferences.daysBeforeDue)
     .map(({ transaction, days }) => ({

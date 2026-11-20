@@ -66,6 +66,7 @@ export function buildSpendingEntries(
         amount: installment.amount,
         type: 'expense',
         category: purchase.category,
+        ...(purchase.notes ? { notes: purchase.notes } : {}),
         date: shiftDate(purchase.date, number - 1),
         source: 'card',
         cardId: purchase.cardId,
