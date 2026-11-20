@@ -78,17 +78,18 @@ export default function DebtsOwedCard({ month, onOpen }: Props) {
         return { kind, rows, total, thisMonth, nextMonth: nextMonthTotal, monthValue }
       })
     } catch {
-      return []
+      // dados ilegíveis: os dois blocos aparecem zerados
+      return (['i-owe', 'owes-me'] as const).map(kind => ({ kind, rows: [], total: 0, thisMonth: 0, nextMonth: 0, monthValue: 0 }))
     }
   }, [month])
 
-  const visible = sides.filter(side => side.rows.length > 0)
-  if (visible.length === 0) return null
+  // Os dois blocos ficam SEMPRE no Dashboard, mesmo zerados
+  const visible = sides
 
   const following = nextMonth(month)
 
   return (
-    <div className={`pf-owed-grid ${visible.length === 1 ? 'is-single' : ''}`}>
+    <div className="pf-owed-grid">
       {visible.map(side => {
         const mine = side.kind === 'i-owe'
         return (
@@ -136,6 +137,11 @@ export default function DebtsOwedCard({ month, onOpen }: Props) {
             )}
 
             <ul className="pf-owed-list">
+              {side.rows.length === 0 && (
+                <li className="pf-owed-empty">
+                  {mine ? 'Nenhuma dívida em aberto. Registre em Devedores → Eu devo.' : 'Ninguém te deve agora. Registre em Devedores → Me devem.'}
+                </li>
+              )}
               {side.rows.slice(0, 4).map(row => (
                 <li key={row.id}>
                   <span className="pf-owed-name">{row.label}</span>
