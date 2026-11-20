@@ -1,4 +1,6 @@
 
+import { getMonthInstallment } from './services/debtors/debtInstallments'
+import { DEBT_PAYMENT_CATEGORY } from './services/categories'
 import DebtsOwedCard from './components/DebtsOwedCard'
 import { deleteAnyTransaction, describeDelete, getLinkedKind, getPurchase, linkedEditHint, purchaseDebtLink, saveEditedTransaction, type DeleteTarget } from './services/transactionEditing'
 import { updateCardPurchase } from './services/cardPurchasesStorage'
@@ -1522,9 +1524,40 @@ const futureMonthEntries = useMemo<SpendingEntry[] | null>(() => {
 }, [isFutureDashboardMonth, dashboardMonth, spendingEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts, activePage])
 
 /** Lançamentos do mês do Dashboard: gravados ou, no futuro, previstos. */
-const dashboardMonthEntries = futureMonthEntries ?? spendingEntries
+// "Eu devo": o que ainda falta pagar da parcela do mês também é saída do
+// mês (como um boleto em aberto). Quando você paga, o pagamento entra como
+// saída e esta parte zera: o total do mês não muda nem conta duas vezes.
+const owedPendingEntries = useMemo<SpendingEntry[]>(() => {
+  if (futureMonthEntries) return []
+  try {
+    const { debtors, debts, payments } = getDebtorsData()
+    const people = new Map(debtors.filter(debtor => debtor.kind === 'i-owe').map(debtor => [debtor.id, debtor.name]))
+    const result: SpendingEntry[] = []
+    for (const debt of debts) {
+      const person = people.get(debt.debtorId)
+      if (!person) continue
+      const installment = getMonthInstallment(debt, payments, dashboardMonth)
+      if (!installment || installment.remainingCents <= 0) continue
+      result.push({
+        id: `owed-${debt.id}-${dashboardMonth}`,
+        description: `Parcela para ${person}: ${debt.description} (${installment.number}/${installment.total}) · a pagar`,
+        amount: installment.remainingCents / 100,
+        type: 'expense',
+        category: DEBT_PAYMENT_CATEGORY,
+        date: installment.dueDate,
+        source: 'transaction',
+      })
+    }
+    return result
+  } catch {
+    return []
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [futureMonthEntries, dashboardMonth, spendingEntries, activePage])
 
-const historyTransactions = (futureMonthEntries ?? spendingEntries)
+const dashboardMonthEntries = futureMonthEntries ?? (owedPendingEntries.length > 0 ? [...spendingEntries, ...owedPendingEntries] : spendingEntries)
+
+const historyTransactions = dashboardMonthEntries
   .filter(transaction => {
     if (historySection === 'monthly') {
       return transaction.date.startsWith(dashboardMonth)
@@ -1768,7 +1801,8 @@ const nextProjectionRaw = useMemo(
   () =>
     buildNextMonthProjection({
       month: dashboardMonth,
-      entries: spendingEntries,
+      // inclui a parcela de "Eu devo" ainda em aberto no mês
+      entries: futureMonthEntries ? spendingEntries : dashboardMonthEntries,
       cards: getCards(),
       purchases: getCardPurchases(),
       payments: getCardPayments(),
@@ -1778,7 +1812,7 @@ const nextProjectionRaw = useMemo(
       debtors: (() => { try { return getDebtorsData() } catch { return undefined } })(),
     }),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [dashboardMonth, spendingEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts, activePage]
+  [dashboardMonth, spendingEntries, dashboardMonthEntries, futureMonthEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts, activePage]
 )
 
 // Se o mês escolhido já é futuro, o ponto de partida é o saldo PREVISTO dele

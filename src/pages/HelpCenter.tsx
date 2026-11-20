@@ -211,7 +211,7 @@ const TOPICS: Topic[] = [
       {
         question: "Como acompanho as parcelas do que eu devo?",
         answer:
-          "Ao cadastrar a dívida, informe o número de parcelas e o vencimento da primeira. Em Devedores → Eu devo, cada dívida parcelada mostra a parcela do mês (ex.: “2 de 3 · R$ 200,00 · vence 15/11”) e se ela já foi paga; parcelas anteriores em atraso aparecem em vermelho. No Dashboard, o bloco “Eu devo” mostra o valor da parcela do mês, quanto ainda falta pagar dela e o saldo total da dívida; o “Me devem” mostra o saldo a receber e quanto vence no mês e no mês seguinte; e a parcela do que você deve no mês seguinte entra no “Saldo projetado para o mês seguinte”. A parcela do mês aparece nas duas abas.",
+          "Ao cadastrar a dívida, informe o número de parcelas e o vencimento da primeira. Em Devedores → Eu devo, cada dívida parcelada mostra a parcela do mês (ex.: “2 de 3 · R$ 200,00 · vence 15/11”) e se ela já foi paga; parcelas anteriores em atraso aparecem em vermelho. No Dashboard, o bloco “Eu devo” mostra o valor da parcela do mês, quanto ainda falta pagar dela e o saldo total da dívida. O que falta pagar no mês já entra nas Saídas do mês (como um boleto em aberto); quando você paga, o pagamento entra no lugar, sem contar duas vezes; o “Me devem” mostra o saldo a receber e quanto vence no mês e no mês seguinte; e a parcela do que você deve no mês seguinte entra no “Saldo projetado para o mês seguinte”. A parcela do mês aparece nas duas abas.",
       },
       {
         question: "Como adianto parcelas?",
