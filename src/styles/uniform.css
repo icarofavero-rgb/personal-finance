@@ -5224,3 +5224,13 @@
 .pf-category-label .pf-category-suggested {
   margin: 0;
 }
+
+/* Tema claro: textos de apoio que tinham cor fixa clara demais */
+:root[data-pf-theme='light'] .sync-file-steps strong {
+  color: var(--pf-text);
+}
+
+:root[data-pf-theme='light'] .budget-period-panel label {
+  color: #475569 !important;
+  font-weight: 600;
+}
