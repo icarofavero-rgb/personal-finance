@@ -22,6 +22,8 @@ type Side = {
   total: number
   thisMonth: number
   nextMonth: number
+  /** valor das parcelas do mês (pagas ou não) */
+  monthValue: number
 }
 
 type Props = {
@@ -45,6 +47,7 @@ export default function DebtsOwedCard({ month, onOpen }: Props) {
         const people = new Map(debtors.filter(debtor => (debtor.kind ?? 'owes-me') === kind).map(debtor => [debtor.id, debtor.name]))
         let total = 0
         let thisMonth = 0
+        let monthValue = 0
         let nextMonthTotal = 0
         const rows: Side['rows'] = []
 
@@ -57,7 +60,10 @@ export default function DebtsOwedCard({ month, onOpen }: Props) {
 
           const current = getMonthInstallment(debt, payments, month)
           const upcoming = getMonthInstallment(debt, payments, following)
-          if (current) thisMonth += current.remainingCents + current.overdueCents
+          if (current) {
+            thisMonth += current.remainingCents + current.overdueCents
+            monthValue += current.amountCents + current.overdueCents
+          }
           if (upcoming) nextMonthTotal += upcoming.remainingCents
 
           rows.push({
@@ -69,7 +75,7 @@ export default function DebtsOwedCard({ month, onOpen }: Props) {
           })
         }
 
-        return { kind, rows, total, thisMonth, nextMonth: nextMonthTotal }
+        return { kind, rows, total, thisMonth, nextMonth: nextMonthTotal, monthValue }
       })
     } catch {
       return []
@@ -96,24 +102,38 @@ export default function DebtsOwedCard({ month, onOpen }: Props) {
               <ChevronRight size={18} />
             </button>
 
-            <div className="pf-owed-totals">
-              <div>
-                <small>{mine ? 'Saldo a pagar' : 'Saldo a receber'}</small>
-                <strong>{money(side.total)}</strong>
+            {mine ? (
+              // Eu devo: valor do mês (parcela), quanto falta do mês e saldo total
+              <div className="pf-owed-totals">
+                <div>
+                  <small>Saldo a pagar em {monthName(month)}</small>
+                  <strong>{money(side.monthValue)}</strong>
+                </div>
+                <div>
+                  <small>Falta pagar em {monthName(month)}</small>
+                  <strong className={side.thisMonth > 0 ? 'is-due' : ''}>{money(side.thisMonth)}</strong>
+                </div>
+                <div>
+                  <small>Saldo total a pagar</small>
+                  <strong>{money(side.total)}</strong>
+                </div>
               </div>
-              <div>
-                <small>
-                  {mine ? 'A pagar' : 'A receber'} em {monthName(month)}
-                </small>
-                <strong className={side.thisMonth > 0 ? 'is-due' : ''}>{money(side.thisMonth)}</strong>
+            ) : (
+              <div className="pf-owed-totals">
+                <div>
+                  <small>Saldo a receber</small>
+                  <strong>{money(side.total)}</strong>
+                </div>
+                <div>
+                  <small>A receber em {monthName(month)}</small>
+                  <strong className={side.thisMonth > 0 ? 'is-due' : ''}>{money(side.thisMonth)}</strong>
+                </div>
+                <div>
+                  <small>A receber em {monthName(following)}</small>
+                  <strong>{money(side.nextMonth)}</strong>
+                </div>
               </div>
-              <div>
-                <small>
-                  {mine ? 'A pagar' : 'A receber'} em {monthName(following)}
-                </small>
-                <strong>{money(side.nextMonth)}</strong>
-              </div>
-            </div>
+            )}
 
             <ul className="pf-owed-list">
               {side.rows.slice(0, 4).map(row => (
