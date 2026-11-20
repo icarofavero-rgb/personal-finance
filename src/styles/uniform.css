@@ -5256,3 +5256,181 @@
 .pf-purchase-delete:hover {
   background: rgba(248, 113, 113, 0.1);
 }
+
+/* ---------- 48. Eu devo: parcela do mês e bloco no Dashboard ---------- */
+.pf-debt-month {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin: 2px 0 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--pf-accent-rgb), 0.35);
+  background: rgba(var(--pf-accent-rgb), 0.08);
+  font-size: 12.5px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-debt-month-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.pf-debt-month-main small {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--pf-accent-ink, var(--pf-accent));
+}
+
+.pf-debt-month-main strong {
+  font-size: 14px;
+  color: var(--pf-text);
+}
+
+.pf-debt-month-status {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.pf-debt-month.is-paid {
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.07);
+}
+
+.pf-debt-month.is-paid .pf-debt-month-status {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.pf-debt-month-late {
+  width: 100%;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #f87171;
+}
+
+.pf-debt-month.is-late {
+  border-color: rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.08);
+  color: #f87171;
+  font-weight: 700;
+}
+
+.pf-debt-month.is-future {
+  border-style: dashed;
+}
+
+/* Bloco "Eu devo" no Dashboard */
+.pf-owed-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border-radius: 20px;
+}
+
+.pf-owed-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pf-text-secondary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pf-owed-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  color: #c4a5ff;
+  background: rgba(196, 165, 255, 0.14);
+}
+
+.pf-owed-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.pf-owed-title strong {
+  font-size: 15px;
+  color: var(--pf-text);
+}
+
+.pf-owed-title small {
+  font-size: 12px;
+}
+
+.pf-owed-totals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pf-owed-totals > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(var(--pf-accent-rgb), 0.06);
+}
+
+.pf-owed-totals small {
+  font-size: 11.5px;
+  color: var(--pf-text-secondary);
+}
+
+.pf-owed-totals strong {
+  font-size: 17px;
+  color: var(--pf-text);
+}
+
+.pf-owed-totals strong.is-due {
+  color: #f59e0b;
+}
+
+.pf-owed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pf-owed-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.pf-owed-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--pf-text);
+}
+
+.pf-owed-detail {
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--pf-text-secondary);
+}

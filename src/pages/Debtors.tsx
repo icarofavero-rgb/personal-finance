@@ -42,6 +42,7 @@ import {
 
 import DatePicker from '../components/DatePicker'
 import { syncDebtPaymentTransactions } from '../services/debtors/debtPaymentTransactions'
+import { getMonthInstallment, installmentDueDate } from '../services/debtors/debtInstallments'
 
 export default function Debtors() {
   const [debtors, setDebtors] = useState<Debtor[]>(() =>
@@ -922,6 +923,51 @@ const filteredDebtors = viewDebtors
     </div>
 
   </div>
+
+  {debt.installments > 1 && summary.remainingCents > 0 && (() => {
+    // Parcela do mês atual (dívidas parceladas)
+    const current = getMonthInstallment(debt, payments)
+    const mine = kindOf(debtors.find(item => item.id === debt.debtorId)) === 'i-owe'
+    const monthName = new Date().toLocaleDateString('pt-BR', { month: 'long' })
+    const day = (date: string) => date.split('-').reverse().slice(0, 2).join('/')
+
+    if (!current) {
+      const firstDue = installmentDueDate(debt, 1)
+      return firstDue.slice(0, 7) > new Date().toLocaleDateString('en-CA').slice(0, 7) ? (
+        <div className="pf-debt-month is-future">
+          <span>1ª parcela vence em {day(firstDue)}</span>
+        </div>
+      ) : (
+        <div className="pf-debt-month is-late">
+          <span>Todas as parcelas já venceram · {mine ? 'falta pagar' : 'falta receber'} {formatCents(summary.remainingCents)}</span>
+        </div>
+      )
+    }
+
+    return (
+      <div className={`pf-debt-month is-${current.status}`}>
+        <div className="pf-debt-month-main">
+          <small>Parcela de {monthName}</small>
+          <strong>
+            {current.number} de {current.total} · {formatCents(current.amountCents)}
+          </strong>
+          <span>vence {day(current.dueDate)}</span>
+        </div>
+        <span className="pf-debt-month-status">
+          {current.status === 'paid'
+            ? mine ? 'Paga' : 'Recebida'
+            : current.status === 'partial'
+              ? `Falta ${formatCents(current.remainingCents)}`
+              : mine ? 'A pagar' : 'A receber'}
+        </span>
+        {current.overdueCents > 0 && (
+          <span className="pf-debt-month-late">
+            + {formatCents(current.overdueCents)} de parcelas anteriores {mine ? 'não pagas' : 'não recebidas'}
+          </span>
+        )}
+      </div>
+    )
+  })()}
 
   <div className="debtor-debt-values">
     <div>

@@ -209,6 +209,11 @@ const TOPICS: Topic[] = [
           "Em Devedores, abra a aba “Eu devo” e toque em “Nova pessoa” (ou, ao cadastrar, escolha “Eu devo para essa pessoa”). Adicione a dívida e, a cada pagamento que você fizer, use “Registrar pagamento”: o valor entra como saída em Transações (categoria Finanças / Dívidas com pessoas), no Dashboard e nos relatórios. Se a dívida tiver vencimento, ela aparece no Calendário como “A pagar”.",
       },
       {
+        question: "Como acompanho as parcelas do que eu devo?",
+        answer:
+          "Ao cadastrar a dívida, informe o número de parcelas e o vencimento da primeira. Em Devedores → Eu devo, cada dívida parcelada mostra a parcela do mês (ex.: “2 de 3 · R$ 200,00 · vence 15/11”) e se ela já foi paga; parcelas anteriores em atraso aparecem em vermelho. No Dashboard, o bloco “Eu devo” mostra o saldo a pagar e quanto vence no mês, e a parcela do mês seguinte entra no “Saldo projetado para o mês seguinte”.",
+      },
+      {
         question: "Como excluo uma dívida?",
         answer:
           "Em Devedores, toque em “Ver detalhes” na pessoa e em “Excluir” na dívida. Os pagamentos dela são apagados junto (e, no caso de “Eu devo”, as saídas que eles geraram em Transações também). Se a dívida usou o seu cartão, a compra sai da fatura, a não ser que essa fatura já tenha pagamento.",

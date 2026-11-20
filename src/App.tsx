@@ -1,4 +1,5 @@
 
+import DebtsOwedCard from './components/DebtsOwedCard'
 import { deleteAnyTransaction, describeDelete, getLinkedKind, getPurchase, linkedEditHint, purchaseDebtLink, saveEditedTransaction, type DeleteTarget } from './services/transactionEditing'
 import { updateCardPurchase } from './services/cardPurchasesStorage'
 import { findBrand } from './services/brandIcons'
@@ -1737,9 +1738,10 @@ const nextProjection = useMemo(
       reminders: getReminders(),
       recurring: getRecurringRules(),
       forecasts: manualForecasts,
+      debtors: (() => { try { return getDebtorsData() } catch { return undefined } })(),
     }),
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  [dashboardMonth, spendingEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts]
+  [dashboardMonth, spendingEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts, activePage]
 )
 
 function monthLabelLong(month: string): string {
@@ -2740,6 +2742,9 @@ function handleDashboardInvoicePayment(
 
 {/* Destaques: comparação automática com o mês anterior */}
 <MonthInsights transactions={spendingEntries} month={dashboardMonth} />
+
+{/* Eu devo: saldo a pagar e parcelas do mês (Devedores) */}
+<DebtsOwedCard month={dashboardMonth} onOpen={() => navigate('Devedores')} />
 
 {/* Comparação de entradas e saídas + evolução por categoria (acima do planejamento) */}
 <Deferred minHeight={420} delay={450}>

@@ -21,6 +21,8 @@ import { getCardInvoices } from './cardInvoices'
 import type { SpendingEntry } from './spending'
 import { isBoletoCategory } from './categories'
 import { getCardInvoiceDueDate } from './cardInvoiceDueDate'
+import type { DebtorsData } from './debtors/debtorsStorage'
+import { getMonthInstallment } from './debtors/debtInstallments'
 
 export type ProjectionItem = {
   kind: 'invoice' | 'boleto' | 'expense' | 'income'
@@ -58,6 +60,8 @@ export function buildNextMonthProjection(input: {
   reminders: Reminder[]
   recurring: RecurringRule[]
   forecasts: ManualForecast[]
+  /** Devedores: as parcelas do que EU devo entram como saída prevista */
+  debtors?: DebtorsData
 }): NextMonthProjection {
   const next = nextMonthKey(input.month)
   const items: ProjectionItem[] = []
@@ -130,6 +134,23 @@ export function buildNextMonthProjection(input: {
       amount: rule.amount,
       date: occurrenceDate(rule, next),
     })
+  }
+
+  // Dívidas com outras pessoas (Eu devo): a parcela que vence no mês seguinte
+  if (input.debtors) {
+    const people = new Map(input.debtors.debtors.filter(debtor => debtor.kind === 'i-owe').map(debtor => [debtor.id, debtor.name]))
+    for (const debt of input.debtors.debts) {
+      const person = people.get(debt.debtorId)
+      if (!person) continue
+      const installment = getMonthInstallment(debt, input.debtors.payments, next)
+      if (!installment || installment.remainingCents <= 0) continue
+      items.push({
+        kind: 'expense',
+        label: `Parcela para ${person}: ${debt.description} (${installment.number}/${installment.total})`,
+        amount: installment.remainingCents / 100,
+        date: installment.dueDate,
+      })
+    }
   }
 
   // Previsões manuais
