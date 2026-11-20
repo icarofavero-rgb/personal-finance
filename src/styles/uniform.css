@@ -4933,3 +4933,43 @@
   color: #c4a5ff;
   border-color: rgba(196, 165, 255, 0.45);
 }
+
+/* ---------- 43. Aviso quando uma página dá erro ---------- */
+.pf-page-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 28px;
+  border-radius: 22px;
+  text-align: center;
+}
+
+.pf-page-error h2 {
+  margin: 0;
+  font-size: 19px;
+  color: var(--pf-text);
+}
+
+.pf-page-error p,
+.pf-page-error small {
+  margin: 0;
+  color: var(--pf-text-secondary);
+}
+
+.pf-page-error small {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.pf-page-error-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.14);
+}

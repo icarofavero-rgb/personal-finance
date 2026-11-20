@@ -73,10 +73,6 @@ const [payments, setPayments] = useState<DebtorPayment[]>(() =>
   const iOwe = view === 'i-owe'
   const kindOf = (debtor: Debtor | undefined): DebtorKind => debtor?.kind ?? 'owes-me'
 
-  // O pagamento aberto é de uma dívida MINHA (aba "Eu devo")?
-  const paymentDebtorId = debts.find(debt => debt.id === selectedPaymentDebtId)?.debtorId
-  const paymentIsMine = kindOf(debtors.find(debtor => debtor.id === paymentDebtorId)) === 'i-owe'
-
   // Exclusão de dívida (com confirmação)
   const [deletingDebt, setDeletingDebt] = useState<DebtorDebt | null>(null)
 
@@ -144,6 +140,11 @@ const myCards = getCards()
   
 const [selectedPaymentDebtId, setSelectedPaymentDebtId] =
   useState<string | null>(null)
+
+// O pagamento aberto é de uma dívida MINHA (aba "Eu devo")?
+// (precisa vir DEPOIS do estado acima)
+const paymentDebtorId = debts.find(debt => debt.id === selectedPaymentDebtId)?.debtorId
+const paymentIsMine = kindOf(debtors.find(debtor => debtor.id === paymentDebtorId)) === 'i-owe'
 
 const [paymentAmount, setPaymentAmount] = useState('')
 const [paymentNotes, setPaymentNotes] = useState('')

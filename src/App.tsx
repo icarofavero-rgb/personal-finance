@@ -1,4 +1,5 @@
 
+import PageErrorBoundary from './components/PageErrorBoundary'
 import { isDebtPaymentTransaction, syncDebtPaymentTransactions } from './services/debtors/debtPaymentTransactions'
 import { getDebtorsData } from './services/debtors/debtorsStorage'
 import { TRANSACTIONS_CHANGED_EVENT } from './services/storage'
@@ -2361,6 +2362,7 @@ function handleDashboardInvoicePayment(
         <section className="content">
         {/* A chave troca a cada página: a página "entra" com a animação do aparelho. */}
         <div key={`${activePage}-${dataRevision}`} className="pf-page" data-direction={pageDirection}>
+<PageErrorBoundary resetKey={activePage}>
 
         {localStorage.getItem(
   'personal-finance-pending-backup-snapshot'
@@ -3962,7 +3964,8 @@ background:
             <Reports transactions={spendingEntries} />
           )}
 
-          </div>
+          </PageErrorBoundary>
+</div>
 
           <footer className="footer">
             <span>Personal Finance © 2026</span>
