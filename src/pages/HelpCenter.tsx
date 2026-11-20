@@ -74,7 +74,7 @@ const TOPICS: Topic[] = [
       {
         question: "Para que serve o “Período” no Dashboard?",
         answer:
-          "Ele escolhe o mês e o ano que o Dashboard inteiro mostra: entradas, saídas, resultado, gráficos e cartões. As saídas juntam todas as formas de pagamento (Pix, débito, dinheiro, boleto e cartão de crédito). Quando o mês vira, o app passa sozinho para o mês novo.",
+          "Ele escolhe o mês e o ano que o Dashboard inteiro mostra: entradas, saídas, resultado, gráficos e cartões. As saídas juntam todas as formas de pagamento (Pix, débito, dinheiro, boleto e cartão de crédito). Quando o mês vira, o app passa sozinho para o mês novo. Num mês futuro, o Dashboard mostra o que está previsto: as faturas que vencem nele (com cada compra e parcela), boletos, recorrentes, lembretes, previsões e parcelas de “Eu devo”. É a mesma conta do “Saldo projetado para o mês seguinte”, então os dois batem.",
       },
       {
         question: "O que é o “Saldo projetado para o mês seguinte”?",

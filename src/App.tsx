@@ -85,6 +85,7 @@ import {
 
 import { matchesSearch, summarize } from './services/transactionSearch'
 import { buildSpendingEntries, type SpendingEntry } from './services/spending'
+import { previousMonthKey } from './services/nextMonthProjection'
 import { BOLETO_CATEGORY, isBoletoCategory } from './services/categories'
 import CardSpendingChart from './components/CardSpendingChart'
 import { buildNextMonthProjection } from './services/nextMonthProjection'
@@ -1488,7 +1489,42 @@ useEffect(() => {
   }
 }, [historySection, isHistoryClosing])
 
-const historyTransactions = spendingEntries
+// Mês FUTURO no "Período": entradas e saídas previstas, com a mesma conta
+// do "Saldo projetado para o mês seguinte" (faturas que vencem no mês com
+// cada compra/parcela, boletos, recorrentes, lembretes, previsões e
+// parcelas de "Eu devo"). Assim o saldo projetado de novembro bate com as
+// saídas de dezembro.
+const isFutureDashboardMonth = dashboardMonth > notificationToday.slice(0, 7)
+
+const futureMonthEntries = useMemo<SpendingEntry[] | null>(() => {
+  if (!isFutureDashboardMonth) return null
+  const projection = buildNextMonthProjection({
+    month: previousMonthKey(dashboardMonth),
+    entries: spendingEntries,
+    cards: getCards(),
+    purchases: getCardPurchases(),
+    payments: getCardPayments(),
+    reminders: getReminders(),
+    recurring: getRecurringRules(),
+    forecasts: manualForecasts,
+    debtors: (() => { try { return getDebtorsData() } catch { return undefined } })(),
+  })
+  return projection.items.map((item, index) => ({
+    id: `proj-${dashboardMonth}-${index}`,
+    description: item.label,
+    amount: item.amount,
+    type: item.kind === 'income' ? ('income' as const) : ('expense' as const),
+    category: item.category ?? 'Outros / Geral',
+    date: item.date ?? `${dashboardMonth}-01`,
+    source: 'transaction' as const,
+  }))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [isFutureDashboardMonth, dashboardMonth, spendingEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts, activePage])
+
+/** Lançamentos do mês do Dashboard: gravados ou, no futuro, previstos. */
+const dashboardMonthEntries = futureMonthEntries ?? spendingEntries
+
+const historyTransactions = (futureMonthEntries ?? spendingEntries)
   .filter(transaction => {
     if (historySection === 'monthly') {
       return transaction.date.startsWith(dashboardMonth)
@@ -1596,9 +1632,10 @@ if (
   }
 }
 
+
 const monthlySummary = useMemo(
-  () => calculateMonthlyDashboard(spendingEntries, dashboardMonth),
-  [spendingEntries, dashboardMonth]
+  () => calculateMonthlyDashboard(dashboardMonthEntries, dashboardMonth),
+  [dashboardMonthEntries, dashboardMonth]
 )
 
 const monthlyIncome = monthlySummary.income
@@ -1607,10 +1644,10 @@ const monthlyBalance = monthlySummary.balance
 
 const dashboardChartTransactions = useMemo(
   () =>
-    spendingEntries.filter(transaction =>
+    dashboardMonthEntries.filter(transaction =>
       transaction.date.startsWith(dashboardMonth)
     ),
-  [spendingEntries, dashboardMonth]
+  [dashboardMonthEntries, dashboardMonth]
 )
 
 const manualForecastSummary = useMemo(
@@ -1727,7 +1764,7 @@ const projectionBreakdown = useMemo(() => {
 void projectionBreakdown.finalBalance
 
 // Saldo projetado para o mês seguinte ao escolhido em "Período"
-const nextProjection = useMemo(
+const nextProjectionRaw = useMemo(
   () =>
     buildNextMonthProjection({
       month: dashboardMonth,
@@ -1743,6 +1780,11 @@ const nextProjection = useMemo(
   // eslint-disable-next-line react-hooks/exhaustive-deps
   [dashboardMonth, spendingEntries, cardsRevision, remindersRevision, recurringRevision, manualForecasts, activePage]
 )
+
+// Se o mês escolhido já é futuro, o ponto de partida é o saldo PREVISTO dele
+const nextProjection = futureMonthEntries
+  ? { ...nextProjectionRaw, base: monthlyBalance, total: Math.round((monthlyBalance + nextProjectionRaw.total - nextProjectionRaw.base) * 100) / 100 }
+  : nextProjectionRaw
 
 function monthLabelLong(month: string): string {
   return new Date(`${month}-01T12:00:00`).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
@@ -2634,7 +2676,7 @@ function handleDashboardInvoicePayment(
 </h2>
 
     <span className="positive">
-  Receitas registradas
+  {isFutureDashboardMonth ? 'Previstas para o mês' : 'Receitas registradas'}
 </span>
 
 <button
@@ -2662,7 +2704,7 @@ function handleDashboardInvoicePayment(
 </h2>
 
     <span className="negative">
-      Despesas registradas
+      {isFutureDashboardMonth ? 'Previstas: faturas, boletos e contas' : 'Despesas registradas'}
     </span>
     <button
   type="button"
@@ -4738,7 +4780,7 @@ options={[
 ) : (
   <>
     <div className="history-total">
-      <span>Total registrado</span>
+      <span>{futureMonthEntries ? 'Total previsto' : 'Total registrado'}</span>
       <h2>{formatMoney(historyTotal)}</h2>
     </div>
 

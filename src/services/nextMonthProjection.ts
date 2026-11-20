@@ -29,6 +29,8 @@ export type ProjectionItem = {
   label: string
   amount: number
   date?: string
+  /** categoria (para os gráficos do mês) */
+  category?: string
 }
 
 export type NextMonthProjection = {
@@ -92,12 +94,29 @@ export function buildNextMonthProjection(input: {
   for (const { invoice, card, dueDate, paid } of cardInvoices) {
     if (!dueDate.startsWith(next)) continue
     const pending = Math.max(0, cents(invoice.total) - paid)
-    if (pending > 0) {
+    if (pending <= 0) continue
+    if (paid === 0) {
+      // Fatura ainda sem pagamento: cada compra/parcela aparece com a sua categoria
+      for (const installment of invoice.installments) {
+        const purchase = input.purchases.find(item => item.id === installment.purchaseId)
+        items.push({
+          kind: 'invoice',
+          label:
+            installment.totalInstallments > 1
+              ? `${installment.description} (${installment.installmentNumber}/${installment.totalInstallments}) · ${card?.name ?? 'cartão'}`
+              : `${installment.description} · ${card?.name ?? 'cartão'}`,
+          amount: installment.amount,
+          date: dueDate,
+          category: purchase?.category ?? 'Compras / Outras compras',
+        })
+      }
+    } else {
       items.push({
         kind: 'invoice',
-        label: `Fatura ${card?.name ?? 'do cartão'}`,
+        label: `Fatura ${card?.name ?? 'do cartão'} (restante)`,
         amount: pending / 100,
         date: dueDate,
+        category: 'Finanças / Outras despesas financeiras',
       })
     }
   }
@@ -110,6 +129,7 @@ export function buildNextMonthProjection(input: {
       label: entry.description,
       amount: entry.amount,
       date: entry.date,
+      category: entry.category,
     })
   }
 
@@ -122,6 +142,7 @@ export function buildNextMonthProjection(input: {
       label: occurrence.reminder.title,
       amount: occurrence.reminder.amountCents / 100,
       date: occurrence.date,
+      category: 'Boletos / Contas de consumo',
     })
   }
 
@@ -133,6 +154,7 @@ export function buildNextMonthProjection(input: {
       label: `${rule.description} (recorrente)`,
       amount: rule.amount,
       date: occurrenceDate(rule, next),
+      category: rule.category,
     })
   }
 
@@ -149,6 +171,7 @@ export function buildNextMonthProjection(input: {
         label: `Parcela para ${person}: ${debt.description} (${installment.number}/${installment.total})`,
         amount: installment.remainingCents / 100,
         date: installment.dueDate,
+        category: 'Finanças / Dívidas com pessoas',
       })
     }
   }
@@ -156,7 +179,7 @@ export function buildNextMonthProjection(input: {
   // Previsões manuais
   for (const forecast of input.forecasts) {
     if (!forecast.date.startsWith(next)) continue
-    items.push({ kind: forecast.type === 'income' ? 'income' : 'expense', label: forecast.description, amount: forecast.amount, date: forecast.date })
+    items.push({ kind: forecast.type === 'income' ? 'income' : 'expense', label: forecast.description, amount: forecast.amount, date: forecast.date, category: forecast.type === 'income' ? 'Outros' : 'Outros / Geral' })
   }
 
   const sum = (kind: ProjectionItem['kind']) => items.filter(item => item.kind === kind).reduce((total, item) => total + cents(item.amount), 0)
@@ -175,4 +198,10 @@ export function buildNextMonthProjection(input: {
     total: (baseCents + incomes - invoices - boletos - otherExpenses) / 100,
     items: items.sort((a, b) => (a.date ?? '').localeCompare(b.date ?? '')),
   }
+}
+
+export function previousMonthKey(month: string): string {
+  const [year, number] = month.split('-').map(Number)
+  const date = new Date(year, number - 2, 1)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 }
