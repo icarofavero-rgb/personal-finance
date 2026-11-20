@@ -284,7 +284,7 @@ const TOPICS: Topic[] = [
       {
         question: "Como excluo avisos do sino?",
         answer:
-          "No sino, toque em “Excluir” no aviso, ou em “Excluir lidas” para tirar todos os já lidos de uma vez. Em Configurações → Notificações → “Apagar avisos antigos”, escolha depois de quantos dias os avisos já vencidos somem sozinhos (3, 7 ou 30 dias, ou nunca).",
+          "No sino, toque em “Excluir” no aviso, ou em “Excluir lidas” para tirar todos os já lidos de uma vez. Em Configurações → Notificações → “Apagar avisos antigos”, escolha depois de quantos dias os avisos já lidos somem sozinhos (3, 7 ou 30 dias, ou nunca). Avisos não lidos, como uma fatura vencida e ainda não paga, continuam no sino até você ler.",
       },
       {
         question: 'Quando recebo os avisos?',

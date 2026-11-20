@@ -875,7 +875,7 @@ const notificationResult = useMemo(() => {
 
 const readIds = new Set(getReadNotificationIds())
 
-const notificationsWithReadState = filterVisibleNotifications(notifications, notificationToday).map(
+const notificationsWithReadState = filterVisibleNotifications(notifications, notificationToday, readIds).map(
   notification => ({
     ...notification,
     read: readIds.has(notification.id),

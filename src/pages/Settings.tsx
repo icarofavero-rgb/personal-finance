@@ -1004,8 +1004,9 @@ return (
     <div className="settings-appearance-group">
       <h3>Apagar avisos antigos</h3>
       <p>
-        Os avisos cuja data já passou somem do sino sozinhos depois do
-        tempo escolhido. Dá para excluir um aviso na hora pelo próprio sino.
+        Os avisos que você já leu somem do sino sozinhos depois do tempo
+        escolhido (os não lidos ficam até você ler). Dá para excluir um aviso
+        na hora pelo próprio sino.
       </p>
 
       <div className="settings-choice-grid">

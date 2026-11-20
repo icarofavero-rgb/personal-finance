@@ -3,8 +3,10 @@
  *
  * Os avisos são calculados a partir dos registros (faturas, boletos,
  * lembretes). "Excluir" guarda o id do aviso para ele não aparecer mais.
- * A limpeza automática esconde os avisos cuja data já passou há mais de N
- * dias (N escolhido em Configurações → Notificações; 0 = nunca).
+ * A limpeza automática esconde os avisos JÁ LIDOS cuja data passou há mais
+ * de N dias (N escolhido em Configurações → Notificações; 0 = nunca).
+ * Avisos não lidos nunca somem sozinhos: uma fatura vencida e não paga
+ * continua avisando.
  */
 
 const DISMISSED_KEY = 'personal-finance-notification-dismissed-v1'
@@ -55,6 +57,7 @@ export function setAutoCleanDays(days: number): void {
 export function filterVisibleNotifications<T extends { id: string; dueDate?: string; createdAt?: string }>(
   notifications: T[],
   today: string,
+  readIds: Set<string> = new Set(),
   autoCleanDays = getAutoCleanDays()
 ): T[] {
   const dismissed = readDismissed()
@@ -63,7 +66,7 @@ export function filterVisibleNotifications<T extends { id: string; dueDate?: str
   return notifications.filter(notification => {
     if (dismissed[notification.id]) return false
     const date = notification.dueDate ?? notification.createdAt ?? ''
-    if (limit && date && date.slice(0, 10) < limit) return false
+    if (limit && readIds.has(notification.id) && date && date.slice(0, 10) < limit) return false
     return true
   })
 }
